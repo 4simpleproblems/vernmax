@@ -239,14 +239,16 @@
         
         /* Conditional Custom Sections */
         #custom-theme-settings-container,
-        #custom-history-days-container {
+        #custom-history-days-container,
+        #aggressive-adblock-options-container {
             opacity: 0; max-height: 0; overflow: hidden;
             margin-top: 0; padding-top: 0;
             border-top: none; /* No border initially */
             transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out, margin-top 0.3s, padding-top 0.3s, border-top 0.3s;
         }
         #custom-theme-settings-container.visible,
-        #custom-history-days-container.visible {
+        #custom-history-days-container.visible,
+        #aggressive-adblock-options-container.visible {
             opacity: 1; max-height: 500px; /* Adjust max-height as needed */
             margin-top: 15px; padding-top: 10px;
             border-top: 1px solid var(--toolbar-border-color); /* Add border when visible */
@@ -379,16 +381,7 @@
             color: var(--button-text-color);
         }
 
-        .search-engine-explanation {
-            font-size: 0.8em;
-            color: var(--text-color);
-            opacity: 0.7;
-            margin-top: -8px; /* Adjust as needed to position it correctly */
-            margin-bottom: 10px;
-            padding-left: 5px;
-        }
-        
-        .setting-explanation {
+        .search-engine-explanation, .setting-explanation {
             font-size: 0.8em;
             color: var(--text-color);
             opacity: 0.7;
@@ -591,7 +584,18 @@
                     <option value="standard">Standard (Hide Ads)</option>
                     <option value="aggressive">Aggressive (Block & Hide)</option>
                 </select>
-                <small class="setting-explanation">"Aggressive" mode attempts to bypass anti-ad-block measures, which may affect site performance.</small>
+                <small class="setting-explanation">"Aggressive" mode is tougher but may affect site performance.</small>
+            </div>
+
+            <div id="aggressive-adblock-options-container">
+                 <div class="menu-setting-item">
+                    <label for="aggressive-scan-mode-selector">Aggressive Scan Mode</label>
+                    <select id="aggressive-scan-mode-selector" class="menu-select">
+                        <option value="once">Run Once (Efficient)</option>
+                        <option value="constant">Constant (Toughest)</option>
+                    </select>
+                    <small class="setting-explanation">"Constant" is the most effective but uses more resources.</small>
+                </div>
             </div>
 
             <div class="menu-setting-item">
@@ -668,6 +672,9 @@
         let isLoading = false;
         let isRefreshing = false;
         let typewriterInterval = null;
+        let adBlockerInterval = null;
+        let adBlockerObserver = null;
+
 
         const searchEngines = {
             'duckduckgo': { name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=%s' },
@@ -706,32 +713,35 @@
             
         };
 
-        // --- AD BLOCKER VARIABLES ---
+        // --- AD BLOCKER VARIABLES (EXPANDED) ---
         const adBlockerDomains = [
             'doubleclick.net', 'adservice.google.com', 'googleadservices.com', 'googlesyndication.com',
             'adnxs.com', 'adroll.com', 'criteo.com', 'pubmatic.com', 'rubiconproject.com', 'youtube-nocookie.com',
-            'scorecardresearch.com', 'zedo.com', 'adsrvr.org', 'openx.net', 'yieldmo.com', 'ad.youtube.com',
+            'scorecardresearch.com', 'zedo.com', 'adsrvr.org', 'openx.net', 'yieldmo.com', 'adobedtm.com',
             'taboola.com', 'outbrain.com', 'revcontent.com', 'bidvertiser.com', 'popads.net', 'admeld.com',
             'propellerads.com', 'adcash.com', 'yllix.com', 'exoclick.com', 'adsterra.com', 'onclickads.net',
-            'media.net', 'sovrn.com', 'infolinks.com', 'contextweb.com', 'chitika.com', 'buysellads.com'
+            'media.net', 'sovrn.com', 'infolinks.com', 'contextweb.com', 'chitika.com', 'buysellads.com',
+            'advertising.com', 'moatads.com', 'yieldlab.net', 'spotxchange.com', 'smartadserver.com'
         ];
         const adBlockerSelectors = [
-            '.ad', '.ads', '.advert', '.advertisement', '.banner-ad', '.google-ad', '.g-ad',
-            '[class*="adsbygoogle"]', '[id*="google_ads"]', '[class*="ad-"]', '[id*="ad-"]',
-            '.ad-banner', '.ad-container', '.ad-wrapper', '.advertisement', '.advertising',
-            '#google_vignette', 'div[id^="ad_"]', 'ins.adsbygoogle', 'a[href*="/ads/"]',
-            'div[data-ad-format]', 'div[data-ad-unit-path]', '[aria-label="advertisement"]',
-            '.ytp-ad-module', '.video-ads', '.ytp-ad-player-overlay', '.ytp-ad-skip-button-container', // YouTube specific
-            '[class*="overlay-ad"]', '[class*="ad-overlay"]', '#ad_position_box', '.ad_sponsorship',
-            '[id^="ad-sense-"]', '[id*="ad_unit"]', '.trc_rbox_div', '.OUTBRAIN', // Common ad network selectors
-            '.ad-placeholder', '.pub_300x250', '.text-ad', '.sponsored-post', '.ads-box'
+            '.ad', '.ads', '.advert', '.advertisement', '.banner-ad', '.google-ad', '.g-ad', 'div[data-google-query-id]',
+            '[class*="adsbygoogle"]', '[id*="google_ads"]', '[class*="ad-"]', '[id*="ad-"]', '[class*="-ad-"]', '[id*="-ad-"]',
+            '.ad-banner', '.ad-container', '.ad-wrapper', '.advertisement', '.advertising', '[data-ad-slot]',
+            '#google_vignette', 'div[id^="ad_"]', 'ins.adsbygoogle', 'a[href*="/ads/"]', 'a[href*="?ad-id="]',
+            'div[data-ad-format]', 'div[data-ad-unit-path]', '[aria-label="advertisement"]', 'div[data-ad-name]',
+            '.ytp-ad-module', '.video-ads', '.ytp-ad-player-overlay', '.ytp-ad-skip-button-container', '.ytp-ad-preview-container', '.ytp-ad-text-overlay', // YouTube
+            '[id^="div-gpt-ad-"]', '[class*="Display_ad_"]', '.ad-rotator', '.sidebar-ad', '.skyscraper-ad', // Common Ad Frameworks
+            '[class*="overlay-ad"]', '[class*="ad-overlay"]', '#ad_position_box', '.ad_sponsorship', '.ad-banner-container',
+            '[id^="ad-sense-"]', '[id*="ad_unit"]', '.trc_rbox_div', '.OUTBRAIN', 'div[widget-id^="outbrain_widget_"]',
+            '.ad-placeholder', '.pub_300x250', '.text-ad', '.sponsored-post', '.ads-box', 'div[aria-label="Ads"]'
         ];
         const antiAdBlockerSelectors = [
             'div[class*="adblock"]', 'div[class*="ad-block"]', 'div[id*="adblock"]', 'div[id*="ad-block"]',
-            '.adblock-overlay', '.adblock-message', '.ad-blocker-detection', '.blocker-notice',
-            '#please-disable-adblock', 'div[class*="FuckAdBlock"]', 'div[class*="BlockAdBlock"]'
+            '.adblock-overlay', '.adblock-message', '.ad-blocker-detection', '.blocker-notice', '#prebid-ad',
+            '#please-disable-adblock', 'div[class*="FuckAdBlock"]', 'div[class*="BlockAdBlock"]', 'div[class*="NoAdBlock"]',
+            'div[style*="z-index: 999999"]', 'div[class*="modal-dialog"][id*="adblock"]' // Generic high z-index overlays
         ];
-        const antiAdBlockerScripts = ['fuckadblock.js', 'blockadblock.js', 'adblock-detector.js', 'advertisement.js'];
+        const antiAdBlockerScripts = ['fuckadblock.js', 'blockadblock.js', 'adblock-detector.js', 'advertisement.js', 'ad-reblock.js', 'sniff.js'];
 
         // --- DOM ELEMENT REFERENCES ---
         let contentIframeEl, searchBarEl, homeButtonEl, backButtonEl, forwardButtonEl, refreshButtonEl,
@@ -746,90 +756,128 @@
             httpsEnforceToggleEl, homepageUrlInputEl, setCurrentPageAsHomepageButtonEl, resetHomepageButtonEl,
             restoreSessionToggleEl, clearCurrentSiteCookiesButtonEl, clearAllBrowserCookiesButtonEl,
             blockThirdPartyCookiesToggleEl, cookieManagementContainerEl,
-            topSearchSuggestionsEl, errorOverlayEl, errorHomeButtonEl;
+            topSearchSuggestionsEl, errorOverlayEl, errorHomeButtonEl, aggressiveAdBlockOptionsContainerEl, aggressiveScanModeSelectorEl;
 
         let bookmarkItemTemplate, historyItemTemplate, historyGroupTemplate;
         
         let particleAnimationId = null;
 
-        // --- AD BLOCKER LOGIC ---
+        // --- SUPER AGGRESSIVE AD BLOCKER LOGIC ---
+        function forcefullyRemoveElement(element) {
+            if (!element) return;
+            try {
+                element.style.setProperty('display', 'none', 'important');
+                element.style.setProperty('visibility', 'hidden', 'important');
+                element.style.setProperty('opacity', '0', 'important');
+                element.style.setProperty('width', '0', 'important');
+                element.style.setProperty('height', '0', 'important');
+                element.style.setProperty('pointer-events', 'none', 'important');
+                if (element.parentNode) {
+                    element.parentNode.removeChild(element);
+                }
+            } catch (e) { /* Element might already be gone */ }
+        }
+
+        function aggressiveClean(doc) {
+            if (!doc || !doc.body) return 0;
+            let totalRemoved = 0;
+
+            const allSelectors = [...adBlockerSelectors, ...antiAdBlockerSelectors];
+            allSelectors.forEach(selector => {
+                try {
+                    const elements = doc.querySelectorAll(selector);
+                    elements.forEach(el => {
+                        forcefullyRemoveElement(el);
+                        totalRemoved++;
+                    });
+                } catch (e) { /* ignore */ }
+            });
+
+            // Neutralize known anti-ad-block scripts by changing their type
+            const scripts = doc.getElementsByTagName('script');
+            for (const script of scripts) {
+                if (antiAdBlockerScripts.some(keyword => script.src.includes(keyword))) {
+                    script.type = 'text/javascript-blocked';
+                    forcefullyRemoveElement(script);
+                    totalRemoved++;
+                }
+            }
+
+            // Restore scrolling on the page body and root element
+            if (doc.body && doc.body.style.overflow !== 'auto') {
+                doc.body.style.setProperty('overflow', 'auto', 'important');
+            }
+            if (doc.documentElement && doc.documentElement.style.overflow !== 'auto') {
+                doc.documentElement.style.setProperty('overflow', 'auto', 'important');
+            }
+
+            return totalRemoved;
+        }
+
         function runAdBlocker(iframe) {
             const adBlockLevel = localStorage.getItem('vernAdBlockLevel') || 'standard';
+            const aggressiveScanMode = localStorage.getItem('vernAggressiveScanMode') || 'once';
+
             if (adBlockLevel === 'off') return;
 
             try {
                 const doc = iframe.contentDocument;
                 if (!doc || !doc.body) return;
 
-                const removeElements = (documentNode, selectors, reason) => {
-                    let elementsFound = 0;
-                    selectors.forEach(selector => {
+                if (adBlockLevel === 'aggressive') {
+                    // This is the super aggressive mode
+                    aggressiveClean(doc); // Run once immediately
+
+                    if (aggressiveScanMode === 'constant') {
+                        // Then run it constantly
+                        adBlockerInterval = setInterval(() => {
+                            const removedCount = aggressiveClean(doc);
+                            if (removedCount > 0) {
+                                console.log(`[AdBlock Constant Scan]: Removed ${removedCount} ad/blocker elements.`);
+                            }
+                        }, 750); // Run every 750ms for a balance of aggression and performance
+                    }
+
+                } else if (adBlockLevel === 'standard') {
+                    // The original, less-intrusive method for standard mode
+                    let adsFound = 0;
+                    adBlockerSelectors.forEach(selector => {
                         try {
-                            const elements = documentNode.querySelectorAll(selector);
+                            const elements = doc.querySelectorAll(selector);
                             elements.forEach(el => {
                                 if (el.style.display !== 'none') {
                                     el.style.setProperty('display', 'none', 'important');
-                                    elementsFound++;
+                                    adsFound++;
                                 }
                             });
-                        } catch (e) {
-                            // Non-critical error
-                        }
+                        } catch (e) { /* Non-critical error */ }
                     });
-                    if (elementsFound > 0) {
-                        console.log(`[AdBlock] Hid ${elementsFound} element(s) matching ${reason}.`);
-                    }
-                };
-
-                const neutralizeScripts = (documentNode) => {
-                    let scriptsNeutralized = 0;
-                    const scripts = documentNode.getElementsByTagName('script');
-                    for (const script of scripts) {
-                        if (antiAdBlockerScripts.some(keyword => script.src.includes(keyword))) {
-                            script.type = 'text/javascript-blocked';
-                            script.innerHTML = '';
-                            script.removeAttribute('src');
-                            scriptsNeutralized++;
-                        }
-                    }
-                     if (scriptsNeutralized > 0) {
-                        console.log(`[AdBlock] Neutralized ${scriptsNeutralized} anti-ad-block script(s).`);
-                    }
-                };
+                    if (adsFound > 0) console.log(`[AdBlock Standard Scan] Hid ${adsFound} ad element(s).`);
+                }
                 
-                const processPage = () => {
-                    // Always hide standard ad elements
-                    removeElements(doc, adBlockerSelectors, "ad selectors");
-
-                    // Aggressive mode enhancements
-                    if (adBlockLevel === 'aggressive') {
-                        // Hide anti-ad-blocker overlays
-                        removeElements(doc, antiAdBlockerSelectors, "anti-ad-block selectors");
-                        
-                        // Attempt to neutralize known anti-ad-block scripts
-                        neutralizeScripts(doc);
-                        
-                        // Restore scrolling if disabled by an overlay
-                        if (doc.body.style.overflow === 'hidden') {
-                           doc.body.style.overflow = 'auto';
-                           console.log("[AdBlock] Restored page scrolling.");
-                        }
-                    }
-                };
-
-                const observer = new MutationObserver((mutations) => {
-                    if (mutations.some(m => m.addedNodes.length > 0)) {
-                         processPage();
-                    }
+                // Use mutation observer as a fallback/backup in all modes except off
+                if (adBlockerObserver) adBlockerObserver.disconnect();
+                adBlockerObserver = new MutationObserver(() => {
+                    if (adBlockLevel === 'aggressive') aggressiveClean(doc);
                 });
-                
-                processPage();
-                observer.observe(doc.body, { childList: true, subtree: true });
+                adBlockerObserver.observe(doc.body, { childList: true, subtree: true });
 
             } catch (e) {
                 console.warn("Ad blocker could not access iframe content.", e);
             }
         }
+        
+        function stopAdBlocker() {
+            if (adBlockerInterval) {
+                clearInterval(adBlockerInterval);
+                adBlockerInterval = null;
+            }
+            if (adBlockerObserver) {
+                adBlockerObserver.disconnect();
+                adBlockerObserver = null;
+            }
+        }
+
 
         // --- CORE LOGIC ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -867,6 +915,8 @@
             topSearchSuggestionsEl = document.getElementById('top-search-suggestions');
             homepageSearchIconEl = document.getElementById('homepage-search-icon');
             adBlockLevelSelectorEl = document.getElementById('ad-block-level-selector');
+            aggressiveAdBlockOptionsContainerEl = document.getElementById('aggressive-adblock-options-container');
+            aggressiveScanModeSelectorEl = document.getElementById('aggressive-scan-mode-selector');
             saveConfigButtonEl = document.getElementById('save-config-button'); saveTimestampEl = document.getElementById('save-timestamp');
             customThemeSettingsContainerEl = document.getElementById('custom-theme-settings-container');
             customThemeBgBaseEl = document.getElementById('custom-theme-bg-base'); customThemeAccentBaseEl = document.getElementById('custom-theme-accent-base'); applyCustomThemeButtonEl = document.getElementById('apply-custom-theme-button');
@@ -885,6 +935,8 @@
         }
         
         async function initUV() { try { await registerSW(); } catch (err) { console.error("SW registration failed:", err); }}
+        
+        function toggleAggressiveOptionsView(show) { aggressiveAdBlockOptionsContainerEl.classList.toggle('visible', show); }
 
         function loadSettings() {
             // Theme
@@ -916,10 +968,13 @@
                 toggleCustomHistoryView(true);
             }
             
-            adBlockLevelSelectorEl.value = localStorage.getItem('vernAdBlockLevel') || 'standard';
+            const adBlockLevel = localStorage.getItem('vernAdBlockLevel') || 'standard';
+            adBlockLevelSelectorEl.value = adBlockLevel;
+            toggleAggressiveOptionsView(adBlockLevel === 'aggressive');
+            aggressiveScanModeSelectorEl.value = localStorage.getItem('vernAggressiveScanMode') || 'once';
+
             blockThirdPartyCookiesToggleEl.checked = localStorage.getItem('vernBlockThirdPartyCookies') === 'true';
             
-            // Set default document title
             document.title = 'VERN MAX';
         }
 
@@ -963,12 +1018,17 @@
                 }
             });
             adBlockLevelSelectorEl.addEventListener('change', (e) => { 
-                localStorage.setItem('vernAdBlockLevel', e.target.value);
-                // Reload current page to apply new ad-block setting
-                if (currentUrl && !currentUrl.startsWith('about:')) {
-                    contentIframeEl.contentWindow.location.reload(true);
-                }
+                const level = e.target.value;
+                localStorage.setItem('vernAdBlockLevel', level);
+                toggleAggressiveOptionsView(level === 'aggressive');
+                if (currentUrl && !currentUrl.startsWith('about:')) contentIframeEl.contentWindow.location.reload(true);
              });
+             
+            aggressiveScanModeSelectorEl.addEventListener('change', (e) => {
+                localStorage.setItem('vernAggressiveScanMode', e.target.value);
+                if (currentUrl && !currentUrl.startsWith('about:')) contentIframeEl.contentWindow.location.reload(true);
+            });
+
 
             applyCustomThemeButtonEl.addEventListener('click', applyAndSaveCustomTheme);
             applyCustomHistoryDaysButtonEl.addEventListener('click', applyAndSaveCustomHistoryDays);
@@ -1028,8 +1088,9 @@
 
         // --- NAVIGATION & PROXY ---
         function navigateTo(urlInput) {
+            stopAdBlocker(); // Stop any running ad blocker from previous page
             isLoading = true;
-            errorOverlayEl.style.display = 'none'; // Hide error page on new navigation
+            errorOverlayEl.style.display = 'none';
             searchSuggestionsEl.style.display = 'none';
             topSearchSuggestionsEl.style.display = 'none';
 
@@ -1067,6 +1128,7 @@
         }
 
         function handleIframeLoad() {
+            stopAdBlocker(); // Ensure previous ad-blocker instances are cleared
             isLoading = false;
             if (isRefreshing) { const icon = refreshButtonEl.querySelector('.icon-img'); icon.classList.remove('spinning'); isRefreshing = false; }
             
@@ -1081,7 +1143,6 @@
                      throw new Error("Proxy location not found");
                 }
             } catch (e) { 
-                // This is our error condition. If we tried to navigate somewhere but ended up blank, show error.
                 if(currentUrl !== 'about:blank' && !contentIframeEl.src.startsWith('about:blank')){
                     showErrorPage();
                     return;
@@ -1114,7 +1175,8 @@
             if (currentUrl && !currentUrl.startsWith('about:')) addToHistory(currentTitle, currentUrl);
 
             if (adBlockLevel !== 'off' && finalUrl !== 'about:blank') {
-                runAdBlocker(contentIframeEl);
+                // Give the page a moment to settle before the first ad-block run
+                setTimeout(() => runAdBlocker(contentIframeEl), 250);
             }
         }
 
