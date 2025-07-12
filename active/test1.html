@@ -245,7 +245,7 @@
             background-color: var(--menu-bg); border: 1px solid var(--menu-border-color); border-radius: 12px;
             list-style: none; padding: 10px 0; margin: 0; text-align: left; z-index: 1010; box-shadow: var(--menu-shadow);
         }
-        .search-suggestions-list li { padding: 10px 20px; cursor: pointer; color: var(--menu-text-color); }
+        .search-suggestions-list li { padding: 10px 20px; cursor: pointer; color: var(--text-color); }
         .search-suggestions-list li:hover { background-color: var(--menu-item-hover-bg); color: var(--button-text-color); }
         .search-engine-explanation, .setting-explanation {
             font-size: 0.8em; color: var(--text-color); opacity: 0.7;
@@ -594,13 +594,13 @@
             '[id^="ad-sense-"]', '[id*="ad_unit"]', '.trc_rbox_div', '.OUTBRAIN', 'div[widget-id^="outbrain_widget_"]', '[class*="native-ad"]',
             '.ad-placeholder', '.pub_300x250', '.text-ad', '.sponsored-post', '.ads-box', 'div[aria-label="Ads"]', 'div[data-ad-manager-id]',
             'object[data*="ad.swf"]', 'embed[src*="ad.swf"]', 'div[id*="taboola"]', 'div[data-content-ad]', 'div[class*="ad-blocker-wrapper"]',
-            '[class*="expandable-ad"]', '[class*="interstitial-ad"]', 'div[id*="interstitial"]', 'div[class*="pop-up-ad"]'
+            '[class*="expandable-ad"]', '[class*="interstitial-ad"]', 'div[id*="interstitial"]', 'div[class*="pop-up-ad"]', 'div.pn-widget', '#inpage-push'
         ];
         const antiAdBlockerSelectors = [
             'div[class*="adblock"]', 'div[class*="ad-block"]', 'div[id*="adblock"]', 'div[id*="ad-block"]',
             '.adblock-overlay', '.adblock-message', '.ad-blocker-detection', '.blocker-notice', '#prebid-ad',
             '#please-disable-adblock', 'div[class*="FuckAdBlock"]', 'div[class*="BlockAdBlock"]', 'div[class*="NoAdBlock"]',
-            'div[style*="z-index: 999999"]', 'div[class*="modal-dialog"][id*="adblock"]', 'div[id="adblock-detect"]'
+            'div[style*="z-index: 9999"]', 'div[class*="modal-dialog"][id*="adblock"]', 'div[id="adblock-detect"]'
         ];
         const blockedScriptKeywords = [
             'fuckadblock.js', 'blockadblock.js', 'adblock-detector.js', 'advertisement.js', 'ad-reblock.js', 'sniff.js',
@@ -725,9 +725,9 @@
                 runScan(doc);
 
                 if (adBlockLevel === 'annihilator') {
-                    adBlockerInterval = setInterval(() => runScan(doc), 10); // Centisecond scan
+                    adBlockerInterval = setInterval(() => runScan(doc), 10);
                 } else if (adBlockLevel === 'aggressive') {
-                     adBlockerInterval = setInterval(() => runScan(doc), 250); // Quarter-second scan
+                     adBlockerInterval = setInterval(() => runScan(doc), 250);
                 }
             } catch (e) {
                 console.warn("Ad blocker could not access iframe content.", e);
@@ -934,17 +934,17 @@
                     content = `<h4>Mode: Off</h4><p>No ads or trackers are being blocked. The web is unfiltered.</p>`;
                     break;
                 case 'standard':
-                    content = `<h4>Mode: Standard</h4><p>Provides basic, lightweight blocking. It hides the most common types of ads without affecting page performance.</p>
+                    content = `<h4>Mode: Standard</h4><p>Provides basic, lightweight blocking. It hides the most common types of ads without affecting page performance. This mode is always running via a MutationObserver.</p>
                                <p class="details-list-heading">What it blocks:</p>
                                <ul><li>Common banner and sidebar ads</li><li>Basic pop-up ads</li></ul>`;
                     break;
                 case 'aggressive':
-                    content = `<h4>Mode: Aggressive</h4><p>A strong, persistent blocker that removes a wide range of ads and trackers. It actively removes ad containers to prevent them from reappearing. A great balance of power and performance.</p>
+                    content = `<h4>Mode: Aggressive</h4><p>A strong, persistent blocker that removes a wide range of ads and trackers. It actively removes ad containers to prevent them from reappearing and runs on a constant quarter-second timer.</p>
                                <p class="details-list-heading">What it blocks:</p>
                                <ul><li>All 'Standard' targets</li><li>Video ads (pre-roll, mid-roll)</li><li>Sticky and floating ads</li><li>Most anti-ad-block scripts</li><li>Many analytics trackers</li></ul>`;
                     break;
                 case 'annihilator':
-                    content = `<h4>Mode: Ad Annihilator</h4><p>The most extreme level of blocking. This mode uses a hyper-aggressive, constant scan to find and destroy almost all forms of advertising, trackers, and annoyances at the centisecond level.</p>
+                    content = `<h4>Mode: Ad Annihilator</h4><p>The most extreme level of blocking. This mode uses a hyper-aggressive, constant scan to find and destroy almost all forms of advertising, trackers, and annoyances at the centisecond level (100 times per second).</p>
                                <p><b>Warning:</b> This mode is very powerful and may cause some websites to load or function incorrectly.</p>
                                <p class="details-list-heading">Simple Ads Blocked:</p>
                                <ul><li>Banner, sidebar, footer, header, pop-up, pop-under, interstitial, in-page text, search engine, and all forms of video ads (pre-roll, mid-roll, post-roll, overlay).</li></ul>
@@ -958,7 +958,6 @@
             adBlockerDetailsModalEl.style.display = "block";
         }
 
-        // --- NAVIGATION & PROXY ---
         function navigateTo(urlInput) {
             stopAdBlockerInstances();
             isLoading = true;
@@ -1059,7 +1058,6 @@
         function getHomepageUrl() { const customHomepage = localStorage.getItem('vernCustomHomepage'); return customHomepage && customHomepage.trim() !== '' ? customHomepage : 'about:blank'; }
         function saveSession() { if (localStorage.getItem('vernRestoreSession') === 'true') localStorage.setItem('vernLastUrl', currentUrl); }
 
-        // --- UI & DATA HELPERS ---
         function showHomepage() {
             homepageEl.style.display = 'flex';
             contentIframeEl.style.display = 'none';
