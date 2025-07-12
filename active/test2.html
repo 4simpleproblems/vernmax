@@ -76,11 +76,20 @@
         .nav-button .icon-img, .toolbar-button .icon-img {
             width: 20px; height: 20px; user-select: none; pointer-events: none;
         }
+        
+        /* UPDATED: Container for top search bar to position suggestions */
+        #top-search-container {
+            position: relative;
+            flex: 1;
+            display: flex;
+            margin-right: 8px;
+        }
         #search-bar {
             flex: 1; height: 36px; border-radius: 8px; border: none; background-color: var(--input-bg);
             color: var(--text-color); padding: 0 15px; font-size: 14px;
             box-shadow: 0 0 0 1px var(--button-outline-color); font-family: var(--font-family-main);
-            margin-right: 8px;
+            margin-right: 0; /* Moved margin to container */
+            width: 100%;
         }
         #search-bar:focus { outline: none; background-color: var(--input-focus-bg); box-shadow: var(--input-focus-shadow); }
         #settings-button { margin-right: 0; }
@@ -107,7 +116,6 @@
             border-bottom: 1px solid var(--toolbar-border-color); padding-bottom: 8px;
             font-weight: 600; display: flex; align-items: center; gap: 8px;
         }
-        /* DELETED: .mini-menu h3 .icon-img { width: 1em; height: 1em; } */
         .mini-menu ul { list-style: none; padding: 0; margin: 0; }
         .mini-menu::-webkit-scrollbar, .mini-menu ul::-webkit-scrollbar { width: 5px; }
         .mini-menu::-webkit-scrollbar-thumb, .mini-menu ul::-webkit-scrollbar-thumb { background-color: var(--button-outline-color); border-radius: 8px; }
@@ -234,7 +242,6 @@
         
         /* Conditional Custom Sections */
         /* Updated visibility logic: default hidden for these containers */
-        #custom-cloak-settings-container,
         #custom-theme-settings-container,
         #custom-history-days-container {
             opacity: 0; max-height: 0; overflow: hidden;
@@ -242,7 +249,6 @@
             border-top: none; /* No border initially */
             transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out, margin-top 0.3s, padding-top 0.3s, border-top 0.3s;
         }
-        #custom-cloak-settings-container.visible,
         #custom-theme-settings-container.visible,
         #custom-history-days-container.visible {
             opacity: 1; max-height: 500px; /* Adjust max-height as needed */
@@ -735,8 +741,9 @@
         #homepage-search-icon:hover {
             background-color: rgba(var(--current-theme-shadow-rgb), 0.1);
         }
-
-        #search-suggestions {
+        
+        /* ADDED/MODIFIED: Generalized Search Suggestions Styling */
+        .search-suggestions-list {
             display: none;
             position: absolute;
             top: calc(100% + 5px);
@@ -749,20 +756,24 @@
             padding: 10px 0;
             margin: 0;
             text-align: left;
-            z-index: 100;
+            z-index: 1001; /* Higher than toolbar */
             box-shadow: var(--menu-shadow);
+            max-height: 300px;
+            overflow-y: auto;
         }
 
-        #search-suggestions li {
+        .search-suggestions-list li {
             padding: 10px 20px;
             cursor: pointer;
             color: var(--menu-text-color);
+            font-size: 14px;
         }
 
-        #search-suggestions li:hover {
+        .search-suggestions-list li:hover {
             background-color: var(--menu-item-hover-bg);
             color: var(--button-text-color);
         }
+
         .search-engine-explanation {
             font-size: 0.8em;
             color: var(--text-color);
@@ -806,6 +817,32 @@
         #settings-menu .menu-setting-item:last-child {
             margin-bottom: 0;
         }
+
+        /* ADDED: Error Page Styling */
+        #error-page {
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+            background-color: var(--bg-color);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #error-page h2 {
+            margin-bottom: 15px;
+            color: var(--current-theme-accent);
+        }
+        #error-page p {
+            margin-bottom: 25px;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        #error-page .menu-button {
+            width: auto;
+            padding: 10px 25px;
+        }
     </style>
 </head>
 <body>
@@ -829,7 +866,11 @@
         <div class="nav-button" id="back-button" title="Back"><img src="../images/arrow-left-white.png" alt="Back" class="icon-img"></div>
         <div class="nav-button" id="forward-button" title="Forward"><img src="../images/arrow-right-white.png" alt="Forward" class="icon-img"></div>
         <div class="nav-button" id="refresh-button" title="Refresh"><img src="../images/refresh-white.png" alt="Refresh" class="icon-img"></div>
-        <input type="text" id="search-bar" placeholder="Search or type a URL">
+        
+        <div id="top-search-container">
+            <input type="text" id="search-bar" placeholder="Search or type a URL">
+            <ul id="top-search-suggestions" class="search-suggestions-list"></ul>
+        </div>
         
         <div class="toolbar-button" id="fullscreen-button" title="Toggle Fullscreen"><img src="../images/zoom-in-white.png" alt="Toggle Fullscreen" id="fullscreen-icon-img" class="icon-img"></div>
         <div class="toolbar-button" id="bookmark-button" title="Bookmarks"><img src="../images/star-white.png" alt="Bookmarks" class="icon-img"></div>
@@ -941,30 +982,12 @@
             <div class="menu-setting-item toggle-item">
                 <div class="toggle-label-container">
                     <label for="ad-free-toggle" style="cursor: pointer;">Ad-Free Toggle</label>
-                    <small class="toggle-description">Disables Google Vignette ads by reloading the URL automatically.</small>
+                    <small class="toggle-description">Blocks known ad domains and hides ad elements on pages.</small>
                 </div>
                 <label class="toggle-switch">
                     <input type="checkbox" id="ad-free-toggle">
                     <span class="slider"></span>
                 </label>
-            </div>
-
-            <div class="menu-setting-item">
-                <label for="cloak-preset-selector">Tab Cloak Preset</label>
-                <select id="cloak-preset-selector" class="menu-select"></select>
-            </div>
-            
-            <div id="custom-cloak-settings-container">
-                <h3>Custom Cloak</h3>
-                <div class="menu-setting-item">
-                    <label for="custom-cloak-title">Custom Title</label>
-                    <input type="text" id="custom-cloak-title" class="menu-input" placeholder="e.g., Google Docs">
-                </div>
-                <div class="menu-setting-item">
-                    <label for="custom-cloak-url">Favicon URL</label>
-                    <input type="text" id="custom-cloak-url" class="menu-input" placeholder="e.g., https://google.com">
-                </div>
-                <button id="apply-custom-cloak-button" class="menu-button">Apply Custom Cloak</button>
             </div>
 
             <div class="menu-action-bar" id="cookie-management-container">
@@ -999,10 +1022,15 @@
             <div id="homepage-search-container">
                 <input type="text" id="homepage-search-bar" placeholder="Search or type a URL">
                 <img id="homepage-search-icon" src="../images/magnify-white.png" alt="Search">
-                <ul id="search-suggestions"></ul>
+                <ul id="homepage-search-suggestions" class="search-suggestions-list"></ul>
             </div>
         </div>
-        <iframe id="content-iframe" title="Content View" sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-presentation allow-same-origin allow-scripts allow-downloads allow-popups-to-escape-sandbox"></iframe>
+        <div id="error-page">
+            <h2>Oops! Something went wrong.</h2>
+            <p id="error-message">The page could not be loaded.</p>
+            <button id="error-return-home-button" class="menu-button">Return to Home</button>
+        </div>
+        <iframe id="content-iframe" title="Content View" sandbox="allow-forms allow-modals allow-pointer-lock allow-presentation allow-same-origin allow-scripts allow-downloads"></iframe>
     </div>
 
     <script src="uv/uv.bundle.js" defer></script>
@@ -1015,28 +1043,17 @@
         let isLoading = false;
         let isRefreshing = false;
         let typewriterInterval = null;
+        let lastAttemptedUrl = ''; // ADDED: To track the last URL for error checking
 
         const searchEngines = {
             'duckduckgo': { name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=%s' },
             'bing': { name: 'Bing', url: 'https://www.bing.com/search?q=%s' },
             'brave': { name: 'Brave Search', url: 'https://search.brave.com/search?q=%s' },
-            'yahoo': { name: 'Yahoo', url: 'https://search.yahoo.com/search?p=%s' } // Replaced Google
+            'yahoo': { name: 'Yahoo', url: 'https://search.yahoo.com/search?p=%s' }
         };
-        let currentSearchEngineKey = 'duckduckgo'; // Default changed to DuckDuckGo
+        let currentSearchEngineKey = 'duckduckgo';
 
-        const cloakPresets = {
-            'none': { displayName: "None (Static VERN MAX)" },
-            'google_docs': { displayName: "Google Docs", title: 'Google Docs', faviconUrl: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico' },
-            'google_slides': { displayName: "Google Slides", title: 'Google Slides', faviconUrl: 'https://ssl.gstatic.com/docs/presentations/images/favicon5.ico' },
-            'google_classroom': { displayName: "Google Classroom", title: 'Home', faviconUrl: 'https://ssl.gstatic.com/classroom/favicon.png' },
-            'gmail': { displayName: "Gmail", title: 'Inbox', faviconUrl: 'https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico' },
-            'clever': { displayName: "Clever", title: 'Clever | Portal', faviconUrl: 'https://assets.clever.com/launchpad/1a74895/favicon.ico?1' },
-            'hac': { displayName: "Home Access Center", title: 'Home Access Center', faviconUrl: 'https://hac.doe.k12.de.us/HomeAccess/Content/Images/favicon.ico' },
-            'google_drive': { displayName: "My Drive", title: 'My Drive - Google Drive', faviconUrl: 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png' },
-            'wikipedia': { displayName: "Wikipedia", title: 'Wikipedia', faviconUrl: 'https://en.wikipedia.org/static/favicon/wikipedia.ico' },
-            'custom': { displayName: "Custom (Manual)" }, // Moved custom to the end for better default ordering
-        };
-        let currentCloakPresetKey = 'google_docs'; // Default changed to Google Docs
+        // DELETED: cloakPresets object
 
         const THEMES = {
             // --- Normal Themes ---
@@ -1130,22 +1147,36 @@
             keyboard_shortcuts: { name: "Keyboard Shortcuts", feature: 'keyboardShortcuts', colors: { bg: '#F5F7FA', text: '#333333', accent: '#3498DB', neutral: '#FFFFFF', btnText: '#FFFFFF' } }
         };
 
+        // --- AD BLOCKER VARIABLES ---
+        const adBlockerDomains = [
+            'doubleclick.net', 'adservice.google.com', 'googleadservices.com', 'googlesyndication.com',
+            'adnxs.com', 'adroll.com', 'criteo.com', 'pubmatic.com', 'rubiconproject.com',
+            'scorecardresearch.com', 'zedo.com', 'adsrvr.org', 'openx.net', 'yieldmo.com',
+            'taboola.com', 'outbrain.com', 'revcontent.com', 'bidvertiser.com', 'popads.net',
+            'propellerads.com', 'adcash.com', 'yllix.com', 'exoclick.com'
+        ];
+        const adBlockerSelectors = [
+            '[class*="adsbygoogle"]', '[id*="google_ads"]', '[class*="ad-"]', '[id*="ad-"]',
+            '.ad-banner', '.ad-container', '.ad-wrapper', '.advertisement', '.advertising',
+            '#google_vignette', 'div[id^="ad_"]', 'ins.adsbygoogle', 'a[href*="/ads/"]',
+            'div[data-ad-format]', 'div[data-ad-unit-path]', '[aria-label="advertisement"]'
+        ];
 
         // --- DOM ELEMENT REFERENCES ---
         let contentIframeEl, searchBarEl, homeButtonEl, backButtonEl, forwardButtonEl, refreshButtonEl,
             fullscreenButtonEl, settingsButtonEl, bookmarkButtonEl, historyButtonEl, bookmarkMenuEl, 
             historyMenuEl, settingsMenuEl, bookmarksListPopupEl, newBookmarkNameInputPopupEl, 
             addCurrentBookmarkButtonPopupEl, historyListPopupEl, toolbarEl, 
-            themeSelectorEl, cloakPresetSelectorEl, customCloakTitleEl, customCloakUrlEl, applyCustomCloakButtonEl,
-            searchEngineSelectorEl, historyLifespanSelectorEl, clearBrowserDataButtonEl, historySearchBarEl,
-            customCloakSettingsContainerEl, homepageEl, homepageSearchBarEl, searchSuggestionsEl,
+            themeSelectorEl, searchEngineSelectorEl, historyLifespanSelectorEl, clearBrowserDataButtonEl, historySearchBarEl,
+            homepageEl, homepageSearchBarEl, homepageSearchSuggestionsEl, topSearchSuggestionsEl,
             homepageSearchIconEl, adFreeToggleEl, saveConfigButtonEl, saveTimestampEl,
             customThemeSettingsContainerEl, customThemeBgBaseEl, customThemeAccentBaseEl, applyCustomThemeButtonEl,
             customHistoryDaysContainerEl, customHistoryDaysInputEl, applyCustomHistoryDaysButtonEl,
-            // NEW DOM Elements
             httpsEnforceToggleEl, homepageUrlInputEl, setCurrentPageAsHomepageButtonEl, resetHomepageButtonEl,
             restoreSessionToggleEl, clearCurrentSiteCookiesButtonEl, clearAllBrowserCookiesButtonEl,
-            blockThirdPartyCookiesToggleEl, cookieManagementContainerEl;
+            blockThirdPartyCookiesToggleEl, cookieManagementContainerEl,
+            // ADDED: Error page elements
+            errorPageEl, errorMessageEl, errorReturnHomeButtonEl;
 
         let bookmarkItemTemplate, historyItemTemplate, historyGroupTemplate;
         
@@ -1194,10 +1225,10 @@
                     const accentColor = document.documentElement.style.getPropertyValue('--current-theme-accent') || '#7F5AF0';
                     const accentRGB = hexToRgb(accentColor);
                     if (accentRGB) {
-                       gradient.addColorStop(0, `rgba(${accentRGB.r}, ${accentRGB.g}, ${accentRGB.b}, 0.3)`);
-                       gradient.addColorStop(1, `rgba(${accentRGB.r}, ${accentRGB.g}, ${accentRGB.b}, 0)`);
-                       canvasCtx.fillStyle = gradient;
-                       canvasCtx.fillRect(0, 0, canvasEl.width, canvasEl.height);
+                        gradient.addColorStop(0, `rgba(${accentRGB.r}, ${accentRGB.g}, ${accentRGB.b}, 0.3)`);
+                        gradient.addColorStop(1, `rgba(${accentRGB.r}, ${accentRGB.g}, ${accentRGB.b}, 0)`);
+                        canvasCtx.fillStyle = gradient;
+                        canvasCtx.fillRect(0, 0, canvasEl.width, canvasEl.height);
                     }
                     particleAnimationId = requestAnimationFrame(animateParticles);
                     return; 
@@ -1264,11 +1295,61 @@
             particleAnimationId = requestAnimationFrame(animateParticles);
         }
 
+        // --- AD BLOCKER LOGIC ---
+        function runAdBlocker(iframe) {
+            const isAdFreeEnabled = localStorage.getItem('vernAdFreeToggle') === 'true';
+            if (!isAdFreeEnabled) return;
+
+            try {
+                const doc = iframe.contentDocument;
+                if (!doc || !doc.body) return;
+
+                const removeAds = (documentNode) => {
+                    let adsFound = 0;
+                    adBlockerSelectors.forEach(selector => {
+                        try {
+                            const elements = documentNode.querySelectorAll(selector);
+                            elements.forEach(el => {
+                                if (el.style.display !== 'none') {
+                                    el.style.setProperty('display', 'none', 'important');
+                                    adsFound++;
+                                }
+                            });
+                        } catch (e) {
+                            // Non-critical error, selector might be invalid in some contexts
+                        }
+                    });
+                    if (adsFound > 0) {
+                        console.log(`[AdBlock] Hid ${adsFound} ad element(s).`);
+                    }
+                };
+
+                // Create an observer to watch for dynamically added ads
+                const observer = new MutationObserver((mutations) => {
+                    // Re-run the ad remover if new nodes are added to the page
+                    if (mutations.some(m => m.addedNodes.length > 0)) {
+                         removeAds(doc);
+                    }
+                });
+                
+                // Initial run on the document
+                removeAds(doc);
+
+                // Start observing the body for changes
+                observer.observe(doc.body, {
+                    childList: true,
+                    subtree: true
+                });
+
+            } catch (e) {
+                console.warn("Ad blocker could not access iframe content. This is often expected due to security policies.", e);
+            }
+        }
+
         // --- CORE LOGIC ---
         document.addEventListener('DOMContentLoaded', async () => {
             assignDOMElements();
             populateThemeSelector();
-            populateCloakSelector();
             populateSearchEngineSelector();
             await initUV();
             loadSettings();
@@ -1278,16 +1359,14 @@
             loadHistory();
             updateSaveButtonText();
             
-            // Initial navigation logic considering session restore
             const restoreSession = localStorage.getItem('vernRestoreSession') === 'true';
             const lastUrl = localStorage.getItem('vernLastUrl');
             if (restoreSession && lastUrl && lastUrl !== 'about:blank' && lastUrl !== 'about:blank#') {
                 navigateTo(lastUrl);
             } else {
-                navigateTo(getHomepageUrl()); // Use getHomepageUrl() for initial load
+                navigateTo(getHomepageUrl());
             }
 
-            // Save session on page unload
             window.addEventListener('beforeunload', saveSession);
         });
 
@@ -1296,19 +1375,18 @@
             bookmarkMenuEl = document.getElementById('bookmark-menu'); historyMenuEl = document.getElementById('history-menu'); settingsMenuEl = document.getElementById('settings-menu');
             bookmarksListPopupEl = document.getElementById('bookmarks-list-popup'); newBookmarkNameInputPopupEl = document.getElementById('new-bookmark-name-popup'); addCurrentBookmarkButtonPopupEl = document.getElementById('add-current-bookmark-button-popup');
             historyListPopupEl = document.getElementById('history-list-popup'); historySearchBarEl = document.getElementById('history-search-bar');
-            themeSelectorEl = document.getElementById('theme-selector'); searchEngineSelectorEl = document.getElementById('search-engine-selector'); historyLifespanSelectorEl = document.getElementById('history-lifespan-selector'); cloakPresetSelectorEl = document.getElementById('cloak-preset-selector');
-            customCloakSettingsContainerEl = document.getElementById('custom-cloak-settings-container'); customCloakTitleEl = document.getElementById('custom-cloak-title'); customCloakUrlEl = document.getElementById('custom-cloak-url'); applyCustomCloakButtonEl = document.getElementById('apply-custom-cloak-button');
+            themeSelectorEl = document.getElementById('theme-selector'); searchEngineSelectorEl = document.getElementById('search-engine-selector'); historyLifespanSelectorEl = document.getElementById('history-lifespan-selector');
             clearBrowserDataButtonEl = document.getElementById('clear-browser-data-button');
             bookmarkItemTemplate = document.getElementById('bookmark-item-template');
             historyItemTemplate = document.getElementById('history-item-template');
             historyGroupTemplate = document.getElementById('history-group-template');
-            homepageEl = document.getElementById('homepage'); homepageSearchBarEl = document.getElementById('homepage-search-bar'); searchSuggestionsEl = document.getElementById('search-suggestions');
+            homepageEl = document.getElementById('homepage'); homepageSearchBarEl = document.getElementById('homepage-search-bar'); homepageSearchSuggestionsEl = document.getElementById('homepage-search-suggestions');
+            topSearchSuggestionsEl = document.getElementById('top-search-suggestions'); // ADDED
             homepageSearchIconEl = document.getElementById('homepage-search-icon');
             adFreeToggleEl = document.getElementById('ad-free-toggle');
             saveConfigButtonEl = document.getElementById('save-config-button');
             saveTimestampEl = document.getElementById('save-timestamp');
 
-            // Assign new/modified elements
             customThemeSettingsContainerEl = document.getElementById('custom-theme-settings-container');
             customThemeBgBaseEl = document.getElementById('custom-theme-bg-base');
             customThemeAccentBaseEl = document.getElementById('custom-theme-accent-base');
@@ -1325,6 +1403,11 @@
             clearAllBrowserCookiesButtonEl = document.getElementById('clear-all-browser-cookies-button');
             blockThirdPartyCookiesToggleEl = document.getElementById('block-third-party-cookies-toggle');
             cookieManagementContainerEl = document.getElementById('cookie-management-container');
+            
+            // ADDED: Error Page Elements
+            errorPageEl = document.getElementById('error-page');
+            errorMessageEl = document.getElementById('error-message');
+            errorReturnHomeButtonEl = document.getElementById('error-return-home-button');
         }
         
         async function initUV() { try { await registerSW(); } catch (err) { console.error("SW registration failed:", err); }}
@@ -1334,62 +1417,42 @@
             const savedTheme = localStorage.getItem('vernTheme') || 'main';
             applyTheme(savedTheme);
             themeSelectorEl.value = savedTheme;
-            // Call the toggle function on load to ensure correct initial visibility
-            toggleCustomThemeView(false); // Default to custom theme section closed
-            
-            // Load the two base colors for the Smart Theme Generator
+            toggleCustomThemeView(false);
             customThemeBgBaseEl.value = localStorage.getItem('vernCustomThemeBaseBg') || '#23272A';
             customThemeAccentBaseEl.value = localStorage.getItem('vernCustomThemeBaseAccent') || '#7F5AF0';
 
-
             // Search Engine
-            currentSearchEngineKey = localStorage.getItem('vernSearchEngine') || 'duckduckgo'; // Default changed to DuckDuckGo
+            currentSearchEngineKey = localStorage.getItem('vernSearchEngine') || 'duckduckgo';
             searchEngineSelectorEl.value = currentSearchEngineKey;
             
-            // NEW: HTTPS Enforcement
-            httpsEnforceToggleEl.checked = false; // Default off
-
-            // NEW: Custom Homepage
+            httpsEnforceToggleEl.checked = localStorage.getItem('vernHttpsEnforce') === 'true';
             homepageUrlInputEl.value = localStorage.getItem('vernCustomHomepage') || '';
-
-            // NEW: Persistent Tabs/Session Restore
-            restoreSessionToggleEl.checked = false; // Default off
+            restoreSessionToggleEl.checked = localStorage.getItem('vernRestoreSession') === 'true';
 
             // History Lifespan
             const savedLifespan = localStorage.getItem('vernHistoryLifespan') || '14';
             const standardLifespans = ['0', '1', '3', '7', '14'];
             if (standardLifespans.includes(savedLifespan)) {
                 historyLifespanSelectorEl.value = savedLifespan;
-                // Call the toggle function on load
-                toggleCustomHistoryView(false); // Default to custom history section closed
+                toggleCustomHistoryView(false);
             } else {
                 historyLifespanSelectorEl.value = 'custom';
                 customHistoryDaysInputEl.value = savedLifespan;
-                // Call the toggle function on load
-                toggleCustomHistoryView(false); // Default to custom history section closed
+                toggleCustomHistoryView(true);
             }
             
-            // Ad-Free Toggle
-            adFreeToggleEl.checked = false; // Default off
+            adFreeToggleEl.checked = localStorage.getItem('vernAdFreeToggle') === 'true';
 
-            // Cloak
-            currentCloakPresetKey = 'google_docs'; // Default changed to Google Docs
-            localStorage.setItem('vernCloakPreset', currentCloakPresetKey); // Ensure it's saved
-            cloakPresetSelectorEl.value = currentCloakPresetKey;
-            customCloakTitleEl.value = localStorage.getItem('vernCustomCloakTitle') || '';
-            customCloakUrlEl.value = localStorage.getItem('vernCustomCloakUrl') || '';
-            applyBrowserCloak();
-            // Call the toggle function on load
-            toggleCustomCloakView(false); // Default to custom cloak section closed
+            // DELETED: Cloak loading logic removed
+            updateTitleAndFavicon(); // Set initial title
 
-            // NEW: Block Third-Party Cookies
-            blockThirdPartyCookiesToggleEl.checked = false; // Default off
+            blockThirdPartyCookiesToggleEl.checked = localStorage.getItem('vernBlockThirdPartyCookies') === 'true';
         }
 
         function setupEventListeners() {
             fullscreenButtonEl.addEventListener('click', toggleIframeFullscreen); document.addEventListener('fullscreenchange', handleFullscreenChange);
             searchBarEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigateTo(e.target.value); });
-            homeButtonEl.addEventListener('click', () => navigateTo(getHomepageUrl())); // Updated to use custom homepage
+            homeButtonEl.addEventListener('click', () => navigateTo(getHomepageUrl()));
             backButtonEl.addEventListener('click', () => contentIframeEl.contentWindow.history.back()); forwardButtonEl.addEventListener('click', () => contentIframeEl.contentWindow.history.forward());
             refreshButtonEl.addEventListener('click', () => { if (contentIframeEl.src !== 'about:blank' && !contentIframeEl.src.endsWith('#')) { const icon = refreshButtonEl.querySelector('.icon-img'); icon.classList.add('spinning'); isRefreshing = true; contentIframeEl.contentWindow.location.reload(true); } });
             contentIframeEl.addEventListener('load', handleIframeLoad);
@@ -1397,10 +1460,17 @@
             settingsButtonEl.addEventListener('click', (e) => { e.stopPropagation(); toggleSettingsMenu(); });
             bookmarkButtonEl.addEventListener('click', (e) => { e.stopPropagation(); toggleBookmarkMenu(); });
             historyButtonEl.addEventListener('click', (e) => { e.stopPropagation(); toggleHistoryMenu(); });
+            
+            // MODIFIED: Global click listener to hide all suggestion lists
             document.addEventListener('click', (e) => {
                 closeAllMenus(e);
-                if (!homepageSearchBarEl.contains(e.target)) {
-                    searchSuggestionsEl.style.display = 'none';
+                const homepageSearchContainer = document.getElementById('homepage-search-container');
+                if (homepageSearchContainer && !homepageSearchContainer.contains(e.target)) {
+                    homepageSearchSuggestionsEl.style.display = 'none';
+                }
+                const topSearchContainer = document.getElementById('top-search-container');
+                if (topSearchContainer && !topSearchContainer.contains(e.target)) {
+                    topSearchSuggestionsEl.style.display = 'none';
                 }
             });
             
@@ -1413,53 +1483,58 @@
                 const themeKey = e.target.value;
                 applyTheme(themeKey);
                 localStorage.setItem('vernTheme', themeKey);
-                toggleCustomThemeView(themeKey === 'custom'); // Call on change
+                toggleCustomThemeView(themeKey === 'custom');
             });
             searchEngineSelectorEl.addEventListener('change', (e) => { currentSearchEngineKey = e.target.value; localStorage.setItem('vernSearchEngine', e.target.value); });
             historyLifespanSelectorEl.addEventListener('change', (e) => {
                 const value = e.target.value;
-                toggleCustomHistoryView(value === 'custom'); // Call on change
+                toggleCustomHistoryView(value === 'custom');
                 if (value !== 'custom') {
                     localStorage.setItem('vernHistoryLifespan', value);
                     pruneHistory();
                     loadHistory();
                 }
             });
-            adFreeToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernAdFreeToggle', e.target.checked); });
+            adFreeToggleEl.addEventListener('change', (e) => { 
+                localStorage.setItem('vernAdFreeToggle', e.target.checked);
+                if (e.target.checked) {
+                    runAdBlocker(contentIframeEl);
+                }
+             });
 
-            cloakPresetSelectorEl.addEventListener('change', (e) => {
-                currentCloakPresetKey = e.target.value;
-                localStorage.setItem('vernCloakPreset', currentCloakPresetKey);
-                applyBrowserCloak();
-                toggleCustomCloakView(currentCloakPresetKey === 'custom'); // Call on change
-            });
+            // DELETED: Cloak related event listeners
 
-            // New listeners
             applyCustomThemeButtonEl.addEventListener('click', applyAndSaveCustomTheme);
             applyCustomHistoryDaysButtonEl.addEventListener('click', applyAndSaveCustomHistoryDays);
-            applyCustomCloakButtonEl.addEventListener('click', applyAndSaveCustomCloak);
             
             clearBrowserDataButtonEl.addEventListener('click', clearAllData);
             saveConfigButtonEl.addEventListener('click', saveConfiguration);
+            
+            // ADDED/MODIFIED: Search suggestion listeners for both bars
+            searchBarEl.addEventListener('input', () => fetchAndShowSuggestions(searchBarEl.value, topSearchSuggestionsEl));
+            homepageSearchBarEl.addEventListener('input', () => fetchAndShowSuggestions(homepageSearchBarEl.value, homepageSearchSuggestionsEl));
 
-            homepageSearchBarEl.addEventListener('input', handleSearchInput);
-            homepageSearchBarEl.addEventListener('focus', () => {
-                if(document.body.classList.contains('theme-typewriter')) {
-                    startTypewriter(homepageSearchBarEl, homepageSearchBarEl.placeholder);
-                }
-            });
-            searchBarEl.addEventListener('focus', () => {
-                if(document.body.classList.contains('theme-typewriter')) {
-                    startTypewriter(searchBarEl, searchBarEl.placeholder);
-                }
-            });
+            homepageSearchBarEl.addEventListener('focus', () => { if(document.body.classList.contains('theme-typewriter')) { startTypewriter(homepageSearchBarEl, homepageSearchBarEl.placeholder); } });
+            searchBarEl.addEventListener('focus', () => { if(document.body.classList.contains('theme-typewriter')) { startTypewriter(searchBarEl, searchBarEl.placeholder); } });
+            
             homepageSearchBarEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigateTo(e.target.value); });
             homepageSearchIconEl.addEventListener('click', () => navigateTo(homepageSearchBarEl.value));
-            searchSuggestionsEl.addEventListener('mousedown', (e) => {
+            
+            homepageSearchSuggestionsEl.addEventListener('mousedown', (e) => {
                 if (e.target.tagName === 'LI') {
                     navigateTo(e.target.textContent);
+                    homepageSearchSuggestionsEl.style.display = 'none';
                 }
             });
+            topSearchSuggestionsEl.addEventListener('mousedown', (e) => {
+                if (e.target.tagName === 'LI') {
+                    navigateTo(e.target.textContent);
+                    topSearchSuggestionsEl.style.display = 'none';
+                }
+            });
+            
+            // ADDED: Error page button listener
+            errorReturnHomeButtonEl.addEventListener('click', () => navigateTo(getHomepageUrl()));
 
             document.addEventListener('keydown', handleGlobalKeyDown);
             window.addEventListener('resize', () => {
@@ -1475,8 +1550,8 @@
                     mouse.y = e.clientY;
                 }
                 if (bodyClassList.contains('theme-tilt3d')) {
-                    const x = (e.clientX / window.innerWidth - 0.5) * 2; // -1 to 1
-                    const y = (e.clientY / window.innerHeight - 0.5) * 2; // -1 to 1
+                    const x = (e.clientX / window.innerWidth - 0.5) * 2;
+                    const y = (e.clientY / window.innerHeight - 0.5) * 2;
                     r.style.setProperty('--tilt-x', `${-y * 10}deg`);
                     r.style.setProperty('--tilt-y', `${x * 10}deg`);
                 }
@@ -1492,15 +1567,8 @@
                 }
             });
 
-            // NEW: HTTPS Enforcement Toggle
-            httpsEnforceToggleEl.addEventListener('change', (e) => {
-                localStorage.setItem('vernHttpsEnforce', e.target.checked);
-            });
-
-            // NEW: Custom Homepage Buttons
-            homepageUrlInputEl.addEventListener('input', () => {
-                localStorage.setItem('vernCustomHomepage', homepageUrlInputEl.value.trim());
-            });
+            httpsEnforceToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernHttpsEnforce', e.target.checked); });
+            homepageUrlInputEl.addEventListener('input', () => { localStorage.setItem('vernCustomHomepage', homepageUrlInputEl.value.trim()); });
             setCurrentPageAsHomepageButtonEl.addEventListener('click', () => {
                 if (currentUrl && currentUrl !== 'about:blank' && currentUrl !== 'about:blank#') {
                     homepageUrlInputEl.value = currentUrl;
@@ -1516,46 +1584,35 @@
                 alert('Homepage reset to default.');
             });
 
-            // NEW: Persistent Tabs/Session Restore Toggle
-            restoreSessionToggleEl.addEventListener('change', (e) => {
-                localStorage.setItem('vernRestoreSession', e.target.checked);
-            });
+            restoreSessionToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernRestoreSession', e.target.checked); });
 
-            // NEW: Cookie Management Buttons
-            clearCurrentSiteCookiesButtonEl.addEventListener('click', () => {
-                if (confirm("Are you sure you want to clear cookies for the current site? This may log you out of the site.")) {
-                    clearCookiesForCurrentSite();
-                    alert("Attempted to clear cookies for the current site.");
-                }
-            });
-            clearAllBrowserCookiesButtonEl.addEventListener('click', () => {
-                if (confirm("Are you sure you want to clear ALL browser cookies? This will log you out of all sites.")) {
-                    clearAllBrowserCookies();
-                    alert("All browser cookies cleared.");
-                }
-            });
-            blockThirdPartyCookiesToggleEl.addEventListener('change', (e) => {
-                localStorage.setItem('vernBlockThirdPartyCookies', e.target.checked);
-                alert("Please note: Blocking third-party cookies is highly browser-dependent and may not be fully effective in all proxy environments. It's primarily a preference setting.");
-            });
+            clearCurrentSiteCookiesButtonEl.addEventListener('click', () => { if (confirm("Are you sure you want to clear cookies for the current site? This may log you out of the site.")) { clearCookiesForCurrentSite(); alert("Attempted to clear cookies for the current site."); } });
+            clearAllBrowserCookiesButtonEl.addEventListener('click', () => { if (confirm("Are you sure you want to clear ALL browser cookies? This will log you out of all sites.")) { clearAllBrowserCookies(); alert("All browser cookies cleared."); } });
+            blockThirdPartyCookiesToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernBlockThirdPartyCookies', e.target.checked); alert("Please note: Blocking third-party cookies is highly browser-dependent and may not be fully effective in all proxy environments. It's primarily a preference setting."); });
         }
 
         // --- NAVIGATION & PROXY ---
         function navigateTo(urlInput) {
             isLoading = true;
-            searchSuggestionsEl.style.display = 'none';
+            homepageSearchSuggestionsEl.style.display = 'none'; // Hide all suggestions on nav
+            topSearchSuggestionsEl.style.display = 'none';
             let targetUrl = urlInput ? urlInput.trim() : '';
+            const isAdFreeEnabled = localStorage.getItem('vernAdFreeToggle') === 'true';
 
-            // NEW: HTTPS Enforcement
+            if (isAdFreeEnabled && targetUrl) {
+                try {
+                    const urlHostname = new URL(formatUrlInput(targetUrl) || targetUrl).hostname;
+                    if (adBlockerDomains.some(domain => urlHostname.includes(domain))) {
+                        console.log(`[AdBlock] Blocked navigation to ad domain: ${targetUrl}`);
+                        isLoading = false;
+                        return;
+                    }
+                } catch (e) { /* Not a full URL, ignore */ }
+            }
+
             if (localStorage.getItem('vernHttpsEnforce') === 'true') {
                 if (targetUrl.startsWith('http://')) {
                     targetUrl = 'https://' + targetUrl.substring(7);
-                } else if (!targetUrl.startsWith('https://') && !targetUrl.startsWith('about:') && !targetUrl.startsWith('data:')) {
-                    // Only prepend https if no protocol or http is explicitly used.
-                    // This avoids breaking local paths or data URIs
-                    if (!/^[a-zA-Z]+:\/\//.test(targetUrl)) { // Check if no protocol is explicitly given
-                            targetUrl = 'https://' + targetUrl;
-                    }
                 }
             }
             
@@ -1564,16 +1621,20 @@
                 targetUrl = formatted ? formatted : searchEngines[currentSearchEngineKey].url.replace('%s', encodeURIComponent(targetUrl));
             }
             
+            lastAttemptedUrl = targetUrl; // Store the URL we are trying to visit
+
             if (targetUrl === 'about:blank' || targetUrl === 'about:blank#') {
                 showHomepage();
                 searchBarEl.value = '';
                 currentUrl = 'about:blank';
             } else {
                 hideHomepage();
+                hideErrorPage(); // Hide error page before trying a new URL
                 contentIframeEl.src = proxyUrl(targetUrl);
             }
         }
 
+        // MODIFIED: handleIframeLoad with error page logic
         function handleIframeLoad() {
             isLoading = false;
             if (isRefreshing) { const icon = refreshButtonEl.querySelector('.icon-img'); icon.classList.remove('spinning'); isRefreshing = false; }
@@ -1590,31 +1651,43 @@
                 finalTitle = 'New Tab';
             }
 
-            // Anti-Google Vignette Logic
             const isAdFreeEnabled = localStorage.getItem('vernAdFreeToggle') === 'true';
-            if (isAdFreeEnabled && finalUrl.includes('/#google_vignette')) {
-                const cleanUrl = finalUrl.split('/#google_vignette')[0];
+
+            if (isAdFreeEnabled && finalUrl.includes('#google_vignette')) {
+                const cleanUrl = finalUrl.split('#google_vignette')[0];
                 navigateTo(cleanUrl);
-                return; // Stop processing this "dirty" URL load
+                return;
             }
             
-            if(finalUrl === 'about:blank' || contentIframeEl.src.endsWith('#')){
+            const isError = (finalUrl === 'about:blank' && lastAttemptedUrl && !lastAttemptedUrl.includes('about:blank'));
+
+            if (isError) {
+                let domain;
+                try { domain = new URL(lastAttemptedUrl).hostname; } catch { domain = lastAttemptedUrl; }
+                showErrorPage(`The page at "${domain}" could not be loaded or was blocked by the network.`);
+            } else if (finalUrl === 'about:blank' || contentIframeEl.src.endsWith('#')) {
                 showHomepage();
+                hideErrorPage();
                 searchBarEl.value = '';
                 currentUrl = 'about:blank';
             } else {
                 hideHomepage();
+                hideErrorPage();
                 currentUrl = finalUrl;
                 searchBarEl.value = finalUrl;
             }
 
             currentTitle = finalTitle;
-            // Only update last visited URL if session restore is enabled
             if (localStorage.getItem('vernRestoreSession') === 'true') {
                 localStorage.setItem('vernLastUrl', currentUrl);
             }
-            applyBrowserCloak();
+            updateTitleAndFavicon(); // MODIFIED
             if (currentUrl && !currentUrl.startsWith('about:')) addToHistory(currentTitle, currentUrl);
+
+            if (isAdFreeEnabled && finalUrl !== 'about:blank') {
+                runAdBlocker(contentIframeEl);
+            }
+            lastAttemptedUrl = ''; // Reset for the next navigation
         }
 
         function proxyUrl(urlToProxy) {
@@ -1627,23 +1700,22 @@
         
         function formatUrlInput(input) { const trimmed = input.trim(); if (/^(?:[a-z]+:)?\/\//i.test(trimmed)) return trimmed; if (/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)*$/.test(trimmed)) return 'https://' + trimmed; return null; }
 
-        // NEW: Get Homepage URL
         function getHomepageUrl() {
             const customHomepage = localStorage.getItem('vernCustomHomepage');
             return customHomepage && customHomepage.trim() !== '' ? customHomepage : 'about:blank';
         }
 
-        // NEW: Save Session
         function saveSession() {
             if (localStorage.getItem('vernRestoreSession') === 'true') {
                 localStorage.setItem('vernLastUrl', currentUrl);
             }
         }
 
-        // --- HOMEPAGE & SEARCH SUGGESTIONS ---
+        // --- HOMEPAGE & UI TOGGLES ---
         function showHomepage() {
             homepageEl.style.display = 'flex';
             contentIframeEl.style.display = 'none';
+            errorPageEl.style.display = 'none';
             if(contentIframeEl.src !== 'about:blank#') contentIframeEl.src = 'about:blank#';
         }
 
@@ -1651,28 +1723,39 @@
             homepageEl.style.display = 'none';
             contentIframeEl.style.display = 'block';
         }
+        
+        // ADDED: Error page functions
+        function showErrorPage(message = 'The requested page could not be loaded.') {
+            homepageEl.style.display = 'none';
+            contentIframeEl.style.display = 'none';
+            errorPageEl.style.display = 'flex';
+            errorMessageEl.textContent = message;
+            if(contentIframeEl.src !== 'about:blank#') contentIframeEl.src = 'about:blank#';
+        }
+        function hideErrorPage() {
+            errorPageEl.style.display = 'none';
+        }
 
-        function handleSearchInput() {
-            const query = homepageSearchBarEl.value;
+        // ADDED: Refactored search suggestion logic
+        function fetchAndShowSuggestions(query, suggestionsEl) {
             if (query.length > 0) {
-                // Using DuckDuckGo suggestions instead of Google
                 fetch(`https://api.allorigins.win/raw?url=https://duckduckgo.com/ac/?q=${encodeURIComponent(query)}&type=json`)
                     .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok.'))
                     .then(data => {
                         const suggestions = data.map(item => item.phrase);
-                        searchSuggestionsEl.innerHTML = '';
+                        suggestionsEl.innerHTML = '';
                         suggestions.forEach(suggestion => {
                             const li = document.createElement('li');
                             li.textContent = suggestion;
-                            searchSuggestionsEl.appendChild(li);
+                            suggestionsEl.appendChild(li);
                         });
-                        searchSuggestionsEl.style.display = 'block';
+                        suggestionsEl.style.display = 'block';
                     }).catch(error => {
                         console.warn("Could not fetch search suggestions:", error);
-                        searchSuggestionsEl.style.display = 'none';
+                        suggestionsEl.style.display = 'none';
                     });
             } else {
-                searchSuggestionsEl.style.display = 'none';
+                suggestionsEl.style.display = 'none';
             }
         }
 
@@ -1696,7 +1779,7 @@
             if (history.length === 0) { const li = document.createElement('li'); li.textContent = 'No history found.'; li.style.cssText = 'cursor: default; text-align: center; opacity: 0.7;'; fragment.appendChild(li); } 
             else { const grouped = {}; [...history].reverse().forEach(item => { const groupKey = new Date(item.timestamp).toDateString(); if (!grouped[groupKey]) grouped[groupKey] = []; grouped[groupKey].push(item); });
                 for (const groupKey in grouped) { const headerTpl = historyGroupTemplate.content.cloneNode(true); headerTpl.querySelector('.history-group-header').textContent = groupKey; fragment.appendChild(headerTpl); 
-                    grouped[groupKey].forEach(item => { const itemTpl = historyItemTemplate.content.cloneNode(true); const li = itemTpl.querySelector('li'); li.dataset.url = item.url; li.title = `${item.title}\n${item.url}`; li.querySelector('.item-name').textContent = item.title; li.querySelector('.item-url').textContent = item.url; fragment.appendChild(itemTpl); }); }
+                    grouped[groupKey].forEach(item => { const itemTpl = historyItemTemplate.content.cloneNode(true); const li = itemTpl.querySelector('li'); li.dataset.url = item.url; li.title = `${item.title}\\n${item.url}`; li.querySelector('.item-name').textContent = item.title; li.querySelector('.item-url').textContent = item.url; fragment.appendChild(itemTpl); }); }
             }
             historyListPopupEl.innerHTML = ''; historyListPopupEl.appendChild(fragment);
         }
@@ -1719,42 +1802,26 @@
                 alert("All browser data has been cleared."); window.location.reload();
             }
         }
-        function applyAndSaveCustomCloak() {
-            localStorage.setItem('vernCustomCloakTitle', customCloakTitleEl.value);
-            localStorage.setItem('vernCustomCloakUrl', customCloakUrlEl.value);
-            currentCloakPresetKey = 'custom'; cloakPresetSelectorEl.value = 'custom';
-            localStorage.setItem('vernCloakPreset', 'custom'); applyBrowserCloak();
-            alert('Custom cloak applied and saved!');
-        }
+        
+        // DELETED: applyAndSaveCustomCloak function
 
-        // NEW: Cookie Management Functions
         function clearCookiesForCurrentSite() {
-            // This can only clear cookies for the main document's domain.
-            // For proxied content inside the iframe, direct access is limited by same-origin policy.
-            // A more robust solution for proxied content would involve the service worker or backend.
             const cookies = document.cookie.split(';');
-            const currentDomain = window.location.hostname; // This refers to the proxy's domain, not the proxied site's.
-
+            const currentDomain = window.location.hostname;
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i];
                 const eqPos = cookie.indexOf("=");
                 const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-                // Attempt to delete for various paths and the current domain
                 document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
                 document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + currentDomain;
-                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + currentDomain; // For subdomains
+                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + currentDomain;
             }
-            // For content inside the iframe, clearing document.cookie of the *iframe* is necessary,
-            // but directly accessing that is blocked by same-origin.
-            // A refresh might be needed to reflect changes.
             if (contentIframeEl.contentWindow && contentIframeEl.contentWindow.location.href !== 'about:blank') {
                     try {
-                        // This attempts to clear cookies for the iframe's *visible* origin.
-                        // It might still be blocked by sandbox attributes or browser policies.
                         contentIframeEl.contentWindow.document.cookie.split(';').forEach(function(c) {
                             document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
                         });
-                        contentIframeEl.contentWindow.location.reload(true); // Force reload to apply cookie changes
+                        contentIframeEl.contentWindow.location.reload(true);
                     } catch (e) {
                         console.warn("Could not directly clear iframe cookies due to security restrictions:", e);
                         alert("Note: Clearing cookies for the proxied site might be limited by browser security policies. You may need to manually clear site data.");
@@ -1763,9 +1830,6 @@
         }
 
         function clearAllBrowserCookies() {
-            // This clears all cookies for the *proxy's domain*.
-            // It doesn't clear cookies for websites *accessed through* the proxy within the iframe's sandbox.
-            // For a complete clear, browser settings would be required, or a very sophisticated proxy.
             const allCookies = document.cookie.split(';');
             for (let i = 0; i < allCookies.length; i++) {
                 const cookie = allCookies[i];
@@ -1773,134 +1837,69 @@
                 const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
                 document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
             }
-            // Attempt to clear cookies for the iframe's content if possible (same limitations apply)
             if (contentIframeEl.contentWindow) {
                 try {
                     contentIframeEl.contentWindow.document.cookie.split(';').forEach(function(c) {
                         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
                     });
-                } catch (e) {
-                    console.warn("Could not directly clear iframe cookies during all-clear:", e);
-                }
+                } catch (e) { console.warn("Could not directly clear iframe cookies during all-clear:", e); }
             }
-            window.location.reload(); // Reload the page to reflect cookie changes
+            window.location.reload();
         }
-
 
         // --- NEW THEME GENERATION LOGIC ---
-        function hexToRgb(hex) {
-            let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : null;
-        }
-
-        function getLuminance(hex) {
-            const rgb = hexToRgb(hex);
-            if (!rgb) return 0;
-            const a = [rgb.r, rgb.g, rgb.b].map(function (v) {
-                v /= 255;
-                return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-            });
-            return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
-        }
-        
+        function hexToRgb(hex) { let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null; }
+        function getLuminance(hex) { const rgb = hexToRgb(hex); if (!rgb) return 0; const a = [rgb.r, rgb.g, rgb.b].map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722; }
         function adjustColor(hex, percent) {
-            const rgb = hexToRgb(hex);
-            if(!rgb) return hex;
-            
-            // For a background, a small additive change is better than multiplicative to avoid oversaturation.
-            const amount = Math.floor(2.55 * percent); // percent is -100 to 100
-
+            const rgb = hexToRgb(hex); if(!rgb) return hex;
+            const amount = Math.floor(2.55 * percent);
             rgb.r = Math.round(Math.max(0, Math.min(255, rgb.r + amount)));
             rgb.g = Math.round(Math.max(0, Math.min(255, rgb.g + amount)));
             rgb.b = Math.round(Math.max(0, Math.min(255, rgb.b + amount)));
-            
             const toHex = c => ('00' + c.toString(16)).slice(-2);
-
             return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
         }
-        
         function generateSmartTheme(baseBg, baseAccent) {
             const bgLuminance = getLuminance(baseBg);
             const accentLuminance = getLuminance(baseAccent);
-
-            // Determine neutral color by slightly adjusting the background
-            // If background is dark, lighten the neutral. If light, darken it.
             const neutral = adjustColor(baseBg, bgLuminance < 0.5 ? 8 : -8);
-
-            // Determine text color based on background contrast
             const textColor = bgLuminance > 0.4 ? '#111111' : '#FFFFFF';
-
-            // Determine button text color based on accent contrast
             const btnTextColor = accentLuminance > 0.4 ? '#111111' : '#FFFFFF';
-
-            return {
-                bg: baseBg,
-                text: textColor,
-                accent: baseAccent,
-                neutral: neutral,
-                btnText: btnTextColor
-            };
+            return { bg: baseBg, text: textColor, accent: baseAccent, neutral: neutral, btnText: btnTextColor };
         }
-
         function applyAndSaveCustomTheme() {
-            // Save the user's two chosen colors
             localStorage.setItem('vernCustomThemeBaseBg', customThemeBgBaseEl.value);
             localStorage.setItem('vernCustomThemeBaseAccent', customThemeAccentBaseEl.value);
-
-            // Generate the full theme from the two base colors
             const generatedColors = generateSmartTheme(customThemeBgBaseEl.value, customThemeAccentBaseEl.value);
-
-            // Save the generated 5-color theme
             localStorage.setItem('vernCustomThemeColors', JSON.stringify(generatedColors));
-            
-            // Set the current theme to 'custom' and apply it
             localStorage.setItem('vernTheme', 'custom');
             themeSelectorEl.value = 'custom';
             applyTheme('custom');
             alert('Smart theme applied and saved!');
         }
-
         function applyAndSaveCustomHistoryDays() {
             const days = parseInt(customHistoryDaysInputEl.value, 10);
-            if (isNaN(days) || days < 0 || days > 14) {
-                alert('Please enter a number between 0 and 14.');
-                return;
-            }
+            if (isNaN(days) || days < 0 || days > 14) { alert('Please enter a number between 0 and 14.'); return; }
             localStorage.setItem('vernHistoryLifespan', days.toString());
             historyLifespanSelectorEl.value = 'custom';
             pruneHistory();
             loadHistory();
             alert(`History lifespan set to ${days} days.`);
         }
-
         function saveConfiguration() {
             const now = new Date();
             localStorage.setItem('vernConfigSaveTimestamp', now.toISOString());
             updateSaveButtonText();
-            
             const originalText = saveConfigButtonEl.firstChild.textContent;
             saveConfigButtonEl.firstChild.textContent = 'Configuration Saved! ';
-            setTimeout(() => {
-                saveConfigButtonEl.firstChild.textContent = originalText;
-            }, 1500);
+            setTimeout(() => { saveConfigButtonEl.firstChild.textContent = originalText; }, 1500);
         }
-
         function updateSaveButtonText() {
             const savedTimestampISO = localStorage.getItem('vernConfigSaveTimestamp');
-            if (!savedTimestampISO) {
-                saveTimestampEl.textContent = '';
-                return;
-            }
-
+            if (!savedTimestampISO) { saveTimestampEl.textContent = ''; return; }
             const savedDate = new Date(savedTimestampISO);
             const now = new Date();
-
             const isToday = savedDate.toDateString() === now.toDateString();
-
             let formattedTimestamp;
             if (isToday) {
                 const hours = String(savedDate.getHours()).padStart(2, '0');
@@ -1916,61 +1915,35 @@
             saveTimestampEl.textContent = `(${formattedTimestamp})`;
         }
 
-
         // --- UI, MENU, & THEME HELPERS ---
         function clearSpecialFeatures() {
-            // Clear spotlight
             const existingSpotlight = document.getElementById('spotlight-overlay');
             if (existingSpotlight) existingSpotlight.remove();
-
-            // Clear typewriter
             if(typewriterInterval) clearInterval(typewriterInterval);
-
-            // Clear keyboard shortcuts
             document.querySelectorAll('.shortcut-text').forEach(el => el.remove());
             document.querySelectorAll('.nav-button, .toolbar-button').forEach(btn => {
                 const icon = btn.querySelector('.icon-img');
                 if (icon) icon.style.display = 'block';
             });
         }
-
         function applyKeyboardShortcuts() {
-            const shortcuts = {
-                'back-button': 'Alt+←',
-                'forward-button': 'Alt+→',
-                'refresh-button': 'Ctrl+R',
-            };
+            const shortcuts = { 'back-button': 'Alt+←', 'forward-button': 'Alt+→', 'refresh-button': 'Ctrl+R', };
             for(const [id, key] of Object.entries(shortcuts)) {
                 const btn = document.getElementById(id);
-                if(btn) {
-                    btn.querySelector('.icon-img').style.display = 'none';
-                    const span = document.createElement('span');
-                    span.className = 'shortcut-text';
-                    span.textContent = key;
-                    btn.appendChild(span);
-                }
+                if(btn) { btn.querySelector('.icon-img').style.display = 'none'; const span = document.createElement('span'); span.className = 'shortcut-text'; span.textContent = key; btn.appendChild(span); }
             }
         }
-
         function startTypewriter(element, text) {
             if (typewriterInterval) clearInterval(typewriterInterval);
-            let i = 0;
-            element.value = '';
+            let i = 0; element.value = '';
             typewriterInterval = setInterval(() => {
-                if (i < text.length) {
-                    element.value += text.charAt(i);
-                    i++;
-                } else {
-                    clearInterval(typewriterInterval);
-                }
+                if (i < text.length) { element.value += text.charAt(i); i++; } 
+                else { clearInterval(typewriterInterval); }
             }, 50);
         }
-
-        // Modified: These functions now only control visibility based on 'custom' selection
-        function toggleCustomCloakView(show) { customCloakSettingsContainerEl.classList.toggle('visible', show); }
+        
         function toggleCustomThemeView(show) { customThemeSettingsContainerEl.classList.toggle('visible', show); }
         function toggleCustomHistoryView(show) { customHistoryDaysContainerEl.classList.toggle('visible', show); }
-        // NEW: Toggle Cookie Management Visibility (added for consistency, though not conditional yet)
         function toggleCookieManagementView(show) { cookieManagementContainerEl.classList.toggle('visible', show); }
 
 
@@ -1982,23 +1955,15 @@
         function positionMenuUnderButton(menuEl, buttonEl) {
             const btnRect = buttonEl.getBoundingClientRect();
             const isBottomBar = document.body.classList.contains('theme-bottom-bar');
-            if (isBottomBar) {
-                menuEl.style.top = 'auto';
-                menuEl.style.bottom = (window.innerHeight - btnRect.top + 5) + 'px';
-            } else {
-                menuEl.style.bottom = 'auto';
-                menuEl.style.top = (btnRect.bottom + 5) + 'px';
-            }
+            if (isBottomBar) { menuEl.style.top = 'auto'; menuEl.style.bottom = (window.innerHeight - btnRect.top + 5) + 'px'; } 
+            else { menuEl.style.bottom = 'auto'; menuEl.style.top = (btnRect.bottom + 5) + 'px'; }
             menuEl.style.right = (document.documentElement.clientWidth - btnRect.right) + 'px';
             menuEl.style.left = 'auto';
         }
         function toggleMenu(menuEl, buttonEl) {
             const isShowing = menuEl.classList.contains('show');
             closeAllMenus();
-            if (!isShowing) {
-                menuEl.classList.add('show');
-                positionMenuUnderButton(menuEl, buttonEl);
-            }
+            if (!isShowing) { menuEl.classList.add('show'); positionMenuUnderButton(menuEl, buttonEl); }
         }
         function toggleBookmarkMenu() { toggleMenu(bookmarkMenuEl, bookmarkButtonEl); }
         function toggleHistoryMenu() { toggleMenu(historyMenuEl, historyButtonEl); if(historyMenuEl.classList.contains('show')) historySearchBarEl.focus(); }
@@ -2006,16 +1971,11 @@
         
         function populateThemeSelector() {
             themeSelectorEl.innerHTML = '';
-            const customThemesGroup = document.createElement('optgroup');
-            customThemesGroup.label = 'Custom';
+            const customThemesGroup = document.createElement('optgroup'); customThemesGroup.label = 'Custom';
             customThemesGroup.appendChild(new Option('Custom Theme', 'custom'));
             themeSelectorEl.appendChild(customThemesGroup);
-
-            const standardThemesGroup = document.createElement('optgroup');
-            standardThemesGroup.label = 'Standard Themes';
-            const specialThemesGroup = document.createElement('optgroup');
-            specialThemesGroup.label = 'Special Themes';
-            
+            const standardThemesGroup = document.createElement('optgroup'); standardThemesGroup.label = 'Standard Themes';
+            const specialThemesGroup = document.createElement('optgroup'); specialThemesGroup.label = 'Special Themes';
             Object.keys(THEMES).forEach(key => {
                 const theme = THEMES[key];
                 const option = new Option(theme.name, key);
@@ -2027,77 +1987,45 @@
         }
         function applyTheme(themeKey) {
             const r = document.documentElement;
-            clearSpecialFeatures();
-            stopAllParticles();
-            document.body.className = '';
+            clearSpecialFeatures(); stopAllParticles(); document.body.className = '';
             r.style.setProperty('--font-family-main', "'PrimaryFont', sans-serif");
-            r.style.removeProperty('--tilt-x');
-            r.style.removeProperty('--tilt-y');
-            
+            r.style.removeProperty('--tilt-x'); r.style.removeProperty('--tilt-y');
             let theme;
             if (themeKey === 'custom') {
                 const customColorsJSON = localStorage.getItem('vernCustomThemeColors');
-                if (customColorsJSON) {
-                    theme = { name: "Custom", colors: JSON.parse(customColorsJSON) };
-                } else {
-                    // Fallback if no custom theme is saved yet
-                    theme = { name: "Custom (Default)", colors: { bg: '#23272A', text: '#E0E1DD', accent: '#7F5AF0', neutral: '#2C2F33', btnText: '#FFFFFF' } };
-                }
-            } else {
-                        theme = THEMES[themeKey] || THEMES.main;
-            }
+                if (customColorsJSON) { theme = { name: "Custom", colors: JSON.parse(customColorsJSON) }; } 
+                else { theme = { name: "Custom (Default)", colors: { bg: '#23272A', text: '#E0E1DD', accent: '#7F5AF0', neutral: '#2C2F33', btnText: '#FFFFFF' } }; }
+            } else { theme = THEMES[themeKey] || THEMES.main; }
 
             if (theme.feature === 'systemMatch') {
                 const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                 theme.colors = prefersDark ? THEMES.dark.colors : THEMES.light.colors;
             }
-
             const colors = theme.colors;
             r.style.setProperty('--current-theme-bg', colors.bg); r.style.setProperty('--current-theme-text', colors.text);
             r.style.setProperty('--current-theme-accent', colors.accent); r.style.setProperty('--current-theme-neutral', colors.neutral);
             r.style.setProperty('--current-theme-button-text', colors.btnText);
-
             if (theme.feature) {
                 const featureClassName = `theme-${theme.feature.toLowerCase().replace(/_/g, '')}`;
                 document.body.classList.add(featureClassName);
-
-                // Handle JS-based features
-                if (['particleFlow', 'oceanDeep', 'sakuraBlossom', 'dynamicGrid', 'aurora', 'mouseGlow', 'staticNoise'].includes(theme.feature)) {
-                    startParticleEffect(theme.feature);
-                }
-                if(theme.feature === 'spotlight') {
-                    const spotlight = document.createElement('div');
-                    spotlight.id = 'spotlight-overlay';
-                    document.body.appendChild(spotlight);
-                }
-                if(theme.feature === 'keyboardShortcuts') {
-                    applyKeyboardShortcuts();
-                }
+                if (['particleFlow', 'oceanDeep', 'sakuraBlossom', 'dynamicGrid', 'aurora', 'mouseGlow', 'staticNoise'].includes(theme.feature)) { startParticleEffect(theme.feature); }
+                if(theme.feature === 'spotlight') { const spotlight = document.createElement('div'); spotlight.id = 'spotlight-overlay'; document.body.appendChild(spotlight); }
+                if(theme.feature === 'keyboardShortcuts') { applyKeyboardShortcuts(); }
             }
         }
-        function populateCloakSelector() { Object.keys(cloakPresets).forEach(key => cloakPresetSelectorEl.add(new Option(cloakPresets[key].displayName, key))); }
+
+        // DELETED: populateCloakSelector function
+
         function populateSearchEngineSelector() { 
-            searchEngineSelectorEl.innerHTML = ''; // Clear existing options
+            searchEngineSelectorEl.innerHTML = '';
             Object.keys(searchEngines).forEach(key => searchEngineSelectorEl.add(new Option(searchEngines[key].name, key))); 
         }
-        function applyBrowserCloak() {
+
+        // ADDED: Simplified title/favicon updater
+        function updateTitleAndFavicon() {
             const appFaviconEl = document.getElementById('app-favicon');
-            const selectedPreset = cloakPresets[currentCloakPresetKey];
-            if (currentCloakPresetKey === 'custom') {
-                const customTitle = localStorage.getItem('vernCustomCloakTitle') || 'VERN MAX';
-                const customFaviconUrlSource = localStorage.getItem('vernCustomCloakUrl') || '../images/favicon.png';
-                document.title = customTitle; appFaviconEl.href = getFaviconUrl(customFaviconUrlSource);
-            } else if (selectedPreset && currentCloakPresetKey !== 'none') {
-                document.title = selectedPreset.title; appFaviconEl.href = selectedPreset.faviconUrl;
-            } else {
-                document.title = 'VERN MAX';
-                appFaviconEl.href = '../images/favicon.png';
-            }
-        }
-        function getFaviconUrl(targetUrl) {
-            if (!targetUrl || targetUrl.startsWith('about:')) return '../images/favicon.png';
-            try { const url = new URL(targetUrl); return `https://icons.duckduckgo.com/ip3/${url.hostname}.ico`; } 
-            catch (e) { return '../images/favicon.png'; }
+            document.title = currentTitle || 'VERN MAX';
+            appFaviconEl.href = '../images/favicon.png';
         }
         
         // --- EVENT HANDLERS & UTILITIES ---
