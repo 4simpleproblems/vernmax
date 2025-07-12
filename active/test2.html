@@ -477,13 +477,14 @@
                 <select id="ad-block-level-selector" class="menu-select">
                     <option value="off">Off</option>
                     <option value="standard">Standard (Hide Ads)</option>
+                    <option value="aggressive">Aggressive (Block & Hide)</option>
                     <option value="annihilator">Ad Annihilator</option>
                 </select>
-                <small class="setting-explanation">"Ad Annihilator" is extremely aggressive and may break some sites.</small>
+                <small class="setting-explanation">Higher levels are tougher but may affect site performance.</small>
             </div>
 
             <div id="ad-block-counter-container">
-                VERN MAX has annihilated <strong>0</strong> ads & trackers on this page!
+                VERN MAX has blocked <strong>0</strong> ads & trackers on this page!
             </div>
 
             <div class="menu-setting-item">
@@ -559,7 +560,7 @@
         let currentTitle = 'New Tab';
         let isLoading = false;
         let isRefreshing = false;
-        let annihilatorInterval = null;
+        let adBlockerInterval = null;
         let adBlockerObserver = null;
         let vernBlockedItems = 0;
 
@@ -600,7 +601,7 @@
             mustard_yellow: { name: "Mustard Yellow", colors: { bg: '#5D4B00', text: '#3B2F00', accent: '#D4A017', neutral: '#7A6300', btnText: '#3B2F00' } },
         };
 
-        // --- AD ANNIHILATOR BLOCKLISTS (MASSIVELY EXPANDED) ---
+        // --- AD BLOCKER BLOCKLISTS (MASSIVELY EXPANDED) ---
         const blockedDomains = [
             'doubleclick.net', 'adservice.google.com', 'googleadservices.com', 'googlesyndication.com', 'google-analytics.com', 'googletagmanager.com',
             'adnxs.com', 'adroll.com', 'criteo.com', 'pubmatic.com', 'rubiconproject.com', 'youtube-nocookie.com', 'adobedtm.com',
@@ -653,17 +654,36 @@
 
         let bookmarkItemTemplate, historyItemTemplate, historyGroupTemplate;
         
-        // --- AD ANNIHILATOR ENGINE ---
+        // --- AD BLOCKER ENGINE (OVERHAULED) ---
+
+        function findAndDestroyAdContainer(element) {
+            if (!element) return false;
+            let current = element;
+            let containerFound = false;
+            // Traverse up to 5 levels to find a likely container
+            for (let i = 0; i < 5 && current.parentElement; i++) {
+                const id = current.id || '';
+                const className = current.className || '';
+                if (id.includes('ad') || className.includes('ad') || id.includes('banner') || className.includes('banner') || id.includes('sponsor') || className.includes('sponsor')) {
+                    containerFound = true;
+                    break;
+                }
+                current = current.parentElement;
+            }
+            const targetToRemove = containerFound ? current : element;
+            return forcefullyRemoveElement(targetToRemove);
+        }
+
         function forcefullyRemoveElement(element) {
             if (!element || element.classList.contains('vern-removed')) return false;
             try {
                 element.style.setProperty('display', 'none', 'important');
                 element.style.setProperty('visibility', 'hidden', 'important');
-                element.style.setProperty('opacity', '0', 'important');
-                element.style.setProperty('width', '0', 'important');
                 element.style.setProperty('height', '0', 'important');
+                element.style.setProperty('max-height', '0', 'important');
+                element.style.setProperty('overflow', 'hidden', 'important');
                 element.style.setProperty('pointer-events', 'none', 'important');
-                element.classList.add('vern-removed'); // Mark as removed to prevent re-counting
+                element.classList.add('vern-removed');
                 if (element.parentNode) {
                     element.parentNode.removeChild(element);
                 }
@@ -679,10 +699,10 @@
                 return;
             }
             adBlockCounterContainerEl.style.display = 'block';
-            adBlockCounterContainerEl.innerHTML = `VERN MAX has annihilated <strong>${vernBlockedItems}</strong> ads & trackers on this page!`;
+            adBlockCounterContainerEl.innerHTML = `VERN MAX has blocked <strong>${vernBlockedItems}</strong> ads & trackers on this page!`;
         }
 
-        function annihilate(doc) {
+        function runScan(doc) {
             if (!doc || !doc.body) return;
             let newlyRemoved = 0;
             const allSelectors = [...blockedSelectors, ...antiAdBlockerSelectors];
@@ -690,27 +710,22 @@
             allSelectors.forEach(selector => {
                 try {
                     doc.querySelectorAll(selector + ':not(.vern-removed)').forEach(el => {
-                        if (forcefullyRemoveElement(el)) newlyRemoved++;
+                        if (findAndDestroyAdContainer(el)) newlyRemoved++;
                     });
                 } catch (e) { /* ignore */ }
             });
-
-            doc.querySelectorAll('script:not(.vern-removed)').forEach(script => {
-                const scriptSrc = script.src || '';
-                const scriptContent = script.innerHTML || '';
-                if (blockedScriptKeywords.some(keyword => scriptSrc.includes(keyword) || scriptContent.includes(keyword))) {
-                    if (forcefullyRemoveElement(script)) newlyRemoved++;
-                }
-            });
             
-            doc.querySelectorAll('iframe:not(.vern-removed), object:not(.vern-removed), embed:not(.vern-removed)').forEach(el => {
-                 const elSrc = el.src || el.data || '';
-                 if (blockedDomains.some(domain => elSrc.includes(domain))) {
-                    if (forcefullyRemoveElement(el)) newlyRemoved++;
-                 }
-            });
+            const adBlockLevel = localStorage.getItem('vernAdBlockLevel');
+            if(adBlockLevel === 'aggressive' || adBlockLevel === 'annihilator') {
+                 doc.querySelectorAll('script:not(.vern-removed)').forEach(script => {
+                    const scriptSrc = script.src || '';
+                    if (blockedScriptKeywords.some(keyword => scriptSrc.includes(keyword))) {
+                        if (forcefullyRemoveElement(script)) newlyRemoved++;
+                    }
+                });
+            }
 
-            if (doc.body && doc.body.style.overflow !== 'auto') {
+            if (doc.body && doc.body.style.overflow === 'hidden') {
                 doc.body.style.setProperty('overflow', 'auto', 'important');
             }
             if (doc.documentElement && doc.documentElement.style.overflow !== 'auto') {
@@ -729,32 +744,20 @@
                 updateBlockCounterDisplay();
                 return;
             }
-
             try {
                 const doc = iframe.contentDocument;
                 if (!doc || !doc.body) return;
 
+                runScan(doc);
+
                 if (adBlockLevel === 'annihilator') {
-                    annihilate(doc); // Run once immediately
-                    annihilatorInterval = setInterval(() => annihilate(doc), 100); // Hyper-aggressive scan
-                } else if (adBlockLevel === 'standard') {
-                    let adsFound = 0;
-                    blockedSelectors.forEach(selector => {
-                        doc.querySelectorAll(selector + ':not(.vern-removed)').forEach(el => {
-                            el.style.setProperty('display', 'none', 'important');
-                            el.classList.add('vern-removed');
-                            adsFound++;
-                        });
-                    });
-                    if (adsFound > 0) {
-                        vernBlockedItems += adsFound;
-                        console.log(`[AdBlock Standard] Hid ${adsFound} elements.`);
-                        updateBlockCounterDisplay();
-                    }
+                    adBlockerInterval = setInterval(() => runScan(doc), 100); 
+                } else if (adBlockLevel === 'aggressive') {
+                     adBlockerInterval = setInterval(() => runScan(doc), 400);
                 }
                 
                 if (adBlockerObserver) adBlockerObserver.disconnect();
-                adBlockerObserver = new MutationObserver(() => annihilate(doc));
+                adBlockerObserver = new MutationObserver(() => runScan(doc));
                 adBlockerObserver.observe(doc.body, { childList: true, subtree: true });
 
             } catch (e) {
@@ -762,10 +765,10 @@
             }
         }
         
-        function stopAnnihilator() {
-            if (annihilatorInterval) {
-                clearInterval(annihilatorInterval);
-                annihilatorInterval = null;
+        function stopAdBlockerInstances() {
+            if (adBlockerInterval) {
+                clearInterval(adBlockerInterval);
+                adBlockerInterval = null;
             }
             if (adBlockerObserver) {
                 adBlockerObserver.disconnect();
@@ -774,7 +777,7 @@
             vernBlockedItems = 0;
         }
 
-        // --- CORE LOGIC ---
+        // --- CORE LOGIC (largely unchanged, so abridged) ---
         document.addEventListener('DOMContentLoaded', async () => {
             assignDOMElements();
             populateThemeSelector();
@@ -871,7 +874,7 @@
             historyButtonEl.addEventListener('click', (e) => { e.stopPropagation(); toggleHistoryMenu(); });
             document.addEventListener('click', (e) => {
                 closeAllMenus(e);
-                if (!homepageSearchBarEl.contains(e.target)) searchSuggestionsEl.style.display = 'none';
+                if (homepageSearchBarEl && !homepageSearchBarEl.contains(e.target)) searchSuggestionsEl.style.display = 'none';
                 if (!searchBarEl.contains(e.target)) topSearchSuggestionsEl.style.display = 'none';
             });
             addCurrentBookmarkButtonPopupEl.addEventListener('click', handleAddCurrentBookmark);
@@ -945,7 +948,7 @@
 
         // --- NAVIGATION & PROXY ---
         function navigateTo(urlInput) {
-            stopAnnihilator();
+            stopAdBlockerInstances();
             isLoading = true;
             errorOverlayEl.style.display = 'none';
             searchSuggestionsEl.style.display = 'none';
@@ -985,7 +988,7 @@
         }
 
         function handleIframeLoad() {
-            stopAnnihilator();
+            stopAdBlockerInstances();
             isLoading = false;
             if (isRefreshing) { refreshButtonEl.querySelector('.icon-img').classList.remove('spinning'); isRefreshing = false; }
             
