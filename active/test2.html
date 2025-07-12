@@ -76,14 +76,9 @@
         .nav-button .icon-img, .toolbar-button .icon-img {
             width: 20px; height: 20px; user-select: none; pointer-events: none;
         }
-        #search-bar-container {
-            flex: 1;
-            position: relative;
-            margin-right: 8px;
-        }
+        #search-bar-container { flex: 1; position: relative; margin-right: 8px; }
         #search-bar {
-            width: 100%;
-            height: 36px; border-radius: 8px; border: none; background-color: var(--input-bg);
+            width: 100%; height: 36px; border-radius: 8px; border: none; background-color: var(--input-bg);
             color: var(--text-color); padding: 0 15px; font-size: 14px;
             box-shadow: 0 0 0 1px var(--button-outline-color); font-family: var(--font-family-main);
             box-sizing: border-box;
@@ -96,9 +91,7 @@
             position: absolute; background-color: var(--menu-bg);
             border: 1px solid var(--menu-border-color); border-radius: 16px;
             box-shadow: var(--menu-shadow); z-index: 1005; 
-            min-width: 330px;
-            max-width: 400px;
-            max-height: 500px;
+            min-width: 330px; max-width: 400px; max-height: 500px;
             overflow-y: auto; padding: 10px;
             color: var(--menu-text-color); opacity: 0; visibility: hidden;
             transform: translateY(-10px) scale(0.98);
@@ -134,14 +127,10 @@
         }
         .mini-menu .item-remove-button:hover { opacity: 1; background-color: rgba(var(--current-theme-shadow-rgb),0.1); border-radius: 50%; }
         .mini-menu .item-remove-icon { width: 12px; height: 12px; display: block; }
-
-        /* History Menu Specifics */
         .history-group-header {
             font-size: 0.8em; font-weight: bold; color: var(--text-color);
             opacity: 0.7; padding: 10px 15px 5px; text-transform: uppercase;
         }
-
-        /* Menu Controls */
         .mini-menu .menu-action-bar { margin-top:15px; padding-top:10px; border-top: 1px solid var(--toolbar-border-color); }
         .mini-menu .menu-input, .mini-menu .menu-select {
             width: 100%; height: 38px; padding: 0 15px; margin-bottom: 10px;
@@ -165,90 +154,48 @@
         /* Settings Menu */
         .menu-setting-item { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
         .menu-setting-item label { font-size: 0.85em; opacity: 0.8; padding-left: 5px; }
+        .menu-setting-item.with-details { flex-direction: row; align-items: center; justify-content: space-between; }
+        .menu-setting-item.with-details .menu-select { flex-grow: 1; }
+        .details-button {
+            flex-shrink: 0; width: 28px; height: 28px; margin-left: 10px;
+            background-color: color-mix(in srgb, var(--current-theme-neutral) 70%, var(--current-theme-bg));
+            border: 1px solid var(--button-outline-color); color: var(--text-color);
+            border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .details-button:hover { background-color: var(--current-theme-neutral); }
 
         /* Toggle Switch Styles */
         .menu-setting-item.toggle-item {
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-            padding: 4px 5px;
+            flex-direction: row; justify-content: space-between; align-items: center; padding: 4px 5px;
         }
-        .toggle-label-container {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            margin-right: 10px;
-        }
-        .menu-setting-item.toggle-item .toggle-label-container label {
-            padding-left: 0;
-            margin-bottom: 0;
-            cursor: pointer;
-        }
-        .toggle-description {
-            font-size: 0.8em;
-            opacity: 0.7;
-            pointer-events: none;
-        }
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 44px;
-            height: 24px;
-            flex-shrink: 0;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+        .toggle-label-container { display: flex; flex-direction: column; gap: 4px; margin-right: 10px; }
+        .menu-setting-item.toggle-item .toggle-label-container label { padding-left: 0; margin-bottom: 0; cursor: pointer; }
+        .toggle-description { font-size: 0.8em; opacity: 0.7; pointer-events: none; }
+        .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .toggle-switch .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
             background-color: color-mix(in srgb, var(--current-theme-neutral) 70%, var(--current-theme-bg));
-            transition: .3s;
-            border-radius: 24px;
-            border: 1px solid var(--button-outline-color);
+            transition: .3s; border-radius: 24px; border: 1px solid var(--button-outline-color);
         }
         .toggle-switch .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 3px;
-            bottom: 3px;
-            background-color: var(--text-color);
-            transition: .3s;
-            border-radius: 50%;
+            position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px;
+            background-color: var(--text-color); transition: .3s; border-radius: 50%;
         }
-        .toggle-switch input:checked + .slider {
-            background-color: var(--current-theme-accent);
-        }
-        .toggle-switch input:checked + .slider:before {
-            transform: translateX(20px);
-            background-color: var(--current-theme-button-text);
-        }
-        #save-timestamp {
-            font-size: 0.8em;
-            opacity: 0.8;
-            margin-left: 8px;
-        }
+        .toggle-switch input:checked + .slider { background-color: var(--current-theme-accent); }
+        .toggle-switch input:checked + .slider:before { transform: translateX(20px); background-color: var(--current-theme-button-text); }
+        #save-timestamp { font-size: 0.8em; opacity: 0.8; margin-left: 8px; }
         
         /* Conditional Custom Sections */
         #custom-theme-settings-container,
         #custom-history-days-container {
-            opacity: 0; max-height: 0; overflow: hidden;
-            margin-top: 0; padding-top: 0;
-            border-top: none;
+            opacity: 0; max-height: 0; overflow: hidden; margin-top: 0; padding-top: 0; border-top: none;
             transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out, margin-top 0.3s, padding-top 0.3s, border-top 0.3s;
         }
         #custom-theme-settings-container.visible,
         #custom-history-days-container.visible {
-            opacity: 1; max-height: 500px;
-            margin-top: 15px; padding-top: 10px;
+            opacity: 1; max-height: 500px; margin-top: 15px; padding-top: 10px;
             border-top: 1px solid var(--toolbar-border-color);
         }
         
@@ -264,8 +211,6 @@
         /* Main Content */
         #content-container { flex: 1; position: relative; background-color: var(--iframe-bg); overflow: hidden; }
         #content-iframe { width: 100%; height: 100%; border: none; display: block; }
-        
-        /* Animations & States */
         #refresh-button .icon-img.spinning { animation: spinRefreshIcon 0.7s linear infinite; }
         @keyframes spinRefreshIcon { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         body.app-ui-hidden #toolbar { display: none !important; }
@@ -283,9 +228,7 @@
             background-color: var(--input-bg); border: none;
             box-shadow: 0 0 0 1px var(--button-outline-color); transition: background-color 0.2s, box-shadow 0.2s;
         }
-        #homepage-search-container:focus-within {
-            background-color: var(--input-focus-bg); box-shadow: var(--input-focus-shadow);
-        }
+        #homepage-search-container:focus-within { background-color: var(--input-focus-bg); box-shadow: var(--input-focus-shadow); }
         #homepage-search-bar {
             flex: 1; height: 36px; border: none; background: transparent; color: var(--text-color);
             padding: 0 15px; font-size: 14px; box-sizing: border-box; outline: none; font-family: var(--font-family-main);
@@ -296,7 +239,7 @@
         }
         #homepage-search-icon:hover { background-color: rgba(var(--current-theme-shadow-rgb), 0.1); }
         
-        /* Search Suggestions (Shared Style) */
+        /* Search Suggestions & Explanations */
         .search-suggestions-list {
             display: none; position: absolute; top: calc(100% + 5px); left: 0; right: 0;
             background-color: var(--menu-bg); border: 1px solid var(--menu-border-color); border-radius: 12px;
@@ -304,13 +247,12 @@
         }
         .search-suggestions-list li { padding: 10px 20px; cursor: pointer; color: var(--menu-text-color); }
         .search-suggestions-list li:hover { background-color: var(--menu-item-hover-bg); color: var(--button-text-color); }
-
         .search-engine-explanation, .setting-explanation {
             font-size: 0.8em; color: var(--text-color); opacity: 0.7;
             margin-top: -8px; margin-bottom: 10px; padding-left: 5px;
         }
 
-        /* Settings Section Styling */
+        /* Settings Sections */
         .settings-section {
             margin-bottom: 20px; padding-top: 10px; border-top: 1px solid var(--toolbar-border-color);
         }
@@ -327,20 +269,38 @@
         }
         #settings-menu .menu-setting-item:last-child { margin-bottom: 0; }
         
-        /* Ad Block Counter */
+        /* Ad Block Counter & Details Modal */
         #ad-block-counter-container {
             margin-top: 15px; padding: 12px 15px; border-radius: 12px;
             background-color: color-mix(in srgb, var(--current-theme-accent) 20%, transparent);
-            border: 1px solid var(--button-outline-color);
-            text-align: center; font-size: 0.9em;
-            display: none; /* Hidden by default */
+            border: 1px solid var(--button-outline-color); text-align: center; font-size: 0.9em;
+            display: none; color: color-mix(in srgb, var(--text-color) 80%, transparent);
         }
-        #ad-block-counter-container strong {
-            color: var(--current-theme-accent);
-            font-weight: 600;
+        #ad-block-counter-container .blocked-count {
+            color: var(--text-color); font-weight: 600; font-size: 1.1em;
         }
+        #ad-blocker-details-modal {
+            display: none; position: fixed; z-index: 9998; left: 0; top: 0;
+            width: 100%; height: 100%; overflow: auto; background-color: rgba(var(--current-theme-shadow-rgb), 0.6);
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+        }
+        .ad-blocker-details-content {
+            background-color: var(--current-theme-bg); margin: 10% auto; padding: 25px;
+            border: 1px solid var(--button-outline-color); border-radius: 16px;
+            width: 80%; max-width: 550px; box-shadow: var(--menu-shadow);
+        }
+        .ad-blocker-details-content h4 { margin-top: 0; color: var(--current-theme-accent); }
+        .ad-blocker-details-content p { font-size: 0.9em; line-height: 1.5; }
+        .ad-blocker-details-content ul { list-style: disc; padding-left: 20px; }
+        .ad-blocker-details-content li { font-size: 0.85em; margin-bottom: 5px; }
+        .ad-blocker-details-close {
+            color: var(--text-color); float: right; font-size: 28px; font-weight: bold;
+            line-height: 1; cursor: pointer; transition: color 0.3s;
+        }
+        .ad-blocker-details-close:hover, .ad-blocker-details-close:focus { color: var(--current-theme-accent); text-decoration: none; }
+        .details-list-heading { font-weight: bold; margin-top: 15px; margin-bottom: 5px; opacity: 0.9; }
 
-        /* Error Page Styling */
+        /* Error Page */
         #error-overlay {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--bg-color); color: var(--text-color);
@@ -474,17 +434,19 @@
             <h3>Privacy</h3>
             <div class="menu-setting-item">
                 <label for="ad-block-level-selector">Smart Ad-Free</label>
-                <select id="ad-block-level-selector" class="menu-select">
-                    <option value="off">Off</option>
-                    <option value="standard">Standard (Hide Ads)</option>
-                    <option value="aggressive">Aggressive (Block & Hide)</option>
-                    <option value="annihilator">Ad Annihilator</option>
-                </select>
-                <small class="setting-explanation">Higher levels are tougher but may affect site performance.</small>
+                <div class="menu-setting-item with-details">
+                    <select id="ad-block-level-selector" class="menu-select">
+                        <option value="off">Off</option>
+                        <option value="standard">Standard</option>
+                        <option value="aggressive">Aggressive</option>
+                        <option value="annihilator">Ad Annihilator</option>
+                    </select>
+                    <button id="ad-blocker-details-button" class="details-button" title="Learn more about blocking levels">?</button>
+                </div>
             </div>
 
             <div id="ad-block-counter-container">
-                VERN MAX has blocked <strong>0</strong> ads & trackers on this page!
+                VERN MAX has blocked <span class="blocked-count">0</span> ads & trackers on this page!
             </div>
 
             <div class="menu-setting-item">
@@ -533,6 +495,14 @@
             <button id="clear-browser-data-button" class="menu-button clear-button">Clear All Browser Data</button>
         </div>
     </div>
+    
+    <div id="ad-blocker-details-modal">
+        <div class="ad-blocker-details-content">
+            <span class="ad-blocker-details-close">&times;</span>
+            <div id="ad-blocker-details-text"></div>
+        </div>
+    </div>
+
 
     <div id="content-container">
         <div id="homepage">
@@ -615,15 +585,16 @@
         const blockedSelectors = [
             '.ad', '.ads', '.advert', '.advertisement', '.banner-ad', '.google-ad', '.g-ad', 'div[data-google-query-id]',
             '[class*="adsbygoogle"]', '[id*="google_ads"]', '[class*="ad-"]', '[id*="ad-"]', '[class*="-ad-"]', '[id*="-ad-"]',
-            '.ad-banner', '.ad-container', '.ad-wrapper', '.advertisement', '.advertising', '[data-ad-slot]',
+            '.ad-banner', '.ad-container', '.ad-wrapper', '.advertisement', '.advertising', '[data-ad-slot]', '[id*="ad-slot"]',
             '#google_vignette', 'div[id^="ad_"]', 'ins.adsbygoogle', 'a[href*="/ads/"]', 'a[href*="?ad-id="]', 'a[data-ad-id]',
             'div[data-ad-format]', 'div[data-ad-unit-path]', '[aria-label="advertisement"]', 'div[data-ad-name]',
             '.ytp-ad-module', '.video-ads', '.ytp-ad-player-overlay', '.ytp-ad-skip-button-container', '.ytp-ad-preview-container', '.ytp-ad-text-overlay', // YouTube
-            '[id^="div-gpt-ad-"]', '[class*="Display_ad_"]', '.ad-rotator', '.sidebar-ad', '.skyscraper-ad', 'div[id*="sticky_ad"]',
+            '[id^="div-gpt-ad-"]', '[class*="Display_ad_"]', '.ad-rotator', '.sidebar-ad', '.skyscraper-ad', 'div[id*="sticky_ad"]', '.sticky-ad',
             '[class*="overlay-ad"]', '[class*="ad-overlay"]', '#ad_position_box', '.ad_sponsorship', '.ad-banner-container',
-            '[id^="ad-sense-"]', '[id*="ad_unit"]', '.trc_rbox_div', '.OUTBRAIN', 'div[widget-id^="outbrain_widget_"]',
+            '[id^="ad-sense-"]', '[id*="ad_unit"]', '.trc_rbox_div', '.OUTBRAIN', 'div[widget-id^="outbrain_widget_"]', '[class*="native-ad"]',
             '.ad-placeholder', '.pub_300x250', '.text-ad', '.sponsored-post', '.ads-box', 'div[aria-label="Ads"]', 'div[data-ad-manager-id]',
-            'object[data*="ad.swf"]', 'embed[src*="ad.swf"]', 'div[id*="taboola"]', 'div[data-content-ad]', 'div[class*="ad-blocker-wrapper"]'
+            'object[data*="ad.swf"]', 'embed[src*="ad.swf"]', 'div[id*="taboola"]', 'div[data-content-ad]', 'div[class*="ad-blocker-wrapper"]',
+            '[class*="expandable-ad"]', '[class*="interstitial-ad"]', 'div[id*="interstitial"]', 'div[class*="pop-up-ad"]'
         ];
         const antiAdBlockerSelectors = [
             'div[class*="adblock"]', 'div[class*="ad-block"]', 'div[id*="adblock"]', 'div[id*="ad-block"]',
@@ -634,7 +605,7 @@
         const blockedScriptKeywords = [
             'fuckadblock.js', 'blockadblock.js', 'adblock-detector.js', 'advertisement.js', 'ad-reblock.js', 'sniff.js',
             'google-analytics.com/analytics.js', 'googletagmanager.com/gtm.js', 'hotjar.com', 'yandex.ru/metrika',
-            'mixpanel.js', 'optimizely.js', 'chartbeat.js', 'quantserve.com/quant.js'
+            'mixpanel.js', 'optimizely.js', 'chartbeat.js', 'quantserve.com/quant.js', 'fingerprint.js', 'client.js'
         ];
 
         // --- DOM ELEMENT REFERENCES ---
@@ -650,17 +621,16 @@
             httpsEnforceToggleEl, homepageUrlInputEl, setCurrentPageAsHomepageButtonEl, resetHomepageButtonEl,
             restoreSessionToggleEl, clearCurrentSiteCookiesButtonEl, clearAllBrowserCookiesButtonEl,
             blockThirdPartyCookiesToggleEl, cookieManagementContainerEl,
-            topSearchSuggestionsEl, errorOverlayEl, errorHomeButtonEl, adBlockCounterContainerEl;
+            topSearchSuggestionsEl, errorOverlayEl, errorHomeButtonEl, adBlockCounterContainerEl,
+            adBlockerDetailsButtonEl, adBlockerDetailsModalEl, adBlockerDetailsCloseEl, adBlockerDetailsTextEl;
 
         let bookmarkItemTemplate, historyItemTemplate, historyGroupTemplate;
         
         // --- AD BLOCKER ENGINE (OVERHAULED) ---
-
         function findAndDestroyAdContainer(element) {
             if (!element) return false;
             let current = element;
             let containerFound = false;
-            // Traverse up to 5 levels to find a likely container
             for (let i = 0; i < 5 && current.parentElement; i++) {
                 const id = current.id || '';
                 const className = current.className || '';
@@ -699,7 +669,7 @@
                 return;
             }
             adBlockCounterContainerEl.style.display = 'block';
-            adBlockCounterContainerEl.innerHTML = `VERN MAX has blocked <strong>${vernBlockedItems}</strong> ads & trackers on this page!`;
+            adBlockCounterContainerEl.innerHTML = `VERN MAX has blocked <span class="blocked-count">${vernBlockedItems}</span> ads & trackers on this page!`;
         }
 
         function runScan(doc) {
@@ -748,18 +718,17 @@
                 const doc = iframe.contentDocument;
                 if (!doc || !doc.body) return;
 
-                runScan(doc);
-
-                if (adBlockLevel === 'annihilator') {
-                    adBlockerInterval = setInterval(() => runScan(doc), 100); 
-                } else if (adBlockLevel === 'aggressive') {
-                     adBlockerInterval = setInterval(() => runScan(doc), 400);
-                }
-                
                 if (adBlockerObserver) adBlockerObserver.disconnect();
                 adBlockerObserver = new MutationObserver(() => runScan(doc));
                 adBlockerObserver.observe(doc.body, { childList: true, subtree: true });
 
+                runScan(doc);
+
+                if (adBlockLevel === 'annihilator') {
+                    adBlockerInterval = setInterval(() => runScan(doc), 10); // Centisecond scan
+                } else if (adBlockLevel === 'aggressive') {
+                     adBlockerInterval = setInterval(() => runScan(doc), 250); // Quarter-second scan
+                }
             } catch (e) {
                 console.warn("Ad blocker could not access iframe content.", e);
             }
@@ -777,7 +746,7 @@
             vernBlockedItems = 0;
         }
 
-        // --- CORE LOGIC (largely unchanged, so abridged) ---
+        // --- CORE LOGIC ---
         document.addEventListener('DOMContentLoaded', async () => {
             assignDOMElements();
             populateThemeSelector();
@@ -814,6 +783,10 @@
             homepageSearchIconEl = document.getElementById('homepage-search-icon');
             adBlockLevelSelectorEl = document.getElementById('ad-block-level-selector');
             adBlockCounterContainerEl = document.getElementById('ad-block-counter-container');
+            adBlockerDetailsButtonEl = document.getElementById('ad-blocker-details-button');
+            adBlockerDetailsModalEl = document.getElementById('ad-blocker-details-modal');
+            adBlockerDetailsCloseEl = document.querySelector('.ad-blocker-details-close');
+            adBlockerDetailsTextEl = document.getElementById('ad-blocker-details-text');
             saveConfigButtonEl = document.getElementById('save-config-button'); saveTimestampEl = document.getElementById('save-timestamp');
             customThemeSettingsContainerEl = document.getElementById('custom-theme-settings-container');
             customThemeBgBaseEl = document.getElementById('custom-theme-bg-base'); customThemeAccentBaseEl = document.getElementById('custom-theme-accent-base'); applyCustomThemeButtonEl = document.getElementById('apply-custom-theme-button');
@@ -902,6 +875,13 @@
                 if (currentUrl && !currentUrl.startsWith('about:')) contentIframeEl.contentWindow.location.reload(true);
                 updateBlockCounterDisplay();
              });
+             adBlockerDetailsButtonEl.addEventListener('click', showBlockerDetails);
+             adBlockerDetailsCloseEl.addEventListener('click', () => adBlockerDetailsModalEl.style.display = "none");
+             window.addEventListener('click', (event) => {
+                if (event.target == adBlockerDetailsModalEl) {
+                    adBlockerDetailsModalEl.style.display = "none";
+                }
+            });
             applyCustomThemeButtonEl.addEventListener('click', applyAndSaveCustomTheme);
             applyCustomHistoryDaysButtonEl.addEventListener('click', applyAndSaveCustomHistoryDays);
             clearBrowserDataButtonEl.addEventListener('click', clearAllData);
@@ -944,6 +924,38 @@
                 }
             });
             blockThirdPartyCookiesToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernBlockThirdPartyCookies', e.target.checked); });
+        }
+
+        function showBlockerDetails() {
+            const level = adBlockLevelSelectorEl.value;
+            let content = '';
+            switch(level) {
+                case 'off':
+                    content = `<h4>Mode: Off</h4><p>No ads or trackers are being blocked. The web is unfiltered.</p>`;
+                    break;
+                case 'standard':
+                    content = `<h4>Mode: Standard</h4><p>Provides basic, lightweight blocking. It hides the most common types of ads without affecting page performance.</p>
+                               <p class="details-list-heading">What it blocks:</p>
+                               <ul><li>Common banner and sidebar ads</li><li>Basic pop-up ads</li></ul>`;
+                    break;
+                case 'aggressive':
+                    content = `<h4>Mode: Aggressive</h4><p>A strong, persistent blocker that removes a wide range of ads and trackers. It actively removes ad containers to prevent them from reappearing. A great balance of power and performance.</p>
+                               <p class="details-list-heading">What it blocks:</p>
+                               <ul><li>All 'Standard' targets</li><li>Video ads (pre-roll, mid-roll)</li><li>Sticky and floating ads</li><li>Most anti-ad-block scripts</li><li>Many analytics trackers</li></ul>`;
+                    break;
+                case 'annihilator':
+                    content = `<h4>Mode: Ad Annihilator</h4><p>The most extreme level of blocking. This mode uses a hyper-aggressive, constant scan to find and destroy almost all forms of advertising, trackers, and annoyances at the centisecond level.</p>
+                               <p><b>Warning:</b> This mode is very powerful and may cause some websites to load or function incorrectly.</p>
+                               <p class="details-list-heading">Simple Ads Blocked:</p>
+                               <ul><li>Banner, sidebar, footer, header, pop-up, pop-under, interstitial, in-page text, search engine, and all forms of video ads (pre-roll, mid-roll, post-roll, overlay).</li></ul>
+                               <p class="details-list-heading">Advanced Ads Blocked:</p>
+                               <ul><li>Floating, sticky, expandable, collapsible, native ads, sponsored articles, promoted posts/tweets, suggested video ads, and all types of in-app and in-feed mobile ads.</li></ul>
+                               <p class="details-list-heading">Extreme Threats Targeted:</p>
+                               <ul><li>Scripts associated with server-side ads, programmatic ad channels, and user fingerprinting.</li><li>Patterns of CDN-injected content and known ad-related WebRTC streams.</li><li><b>Note:</b> True DNS hijacking or P2P injection are network-level threats and cannot be fully blocked by a webpage alone, but this mode blocks their known patterns and scripts.</li></ul>`;
+                    break;
+            }
+            adBlockerDetailsTextEl.innerHTML = content;
+            adBlockerDetailsModalEl.style.display = "block";
         }
 
         // --- NAVIGATION & PROXY ---
