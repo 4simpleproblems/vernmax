@@ -76,20 +76,17 @@
         .nav-button .icon-img, .toolbar-button .icon-img {
             width: 20px; height: 20px; user-select: none; pointer-events: none;
         }
-        
-        /* UPDATED: Container for top search bar to position suggestions */
-        #top-search-container {
-            position: relative;
+        #search-bar-container {
             flex: 1;
-            display: flex;
+            position: relative;
             margin-right: 8px;
         }
         #search-bar {
-            flex: 1; height: 36px; border-radius: 8px; border: none; background-color: var(--input-bg);
+            width: 100%;
+            height: 36px; border-radius: 8px; border: none; background-color: var(--input-bg);
             color: var(--text-color); padding: 0 15px; font-size: 14px;
             box-shadow: 0 0 0 1px var(--button-outline-color); font-family: var(--font-family-main);
-            margin-right: 0; /* Moved margin to container */
-            width: 100%;
+            box-sizing: border-box;
         }
         #search-bar:focus { outline: none; background-color: var(--input-focus-bg); box-shadow: var(--input-focus-shadow); }
         #settings-button { margin-right: 0; }
@@ -241,7 +238,6 @@
         }
         
         /* Conditional Custom Sections */
-        /* Updated visibility logic: default hidden for these containers */
         #custom-theme-settings-container,
         #custom-history-days-container {
             opacity: 0; max-height: 0; overflow: hidden;
@@ -288,394 +284,6 @@
         #refresh-button .icon-img.spinning { animation: spinRefreshIcon 0.7s linear infinite; }
         @keyframes spinRefreshIcon { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         body.app-ui-hidden #toolbar { display: none !important; }
-
-        /* --- Special Theme Features --- */
-        body.theme-bottom-bar { flex-direction: column-reverse; }
-        body.theme-bottom-bar #toolbar { border-top: 1px solid var(--toolbar-border-color); border-bottom: none; }
-        body.theme-bottom-bar .mini-menu { transform-origin: bottom right; }
-
-        body.theme-floating-toolbar #toolbar {
-            margin: 10px; border-radius: 12px; width: calc(100% - 20px);
-            background-color: color-mix(in srgb, var(--toolbar-bg) 85%, transparent);
-            backdrop-filter: blur(5px);
-        }
-
-        body.theme-retro-terminal #search-bar:focus,
-        body.theme-retro-terminal #homepage-search-bar:focus { animation: blink-caret 1s step-end infinite; }
-        @keyframes blink-caret {
-            from, to { box-shadow: var(--input-focus-shadow), inset 2px 0 0 0 var(--current-theme-accent); }
-            50% { box-shadow: var(--input-focus-shadow), inset 2px 0 0 0 transparent; }
-        }
-
-        body.theme-minimalist .toolbar-button, body.theme-minimalist #fullscreen-button {
-            opacity: 0; transform: scale(0.8); transition: opacity 0.3s, transform 0.3s;
-        }
-        body.theme-minimalist #toolbar:hover .toolbar-button, body.theme-minimalist #toolbar:hover #fullscreen-button {
-            opacity: 1; transform: scale(1);
-        }
-
-        body.theme-glitchy { animation: glitch-anim 7s infinite steps(8) alternate; }
-        @keyframes glitch-anim {
-            0% { transform: translate(0); } 10% { transform: translate(-2px, 2px); } 20% { transform: translate(2px, -2px); }
-            30% { transform: translate(-2px, -2px); } 40% { transform: translate(2px, 2px); } 50% { transform: translate(0); }
-            100% { transform: translate(0); }
-        }
-
-        body.theme-flipped-mode #toolbar, body.theme-flipped-mode #content-container { transform: scaleX(-1); }
-        body.theme-flipped-mode .nav-button, body.theme-flipped-mode .toolbar-button, body.theme-flipped-mode #search-bar, body.theme-flipped-mode .mini-menu {
-            transform: scaleX(-1);
-        }
-        
-        body.theme-holographic .nav-button,
-        body.theme-holographic .toolbar-button,
-        body.theme-holographic #homepage-search-icon {
-            background: linear-gradient(135deg, #ff00c8, #00e5ff, #ff005d, #00ff87);
-            background-size: 400% 400%;
-            animation: holographic-shine 5s ease infinite;
-        }
-        @keyframes holographic-shine {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        body.theme-translucent-ui #toolbar {
-            background-color: color-mix(in srgb, var(--toolbar-bg) 60%, transparent);
-            border-bottom-color: color-mix(in srgb, var(--toolbar-border-color) 60%, transparent);
-            box-shadow: none;
-            backdrop-filter: blur(8px);
-        }
-        body.theme-translucent-ui .nav-button,
-        body.theme-translucent-ui .toolbar-button {
-            background-color: color-mix(in srgb, var(--button-bg) 60%, transparent);
-        }
-        body.theme-translucent-ui .mini-menu {
-            background-color: color-mix(in srgb, var(--menu-bg) 60%, transparent);
-            backdrop-filter: blur(8px);
-        }
-
-        /* --- 10 Previous Special Themes --- */
-
-        body.theme-tilt3d { perspective: 1000px; }
-        body.theme-tilt3d #toolbar {
-            transition: transform 0.1s ease-out;
-            transform-style: preserve-3d;
-            transform: rotateX(var(--tilt-x, 0)) rotateY(var(--tilt-y, 0));
-        }
-
-        body.theme-comicbook {
-            --font-family-main: 'Bangers', cursive;
-        }
-        body.theme-comicbook #toolbar, 
-        body.theme-comicbook .nav-button, 
-        body.theme-comicbook .toolbar-button, 
-        body.theme-comicbook #search-bar,
-        body.theme-comicbook .mini-menu,
-        body.theme-comicbook #homepage-search-container {
-            border: 3px solid #000 !important;
-            box-shadow: 2px 2px 0px #000 !important;
-            border-radius: 8px !important;
-        }
-        body.theme-comicbook .mini-menu li {
-            border: 2px solid #000 !important;
-        }
-
-        body.theme-crtscanlines { position: relative; --font-family-main: 'Courier New', monospace; }
-        body.theme-crtscanlines::after {
-            content: ' ';
-            display: block;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.4), rgba(0,0,0,0.4) 1px, transparent 1px, transparent 3px);
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0.7;
-            animation: flicker 0.15s infinite;
-        }
-        @keyframes flicker {
-            0% { opacity: 0.6; } 50% { opacity: 0.7; } 100% { opacity: 0.6; }
-        }
-
-        body.theme-skewedlook #toolbar {
-            transform: skewX(-15deg);
-            transition: transform 0.3s ease;
-        }
-        body.theme-skewedlook #toolbar:hover { transform: skewX(0deg); }
-        body.theme-skewedlook .nav-button, 
-        body.theme-skewedlook .toolbar-button, 
-        body.theme-skewedlook #search-bar {
-            transform: skewX(15deg);
-        }
-
-        body.theme-textpop { --font-family-main: 'Arial Black', Gadget, sans-serif; }
-        body.theme-textpop .nav-button, 
-        body.theme-textpop .toolbar-button,
-        body.theme-textpop .mini-menu h3,
-        body.theme-textpop .menu-button {
-            text-shadow: 
-                2px 2px 0 var(--current-theme-accent),
-                -2px -2px 0 color-mix(in srgb, var(--current-theme-accent) 50%, #00e5ff);
-        }
-        body.theme-textpop #homepage-logo {
-            filter: drop-shadow(5px 5px 0 var(--current-theme-accent)) drop-shadow(-5px -5px 0 color-mix(in srgb, var(--current-theme-accent) 50%, #00e5ff));
-        }
-
-        body.theme-focusmode #toolbar {
-            transition: opacity 0.4s, filter 0.4s;
-            opacity: 0.5;
-            filter: blur(3px);
-        }
-        body.theme-focusmode #toolbar:hover {
-            opacity: 1;
-            filter: blur(0);
-        }
-
-        body.theme-invertedui {
-            filter: invert(1);
-        }
-        body.theme-invertedui #content-container,
-        body.theme-invertedui #homepage {
-            filter: invert(1); 
-        }
-        body.theme-invertedui .icon-img,
-        body.theme-invertedui #homepage-logo {
-            filter: invert(1);
-        }
-
-        body.theme-stealthmode #toolbar {
-            transform: translateY(-105%);
-            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        body.theme-stealthmode:hover #toolbar {
-            transform: translateY(0);
-        }
-        body.theme-stealthmode #content-container {
-            height: 100vh;
-        }
-
-        body.theme-oldnewspaper {
-            --font-family-main: 'Crete Round', serif;
-            background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
-            filter: sepia(0.4);
-        }
-        body.theme-oldnewspaper #content-container,
-        body.theme-oldnewspaper #homepage {
-            filter: sepia(0);
-        }
-        body.theme-oldnewspaper #toolbar {
-            background-color: var(--current-theme-neutral) !important;
-        }
-
-        /* --- 25 NEW Special Themes --- */
-
-        #spotlight-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 9998;
-            background: radial-gradient(circle at var(--spotlight-x) var(--spotlight-y), transparent 100px, rgba(0,0,0,0.95) 250px);
-        }
-
-        body.theme-pagecurl::after {
-            content: '';
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.1) 50.5%, rgba(0,0,0,0.4) 52%, var(--bg-color) 52%);
-            box-shadow: -5px -5px 15px rgba(0,0,0,0.3);
-            transform: rotate(90deg);
-            pointer-events: none;
-            z-index: 9999;
-        }
-        
-        body.theme-blueprint {
-            --font-family-main: 'Courier New', monospace;
-            background-image: 
-                linear-gradient(rgba(var(--current-theme-shadow-rgb),0.2) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(var(--current-theme-shadow-rgb),0.2) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        body.theme-blueprint #toolbar,
-        body.theme-blueprint .mini-menu {
-            background-color: color-mix(in srgb, var(--toolbar-bg) 80%, transparent);
-            backdrop-filter: blur(2px);
-        }
-
-        body.theme-notebookpaper {
-            --font-family-main: 'Patrick Hand', cursive;
-            background-color: #fff;
-            background-image: 
-                linear-gradient(to right, transparent 39px, #ffb6c1 39px, #ffb6c1 41px, transparent 41px),
-                linear-gradient(to bottom, transparent 19px, #a4d8f2 19px, #a4d8f2 20px, transparent 20px);
-            background-size: 100% 20px;
-        }
-
-        body.theme-zoomhover .nav-button, body.theme-zoomhover .toolbar-button {
-            transition: transform 0.2s ease-out;
-        }
-        body.theme-zoomhover .nav-button:hover, body.theme-zoomhover .toolbar-button:hover {
-            transform: scale(1.15);
-        }
-
-        @keyframes shaky-anim {
-            0% { transform: translate(0, 0); } 25% { transform: translate(1px, -1px); }
-            50% { transform: translate(-1px, 1px); } 75% { transform: translate(1px, 1px); }
-            100% { transform: translate(0, 0); }
-        }
-        body.theme-shakytext .nav-button, body.theme-shakytext .toolbar-button, body.theme-shakytext .mini-menu h3 {
-            animation: shaky-anim 0.2s infinite;
-        }
-
-        @keyframes rainbow-text-anim {
-            0% { color: #ff0000; } 15% { color: #ff7f00; } 30% { color: #ffff00; }
-            45% { color: #00ff00; } 60% { color: #0000ff; } 75% { color: #4b0082; }
-            90% { color: #9400d3; } 100% { color: #ff0000; }
-        }
-        body.theme-rainbowtext .nav-button, body.theme-rainbowtext .toolbar-button, body.theme-rainbowtext .menu-button {
-            animation: rainbow-text-anim 4s linear infinite;
-        }
-
-        @keyframes bounce-in-anim {
-            0% { transform: translateY(-50px); opacity: 0; }
-            50% { transform: translateY(5px); }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-        body.theme-bouncingui #toolbar {
-            animation: bounce-in-anim 0.6s ease-out;
-        }
-
-        body.theme-8bitgamer {
-            --font-family-main: 'VT323', monospace;
-            image-rendering: pixelated;
-        }
-        body.theme-8bitgamer .nav-button, body.theme-8bitgamer .toolbar-button, body.theme-8bitgamer #search-bar, body.theme-8bitgamer .mini-menu {
-            border-radius: 0 !important;
-            border: 2px solid var(--text-color);
-        }
-
-        @keyframes construction-anim {
-            0% { background-position: 0 0; }
-            100% { background-position: 56px 0; }
-        }
-        body.theme-underconstruction #toolbar {
-            background-image: repeating-linear-gradient(45deg, #fdd835, #fdd835 20px, #212121 20px, #212121 40px);
-            background-size: 56px 56px;
-            animation: construction-anim 1s linear infinite;
-        }
-
-        @keyframes ghostly-anim {
-            0% { opacity: 0.8; filter: blur(1px); }
-            50% { opacity: 0.6; filter: blur(2px); }
-            100% { opacity: 0.8; filter: blur(1px); }
-        }
-        body.theme-ghostly #toolbar {
-            animation: ghostly-anim 8s ease-in-out infinite;
-            box-shadow: 0 0 15px var(--current-theme-accent);
-        }
-
-        body.theme-typewriter #search-bar:focus,
-        body.theme-typewriter #homepage-search-bar:focus { animation: blink-caret 0.8s step-end infinite; }
-        
-        @keyframes color-cycle-anim {
-            0% { background-color: #23272A; }
-            25% { background-color: #0A2E36; }
-            50% { background-color: #2C3E50; }
-            75% { background-color: #4a403a; }
-            100% { background-color: #23272A; }
-        }
-        body.theme-colorcyclebg {
-            animation: color-cycle-anim 20s linear infinite;
-        }
-
-        body.theme-mirrorworld { transform: scaleY(-1); }
-        body.theme-mirrorworld #toolbar, body.theme-mirrorworld #content-container { transform: scaleY(1); }
-        body.theme-mirrorworld #toolbar { transform: scaleY(-1); }
-
-        body.theme-lensflare::after {
-            content: '';
-            position: fixed;
-            top: -20%; left: -20%;
-            width: 140%; height: 140%;
-            background: url('https://i.ibb.co/L5B0brH/lensflare.png') no-repeat;
-            background-size: contain;
-            background-position: var(--flare-x, 50%) var(--flare-y, 50%);
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0.4;
-        }
-        
-        body.theme-commandprompt { --font-family-main: 'Courier New', monospace; }
-        body.theme-commandprompt .nav-button, body.theme-commandprompt .toolbar-button {
-            background: transparent;
-            border: 1px solid var(--text-color);
-        }
-        body.theme-commandprompt .icon-img { display: none; }
-        body.theme-commandprompt .nav-button::after, body.theme-commandprompt .toolbar-button::after {
-            font-size: 12px;
-            color: var(--text-color);
-        }
-        body.theme-commandprompt #home-button::after { content: 'HOME'; }
-        body.theme-commandprompt #back-button::after { content: 'BACK'; }
-        body.theme-commandprompt #forward-button::after { content: 'FWD'; }
-        body.theme-commandprompt #refresh-button::after { content: 'RFRS'; }
-        body.theme-commandprompt #fullscreen-button::after { content: 'FULL'; }
-        body.theme-commandprompt #bookmark-button::after { content: 'BKMK'; }
-        body.theme-commandprompt #history-button::after { content: 'HIST'; }
-        body.theme-commandprompt #settings-button::after { content: 'SET'; }
-
-        body.theme-perspectiveui { perspective: 1500px; }
-        body.theme-perspectiveui #toolbar { transform: rotateY(25deg) scale(0.9); }
-        body.theme-perspectiveui #toolbar:hover { transform: rotateY(0deg) scale(1); }
-
-        body.theme-textfocus .nav-button, body.theme-textfocus .toolbar-button {
-            color: transparent;
-            text-shadow: 0 0 5px var(--text-color);
-            transition: text-shadow 0.2s;
-        }
-        body.theme-textfocus .nav-button:hover, body.theme-textfocus .toolbar-button:hover {
-            color: var(--button-text-color);
-            text-shadow: none;
-        }
-        
-        @keyframes gradient-border-anim {
-            0% { border-color: #ff00c8; } 50% { border-color: #00e5ff; } 100% { border-color: #ff00c8; }
-        }
-        body.theme-gradientborder .nav-button, body.theme-gradientborder .toolbar-button,
-        body.theme-gradientborder #search-bar, body.theme-gradientborder .mini-menu {
-            border: 2px solid;
-            animation: gradient-border-anim 3s linear infinite;
-            box-shadow: none;
-        }
-
-        @keyframes wobbly-anim {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(-2deg) scale(1.02); }
-            50% { transform: rotate(2deg) scale(0.98); }
-            75% { transform: rotate(-1deg) scale(1.01); }
-            100% { transform: rotate(0deg); }
-        }
-        body.theme-wobblyui .nav-button, body.theme-wobblyui .toolbar-button, body.theme-wobblyui .mini-menu {
-            animation: wobbly-anim 0.5s ease-in-out;
-        }
-        
-        .shortcut-text {
-            font-size: 9px;
-            font-family: Arial, sans-serif;
-            font-weight: bold;
-            display: block;
-            margin-top: 2px;
-            opacity: 0.8;
-            color: var(--current-theme-text);
-        }
 
         /* Homepage Styles */
         #homepage {
@@ -742,7 +350,7 @@
             background-color: rgba(var(--current-theme-shadow-rgb), 0.1);
         }
         
-        /* ADDED/MODIFIED: Generalized Search Suggestions Styling */
+        /* Search Suggestions (Shared Style) */
         .search-suggestions-list {
             display: none;
             position: absolute;
@@ -756,17 +364,14 @@
             padding: 10px 0;
             margin: 0;
             text-align: left;
-            z-index: 1001; /* Higher than toolbar */
+            z-index: 1010; /* Ensure it's above other elements */
             box-shadow: var(--menu-shadow);
-            max-height: 300px;
-            overflow-y: auto;
         }
 
         .search-suggestions-list li {
             padding: 10px 20px;
             cursor: pointer;
             color: var(--menu-text-color);
-            font-size: 14px;
         }
 
         .search-suggestions-list li:hover {
@@ -779,6 +384,15 @@
             color: var(--text-color);
             opacity: 0.7;
             margin-top: -8px; /* Adjust as needed to position it correctly */
+            margin-bottom: 10px;
+            padding-left: 5px;
+        }
+        
+        .setting-explanation {
+            font-size: 0.8em;
+            color: var(--text-color);
+            opacity: 0.7;
+            margin-top: -8px;
             margin-bottom: 10px;
             padding-left: 5px;
         }
@@ -806,7 +420,7 @@
             gap: 8px;
             padding-left: 5px; /* Align with label text */
         }
-        /* ADDED: Padding to all settings menu items */
+
         #settings-menu .menu-setting-item,
         #settings-menu .menu-action-bar {
             padding: 8px 10px; /* Adjust padding as needed */
@@ -818,31 +432,44 @@
             margin-bottom: 0;
         }
 
-        /* ADDED: Error Page Styling */
-        #error-page {
+        /* Error Page Styling */
+        #error-overlay {
             display: none; /* Hidden by default */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100%;
             text-align: center;
-            background-color: var(--bg-color);
+            z-index: 2000;
             padding: 20px;
             box-sizing: border-box;
         }
-        #error-page h2 {
+        #error-overlay h2 {
+            font-size: 2em;
             margin-bottom: 15px;
             color: var(--current-theme-accent);
         }
-        #error-page p {
-            margin-bottom: 25px;
+        #error-overlay p {
             font-size: 1.1em;
-            opacity: 0.9;
+            margin-bottom: 30px;
         }
-        #error-page .menu-button {
-            width: auto;
-            padding: 10px 25px;
+        #error-home-button {
+             height: 42px; padding: 0 25px; background-color: var(--button-bg);
+            color: var(--button-text-color); border: none; border-radius: 12px; cursor: pointer;
+            transition: background-color 0.2s ease; font-family: var(--font-family-main);
+            box-shadow: 0 0 0 1px var(--button-outline-color);
+            align-items: center; justify-content: center; font-size: 1em; font-weight: 500;
         }
+         #error-home-button:hover {
+            background-color: var(--button-hover-bg);
+        }
+
     </style>
 </head>
 <body>
@@ -866,8 +493,7 @@
         <div class="nav-button" id="back-button" title="Back"><img src="../images/arrow-left-white.png" alt="Back" class="icon-img"></div>
         <div class="nav-button" id="forward-button" title="Forward"><img src="../images/arrow-right-white.png" alt="Forward" class="icon-img"></div>
         <div class="nav-button" id="refresh-button" title="Refresh"><img src="../images/refresh-white.png" alt="Refresh" class="icon-img"></div>
-        
-        <div id="top-search-container">
+        <div id="search-bar-container">
             <input type="text" id="search-bar" placeholder="Search or type a URL">
             <ul id="top-search-suggestions" class="search-suggestions-list"></ul>
         </div>
@@ -959,6 +585,16 @@
         <div class="settings-section">
             <h3>Privacy</h3>
             <div class="menu-setting-item">
+                <label for="ad-block-level-selector">Smart Ad-Free</label>
+                <select id="ad-block-level-selector" class="menu-select">
+                    <option value="off">Off</option>
+                    <option value="standard">Standard (Hide Ads)</option>
+                    <option value="aggressive">Aggressive (Block & Hide)</option>
+                </select>
+                <small class="setting-explanation">"Aggressive" mode attempts to bypass anti-ad-block measures, which may affect site performance.</small>
+            </div>
+
+            <div class="menu-setting-item">
                 <label for="history-lifespan-selector">Clear History After</label>
                 <select id="history-lifespan-selector" class="menu-select">
                     <option value="0">Never</option>
@@ -979,17 +615,6 @@
                 <button id="apply-custom-history-days-button" class="menu-button">Set Custom Days</button>
            </div>
 
-            <div class="menu-setting-item toggle-item">
-                <div class="toggle-label-container">
-                    <label for="ad-free-toggle" style="cursor: pointer;">Ad-Free Toggle</label>
-                    <small class="toggle-description">Blocks known ad domains and hides ad elements on pages.</small>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="ad-free-toggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
-
             <div class="menu-action-bar" id="cookie-management-container">
                 <h3>Cookie Management</h3>
                 <button id="clear-current-site-cookies-button" class="menu-button">Clear Current Site Cookies</button>
@@ -1001,10 +626,10 @@
                     </div>
                     <label class="toggle-switch">
                         <input type="checkbox" id="block-third-party-cookies-toggle">
-                        <span class="slider"></span>
-                    </label>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
                 </div>
-            </div>
         </div>
 
         <div class="settings-section">
@@ -1022,15 +647,15 @@
             <div id="homepage-search-container">
                 <input type="text" id="homepage-search-bar" placeholder="Search or type a URL">
                 <img id="homepage-search-icon" src="../images/magnify-white.png" alt="Search">
-                <ul id="homepage-search-suggestions" class="search-suggestions-list"></ul>
+                <ul id="search-suggestions" class="search-suggestions-list"></ul>
             </div>
         </div>
-        <div id="error-page">
+        <iframe id="content-iframe" title="Content View" sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-presentation allow-same-origin allow-scripts allow-downloads allow-popups-to-escape-sandbox"></iframe>
+        <div id="error-overlay">
             <h2>Oops! Something went wrong.</h2>
-            <p id="error-message">The page could not be loaded.</p>
-            <button id="error-return-home-button" class="menu-button">Return to Home</button>
+            <p>We couldn't load the page you requested. It might be down or blocking proxy access.</p>
+            <button id="error-home-button">Return to Home</button>
         </div>
-        <iframe id="content-iframe" title="Content View" sandbox="allow-forms allow-modals allow-pointer-lock allow-presentation allow-same-origin allow-scripts allow-downloads"></iframe>
     </div>
 
     <script src="uv/uv.bundle.js" defer></script>
@@ -1043,7 +668,6 @@
         let isLoading = false;
         let isRefreshing = false;
         let typewriterInterval = null;
-        let lastAttemptedUrl = ''; // ADDED: To track the last URL for error checking
 
         const searchEngines = {
             'duckduckgo': { name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=%s' },
@@ -1053,114 +677,61 @@
         };
         let currentSearchEngineKey = 'duckduckgo';
 
-        // DELETED: cloakPresets object
-
         const THEMES = {
-            // --- Normal Themes ---
-            main: { name: "Main (Default)", colors: { bg: '#23272A', text: '#E0E1DD', accent: '#7F5AF0', neutral: '#2C2F33', btnText: '#FFFFFF' } }, 
-            light: { name: "Light", colors: { bg: '#EDEDED', text: '#333333', accent: '#A6A6A6', neutral: '#FFFFFF', btnText: '#FFFFFF' } }, 
-            dark: { name: "Dark", colors: { bg: '#1E1E1E', text: '#F1F1F1', accent: '#999999', neutral: '#2A2A2A', btnText: '#000000' } }, 
-            oceanic: { name: "Oceanic", colors: { bg: '#0A2E36', text: '#E0F4F2', accent: '#2E8B57', neutral: '#144552', btnText: '#FFFFFF' } }, 
-            sunset: { name: "Crimson Navy", colors: { bg: '#2C3E50', text: '#FAD7A0', accent: '#E74C3C', neutral: '#34495E', btnText: '#FFFFFF' } }, 
-            forest: { name: "Forest", colors: { bg: '#2d3a32', text: '#e6e2dd', accent: '#588157', neutral: '#344e41', btnText: '#FFFFFF' } }, 
-            rose: { name: "Rosé Quartz", colors: { bg: '#f7d1cd', text: '#5e3d42', accent: '#e8959e', neutral: '#f2b5b0', btnText: '#5e3d42' } }, 
-            coffee: { name: "Coffee House", colors: { bg: '#4a403a', text: '#e7e2dd', accent: '#a5a58d', neutral: '#6b5f58', btnText: '#FFFFFF' } }, 
-            matrix: { name: "Matrix", colors: { bg: '#000000', text: '#00FF41', accent: '#00A329', neutral: '#050505', btnText: '#000000' } }, 
-            cyberpunk: { name: "Cyberpunk", colors: { bg: '#0d0221', text: '#f0f0f0', accent: '#f72585', neutral: '#261a3b', btnText: '#FFFFFF' } }, 
-            dracula: { name: "Dracula", colors: { bg: '#282a36', text: '#f8f8f2', accent: '#bd93f9', neutral: '#44475a', btnText: '#f8f8f2' } }, 
-            nord: { name: "Nord", colors: { bg: '#2E3440', text: '#D8DEE9', accent: '#88C0D0', neutral: '#3B4252', btnText: '#2E3440' } }, 
-            gruvbox: { name: "Gruvbox", colors: { bg: '#282828', text: '#ebdbb2', accent: '#fabd2f', neutral: '#3c3836', btnText: '#282828' } }, 
-            tokyo: { name: "Tokyo Night", colors: { bg: '#1a1b26', text: '#a9b1d6', accent: '#7aa2f7', neutral: '#292e42', btnText: '#FFFFFF' } }, 
-            slate: { name: "Slate", colors: { bg: '#36454F', text: '#EAEAEA', accent: '#708090', neutral: '#2F3T4F', btnText: '#FFFFFF' } },
-            indigo: { name: "Indigo", colors: { bg: '#1a1b36', text: '#c5c8e6', accent: '#6a79f7', neutral: '#292e52', btnText: '#FFFFFF' } },
-            crimson: { name: "Crimson", colors: { bg: '#3b1a1a', text: '#e6c5c5', accent: '#f76a6a', neutral: '#522929', btnText: '#FFFFFF' } },
-            monokai: { name: "Monokai", colors: { bg: '#272822', text: '#F8F8F2', accent: '#FD971F', neutral: '#3E3D32', btnText: '#FFFFFF' } },
-            lavender: { name: "Lavender", colors: { bg: '#E6E6FA', text: '#333333', accent: '#967BB6', neutral: '#D8BFD8', btnText: '#FFFFFF' } },
-            minty: { name: "Minty", colors: { bg: '#f1f8f6', text: '#2a5247', accent: '#3EB489', neutral: '#d9e9e4', btnText: '#FFFFFF' } },
-            candy: { name: "Candy", colors: { bg: '#ffebf2', text: '#800040', accent: '#ff80bf', neutral: '#ffcce6', btnText: '#FFFFFF' } },
-            solarized_light: { name: "Solarized Light", colors: { bg: '#fdf6e3', text: '#657b83', accent: '#268bd2', neutral: '#eee8d5', btnText: '#FFFFFF' } },
-            solarized_dark: { name: "Solarized Dark", colors: { bg: '#002b36', text: '#839496', accent: '#268bd2', neutral: '#073642', btnText: '#FFFFFF' } },
-            sandy: { name: "Sandy Beach", colors: { bg: '#F4A460', text: '#6B4226', accent: '#87CEEB', neutral: '#DEB887', btnText: '#6B4226' } },
-            peach: { name: "Peach", colors: { bg: '#ffdab9', text: '#8B4513', accent: '#ffa07a', neutral: '#ffdead', btnText: '#8B4513' } },
-            olive: { name: "Olive", colors: { bg: '#556B2F', text: '#F5F5DC', accent: '#BDB76B', neutral: '#6B8E23', btnText: '#FFFFFF' } },
-            grape: { name: "Grape", colors: { bg: '#483D8B', text: '#E6E6FA', accent: '#9370DB', neutral: '#312A5C', btnText: '#FFFFFF' } },
-            mocha: { name: "Mocha", colors: { bg: '#8B4513', text: '#F5DEB3', accent: '#D2691E', neutral: '#A0522D', btnText: '#FFFFFF' } },
-            teal: { name: "Teal", colors: { bg: '#008080', text: '#E0FFFF', accent: '#48D1CC', neutral: '#20B2AA', btnText: '#FFFFFF' } },
-            maroon: { name: "Maroon", colors: { bg: '#800000', text: '#FFE4E1', accent: '#B22222', neutral: '#8B0000', btnText: '#FFFFFF' } },
-            charcoal: { name: "Charcoal", colors: { bg: '#36454F', text: '#DCDCDC', accent: '#778899', neutral: '#2F4F4F', btnText: '#FFFFFF' } },
-            honey: { name: "Honey", colors: { bg: '#FFD700', text: '#614126', accent: '#FFA500', neutral: '#FFEC8B', btnText: '#614126' } },
-            sky: { name: "Sky", colors: { bg: '#87CEEB', text: '#00008B', accent: '#00BFFF', neutral: '#ADD8E6', btnText: '#FFFFFF' } },
-            rose_gold: { name: "Rose Gold", colors: { bg: '#B76E79', text: '#FFFFFF', accent: '#E1A9B0', neutral: '#C88C95', btnText: '#4A2A2E' } },
-            emerald: { name: "Emerald", colors: { bg: '#006A4E', text: '#F0FFF0', accent: '#50C878', neutral: '#2E8B57', btnText: '#FFFFFF' } },
-            ruby: { name: "Ruby", colors: { bg: '#E0115F', text: '#FFFFFF', accent: '#FF69B4', neutral: '#C71585', btnText: '#FFFFFF' } },
-            sapphire: { name: "Sapphire", colors: { bg: '#0F52BA', text: '#F0F8FF', accent: '#6495ED', neutral: '#4169E1', btnText: '#FFFFFF' } },
-            amethyst: { name: "Amethyst", colors: { bg: '#9966CC', text: '#F3E5AB', accent: '#BA55D3', neutral: '#8A2BE2', btnText: '#FFFFFF' } },
-            clay: { name: "Clay", colors: { bg: '#E3735E', text: '#FFF5EE', accent: '#CD5C5C', neutral: '#F08080', btnText: '#8B4513' } },
+            main: { name: "Main (Default)", colors: { bg: '#23272A', text: '#E0E1DD', accent: '#7F5AF0', neutral: '#2C2F33', btnText: '#FFFFFF' } },
+            '4sp_purple': { name: "4SP Purple", colors: { bg: '#100D14', text: '#EAEAEA', accent: '#6720BD', neutral: '#1C1A21', btnText: '#FFFFFF' } },
+            light: { name: "Light", colors: { bg: '#FFFFFF', text: '#222222', accent: '#EAEAEA', neutral: '#F5F5F5', btnText: '#222222' } },
+            dark: { name: "Dark", colors: { bg: '#000000', text: '#EAEAEA', accent: '#222222', neutral: '#111111', btnText: '#EAEAEA' } },  
+            oceanic: { name: "Serene Coast", colors: { bg: '#F0F4F8', text: '#334E68', accent: '#48BB78', neutral: '#E2E8F0', btnText: '#FFFFFF' } },
+            sunset: { name: "Amber Twilight", colors: { bg: '#4C1D42', text: '#FDECB7', accent: '#F56565', neutral: '#6B315B', btnText: '#FFFFFF' } },
+            forest: { name: "Evergreen", colors: { bg: '#2F4858', text: '#F7FAFC', accent: '#38A169', neutral: '#3A5B70', btnText: '#FFFFFF' } },
+            rose: { name: "Sakura", colors: { bg: '#FFF5F7', text: '#702459', accent: '#ED64A6', neutral: '#FED7E2', btnText: '#FFFFFF' } },
+            coffee: { name: "Latte", colors: { bg: '#F7F2ED', text: '#694A37', accent: '#A88B79', neutral: '#EFEAE4', btnText: '#FFFFFF' } },
+            matrix: { name: "Terminal", colors: { bg: '#0A192F', text: '#64FFDA', accent: '#64FFDA', neutral: '#172A45', btnText: '#0A192F' } },
+            cyberpunk: { name: "Neon District", colors: { bg: '#1A202C', text: '#A0AEC0', accent: '#38B2AC', neutral: '#2D3748', btnText: '#EDF2F7' } },
+            dracula: { name: "Midnight", colors: { bg: '#282A36', text: '#F8F8F2', accent: '#BD93F9', neutral: '#44475A', btnText: '#F8F8F2' } },
+            nord: { name: "Arctic", colors: { bg: '#2E3440', text: '#D8DEE9', accent: '#88C0D0', neutral: '#3B4252', btnText: '#2E3440' } },
+            gruvbox: { name: "Groove", colors: { bg: '#282828', text: '#EBDBB2', accent: '#FABD2F', neutral: '#3C3836', btnText: '#282828' } },
+            tokyo: { name: "Tokyo Night", colors: { bg: '#1A1B26', text: '#A9B1D6', accent: '#7AA2F7', neutral: '#292E42', btnText: '#FFFFFF' } },
+            maroon: { name: "Maroon", colors: { bg: '#5D0000', text: '#FDE2E2', accent: '#800000', neutral: '#4E0000', btnText: '#FFFFFF' } },
+            olive: { name: "Olive", colors: { bg: '#4D5D2E', text: '#F5FBEF', accent: '#6B8E23', neutral: '#3E4A2A', btnText: '#FFFFFF' } },
+            teal: { name: "Teal", colors: { bg: '#004D4D', text: '#D6F5F5', accent: '#008080', neutral: '#003838', btnText: '#FFFFFF' } },
+            slate: { name: "Slate", colors: { bg: '#2F3T4F', text: '#EAEAEA', accent: '#708090', neutral: '#36454F', btnText: '#FFFFFF' } },
+            indigo: { name: "Indigo", colors: { bg: '#1A1B36', text: '#C5C8E6', accent: '#6A79F7', neutral: '#292E52', btnText: '#FFFFFF' } },
+            black_coffee: { name: "Black Coffee", colors: { bg: '#14100C', text: '#D7D3D1', accent: '#3C3531', neutral: '#25201D', btnText: '#D7D3D1' } },
+            ocean_breeze: { name: "Ocean Breeze", colors: { bg: '#F0F8FF', text: '#2F4F4F', accent: '#87CEEB', neutral: '#E6F2FF', btnText: '#FFFFFF' } },
+            mint_chocolate: { name: "Mint Chocolate", colors: { bg: '#3D2B1F', text: '#F0FFF0', accent: '#98FF98', neutral: '#4E3A2B', btnText: '#3D2B1F' } },
+            heinz_red: { name: "Heinz Red", colors: { bg: '#4B0000', text: '#FFF0F0', accent: '#DA291C', neutral: '#8B0000', btnText: '#FFF0F0' } },
+            mustard_yellow: { name: "Mustard Yellow", colors: { bg: '#5D4B00', text: '#3B2F00', accent: '#D4A017', neutral: '#7A6300', btnText: '#3B2F00' } },
             
-            // --- Special Themes ---
-            bottom_bar: { name: "Bottom Bar", feature: 'bottomBar', colors: { bg: '#23272A', text: '#E0E1DD', accent: '#7F5AF0', neutral: '#2C2F33', btnText: '#FFFFFF' } },
-            particle_flow: { name: "Particle Flow", feature: 'particleFlow', colors: { bg: '#0d0221', text: '#f0f0f0', accent: '#f72585', neutral: '#261a3b', btnText: '#FFFFFF' } },
-            retro_terminal: { name: "Retro Terminal", feature: 'retroTerminal', colors: { bg: '#000000', text: '#00FF41', accent: '#00A329', neutral: '#050505', btnText: '#000000' } },
-            floating_toolbar: { name: "Floating Toolbar", feature: 'floatingToolbar', colors: { bg: '#2E3440', text: '#D8DEE9', accent: '#88C0D0', neutral: '#3B4252', btnText: '#2E3440' } },
-            minimalist: { name: "Minimalist", feature: 'minimalist', colors: { bg: '#F5F7FA', text: '#333333', accent: '#3498DB', neutral: '#FFFFFF', btnText: '#FFFFFF' } },
-            ocean_deep: { name: "Ocean Deep", feature: 'oceanDeep', colors: { bg: '#0A2E36', text: '#E0F4F2', accent: '#2E8B57', neutral: '#144552', btnText: '#FFFFFF' } },
-            sakura_blossom: { name: "Sakura Blossom", feature: 'sakuraBlossom', colors: { bg: '#fff0f3', text: '#5e3d42', accent: '#e8959e', neutral: '#ffe0e7', btnText: '#5e3d42' } },
-            glitchy: { name: "Glitchy", feature: 'glitchy', colors: { bg: '#0d1117', text: '#c9d1d9', accent: '#58a6ff', neutral: '#161b22', btnText: '#ffffff' } },
-            flipped_mode: { name: "Flipped Mode", feature: 'flippedMode', colors: { bg: '#282828', text: '#ebdbb2', accent: '#fabd2f', neutral: '#3c3836', btnText: '#282828' } },
-            translucent_ui: { name: "Translucent UI", feature: 'translucentUi', colors: { bg: '#212121', text: '#ffffff', accent: '#82aaff', neutral: '#292929', btnText: '#ffffff' } },
-            aurora: { name: "Aurora", feature: 'aurora', colors: { bg: '#000', text: '#fff', accent: '#00e5ff', neutral: '#111', btnText: '#000' } },
-            dynamic_grid: { name: "Dynamic Grid", feature: 'dynamicGrid', colors: { bg: '#101010', text: '#f0f0f0', accent: '#f72585', neutral: '#1a1a1a', btnText: '#FFFFFF' } },
-            vintage_paper: { name: "Vintage Paper", feature: 'vintagePaper', colors: { bg: '#f3eacb', text: '#5b4636', accent: '#8c6c5a', neutral: '#e9dcc0', btnText: '#f3eacb' } },
-            holographic: { name: "Holographic", feature: 'holographic', colors: { bg: '#0d1117', text: '#c9d1d9', accent: '#58a6ff', neutral: '#161b22', btnText: '#ffffff' } },
-            system_match: { name: "System Match", feature: 'systemMatch', colors: { bg: '#F5F7FA', text: '#333333', accent: '#3498DB', neutral: '#FFFFFF', btnText: '#FFFFFF' } },
-            tilt_3d: { name: "3D Tilt", feature: 'tilt3d', colors: { bg: '#2C3E50', text: '#FAD7A0', accent: '#E74C3C', neutral: '#34495E', btnText: '#FFFFFF' } },
-            comic_book: { name: "Comic Book", feature: 'comicBook', colors: { bg: '#e5e5e5', text: '#000000', accent: '#3498db', neutral: '#ffffff', btnText: '#ffffff' } },
-            crt_scanlines: { name: "CRT Scanlines", feature: 'crtScanlines', colors: { bg: '#080808', text: '#1ff739', accent: '#16c72e', neutral: '#111111', btnText: '#080808' } },
-            skewed_look: { name: "Skewed Look", feature: 'skewedLook', colors: { bg: '#1a1b36', text: '#c5c8e6', accent: '#6a79f7', neutral: '#292e52', btnText: '#FFFFFF' } },
-            text_pop: { name: "Text Pop", feature: 'textPop', colors: { bg: '#23272A', text: '#FFFFFF', accent: '#ff00c8', neutral: '#2C2F33', btnText: '#FFFFFF' } },
-            focus_mode: { name: "Focus Mode", feature: 'focusMode', colors: { bg: '#2E3440', text: '#D8DEE9', accent: '#88C0D0', neutral: '#3B4252', btnText: '#2E3440' } },
-            inverted_ui: { name: "Inverted UI", feature: 'invertedUi', colors: { bg: '#ddddd3', text: '#1f1f18', accent: '#80a50f', neutral: '#c3c7c9', btnText: '#1f1f18' } },
-            mouse_glow: { name: "Mouse Glow", feature: 'mouseGlow', colors: { bg: '#010101', text: '#f0f0f0', accent: '#f72585', neutral: '#111111', btnText: '#FFFFFF' } },
-            stealth_mode: { name: "Stealth Mode", feature: 'stealthMode', colors: { bg: '#1E1E1E', text: '#F1F1F1', accent: '#BB86FC', neutral: '#2A2A2A', btnText: '#000000' } },
-            old_newspaper: { name: "Old Newspaper", feature: 'oldNewspaper', colors: { bg: '#f5e8d7', text: '#5a4d3f', accent: '#7a6a59', neutral: '#e9dacb', btnText: '#FFFFFF' } },
-            page_curl: { name: "Page Curl", feature: 'pageCurl', colors: { bg: '#F5F7FA', text: '#333333', accent: '#3498DB', neutral: '#FFFFFF', btnText: '#FFFFFF' } },
-            spotlight: { name: "Spotlight", feature: 'spotlight', colors: { bg: '#000000', text: '#f1f1f1', accent: '#BB86FC', neutral: '#111111', btnText: '#000000' } },
-            blueprint: { name: "Blueprint", feature: 'blueprint', colors: { bg: '#0d2b45', text: '#90e0ef', accent: '#caf0f8', neutral: '#0c3d61', btnText: '#0d2b45' } },
-            notebook_paper: { name: "Notebook Paper", feature: 'notebookPaper', colors: { bg: '#fefefe', text: '#2b2b2b', accent: '#59a5d8', neutral: '#ffffff', btnToext: '#ffffff' } },
-            zoom_hover: { name: "Zoom Hover", feature: 'zoomHover', colors: { bg: '#23272A', text: '#E0E1DD', accent: '#7F5AF0', neutral: '#2C2F33', btnText: '#FFFFFF' } },
-            shaky_text: { name: "Shaky Text", feature: 'shakyText', colors: { bg: '#2a2a2a', text: '#e0e0e0', accent: '#f44336', neutral: '#3c3c3c', btnText: '#ffffff' } },
-            rainbow_text: { name: "Rainbow Text", feature: 'rainbowText', colors: { bg: '#1E1E1E', text: '#F1F1F1', accent: '#BB86FC', neutral: '#2A2A2A', btnText: '#000000' } },
-            bouncing_ui: { name: "Bouncing UI", feature: 'bouncingUi', colors: { bg: '#2C3E50', text: '#FAD7A0', accent: '#E74C3C', neutral: '#34495E', btnText: '#FFFFFF' } },
-            '8_bit_gamer': { name: "8-Bit Gamer", feature: '8bitGamer', colors: { bg: '#000000', text: '#ffffff', accent: '#ff0000', neutral: '#333333', btnText: '#000000' } },
-            under_construction: { name: "Under Construction", feature: 'underConstruction', colors: { bg: '#424242', text: '#ffffff', accent: '#fdd835', neutral: '#313131', btnText: '#000000' } },
-            ghostly: { name: "Ghostly", feature: 'ghostly', colors: { bg: '#0d1117', text: '#e6edf3', accent: '#58a6ff', neutral: '#161b22', btnText: '#ffffff' } },
-            typewriter: { name: "Typewriter", feature: 'typewriter', colors: { bg: '#f3eacb', text: '#5b4636', accent: '#8c6c5a', neutral: '#e9dcc0', btnText: '#f3eacb' } },
-            static_noise: { name: "Static Noise", feature: 'staticNoise', colors: { bg: '#111111', text: '#e0e0e0', accent: '#9e9e9e', neutral: '#212121', btnText: '#000000' } },
-            color_cycle_bg: { name: "Color Cycle BG", feature: 'colorCycleBg', colors: { bg: '#23272A', text: '#E0E1DD', accent: '#7F5AF0', neutral: '#2C2F33', btnText: '#FFFFFF' } },
-            mirror_world: { name: "Mirror World", feature: 'mirrorWorld', colors: { bg: '#1a1b26', text: '#a9b1d6', accent: '#7aa2f7', neutral: '#292e42', btnText: '#FFFFFF' } },
-            lens_flare: { name: "Lens Flare", feature: 'lensFlare', colors: { bg: '#0d0221', text: '#f0f0f0', accent: '#f72585', neutral: '#261a3b', btnText: '#FFFFFF' } },
-            command_prompt: { name: "Command Prompt", feature: 'commandPrompt', colors: { bg: '#0c0c0c', text: '#cccccc', accent: '#ffffff', neutral: '#0c0c0c', btnText: '#0c0c0c' } },
-            perspective_ui: { name: "Perspective UI", feature: 'perspectiveUi', colors: { bg: '#2E3440', text: '#D8DEE9', accent: '#88C0D0', neutral: '#3B4252', btnText: '#2E3440' } },
-            text_focus: { name: "Text Focus", feature: 'textFocus', colors: { bg: '#1E1E1E', text: '#F1F1F1', accent: '#BB86FC', neutral: '#2A2A2A', btnText: '#FFFFFF' } },
-            gradient_border: { name: "Gradient Border", feature: 'gradientBorder', colors: { bg: '#0d1117', text: '#c9d1d9', accent: '#58a6ff', neutral: '#161b22', btnText: '#ffffff' } },
-            wobbly_ui: { name: "Wobbly UI", feature: 'wobblyUi', colors: { bg: '#2d3a32', text: '#e6e2dd', accent: '#588157', neutral: '#344e41', btnText: '#FFFFFF' } },
-            keyboard_shortcuts: { name: "Keyboard Shortcuts", feature: 'keyboardShortcuts', colors: { bg: '#F5F7FA', text: '#333333', accent: '#3498DB', neutral: '#FFFFFF', btnText: '#FFFFFF' } }
         };
 
         // --- AD BLOCKER VARIABLES ---
         const adBlockerDomains = [
             'doubleclick.net', 'adservice.google.com', 'googleadservices.com', 'googlesyndication.com',
-            'adnxs.com', 'adroll.com', 'criteo.com', 'pubmatic.com', 'rubiconproject.com',
-            'scorecardresearch.com', 'zedo.com', 'adsrvr.org', 'openx.net', 'yieldmo.com',
-            'taboola.com', 'outbrain.com', 'revcontent.com', 'bidvertiser.com', 'popads.net',
-            'propellerads.com', 'adcash.com', 'yllix.com', 'exoclick.com'
+            'adnxs.com', 'adroll.com', 'criteo.com', 'pubmatic.com', 'rubiconproject.com', 'youtube-nocookie.com',
+            'scorecardresearch.com', 'zedo.com', 'adsrvr.org', 'openx.net', 'yieldmo.com', 'ad.youtube.com',
+            'taboola.com', 'outbrain.com', 'revcontent.com', 'bidvertiser.com', 'popads.net', 'admeld.com',
+            'propellerads.com', 'adcash.com', 'yllix.com', 'exoclick.com', 'adsterra.com', 'onclickads.net',
+            'media.net', 'sovrn.com', 'infolinks.com', 'contextweb.com', 'chitika.com', 'buysellads.com'
         ];
         const adBlockerSelectors = [
+            '.ad', '.ads', '.advert', '.advertisement', '.banner-ad', '.google-ad', '.g-ad',
             '[class*="adsbygoogle"]', '[id*="google_ads"]', '[class*="ad-"]', '[id*="ad-"]',
             '.ad-banner', '.ad-container', '.ad-wrapper', '.advertisement', '.advertising',
             '#google_vignette', 'div[id^="ad_"]', 'ins.adsbygoogle', 'a[href*="/ads/"]',
-            'div[data-ad-format]', 'div[data-ad-unit-path]', '[aria-label="advertisement"]'
+            'div[data-ad-format]', 'div[data-ad-unit-path]', '[aria-label="advertisement"]',
+            '.ytp-ad-module', '.video-ads', '.ytp-ad-player-overlay', '.ytp-ad-skip-button-container', // YouTube specific
+            '[class*="overlay-ad"]', '[class*="ad-overlay"]', '#ad_position_box', '.ad_sponsorship',
+            '[id^="ad-sense-"]', '[id*="ad_unit"]', '.trc_rbox_div', '.OUTBRAIN', // Common ad network selectors
+            '.ad-placeholder', '.pub_300x250', '.text-ad', '.sponsored-post', '.ads-box'
         ];
+        const antiAdBlockerSelectors = [
+            'div[class*="adblock"]', 'div[class*="ad-block"]', 'div[id*="adblock"]', 'div[id*="ad-block"]',
+            '.adblock-overlay', '.adblock-message', '.ad-blocker-detection', '.blocker-notice',
+            '#please-disable-adblock', 'div[class*="FuckAdBlock"]', 'div[class*="BlockAdBlock"]'
+        ];
+        const antiAdBlockerScripts = ['fuckadblock.js', 'blockadblock.js', 'adblock-detector.js', 'advertisement.js'];
 
         // --- DOM ELEMENT REFERENCES ---
         let contentIframeEl, searchBarEl, homeButtonEl, backButtonEl, forwardButtonEl, refreshButtonEl,
@@ -1168,181 +739,95 @@
             historyMenuEl, settingsMenuEl, bookmarksListPopupEl, newBookmarkNameInputPopupEl, 
             addCurrentBookmarkButtonPopupEl, historyListPopupEl, toolbarEl, 
             themeSelectorEl, searchEngineSelectorEl, historyLifespanSelectorEl, clearBrowserDataButtonEl, historySearchBarEl,
-            homepageEl, homepageSearchBarEl, homepageSearchSuggestionsEl, topSearchSuggestionsEl,
-            homepageSearchIconEl, adFreeToggleEl, saveConfigButtonEl, saveTimestampEl,
+            homepageEl, homepageSearchBarEl, searchSuggestionsEl,
+            homepageSearchIconEl, adBlockLevelSelectorEl, saveConfigButtonEl, saveTimestampEl,
             customThemeSettingsContainerEl, customThemeBgBaseEl, customThemeAccentBaseEl, applyCustomThemeButtonEl,
             customHistoryDaysContainerEl, customHistoryDaysInputEl, applyCustomHistoryDaysButtonEl,
             httpsEnforceToggleEl, homepageUrlInputEl, setCurrentPageAsHomepageButtonEl, resetHomepageButtonEl,
             restoreSessionToggleEl, clearCurrentSiteCookiesButtonEl, clearAllBrowserCookiesButtonEl,
             blockThirdPartyCookiesToggleEl, cookieManagementContainerEl,
-            // ADDED: Error page elements
-            errorPageEl, errorMessageEl, errorReturnHomeButtonEl;
+            topSearchSuggestionsEl, errorOverlayEl, errorHomeButtonEl;
 
         let bookmarkItemTemplate, historyItemTemplate, historyGroupTemplate;
         
-        // --- PARTICLE ENGINE & INTERACTIVITY---
         let particleAnimationId = null;
-        const canvasEl = document.getElementById('canvas');
-        const canvasCtx = canvasEl.getContext('2d');
-        let particles = [];
-        let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-
-
-        function resizeCanvas() { canvasEl.width = window.innerWidth; canvasEl.height = window.innerHeight; }
-        function stopAllParticles() { if (particleAnimationId) { cancelAnimationFrame(particleAnimationId); particleAnimationId = null; } particles = []; canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height); canvasEl.style.display = 'none'; }
-        
-        function startParticleEffect(type) {
-            stopAllParticles();
-            canvasEl.style.display = 'block';
-            resizeCanvas();
-            let config = {};
-            switch(type) {
-                case 'particleFlow': config = { count: 150, shape: 'line', speed: 1, maxSize: 4, color: 'rgba(247, 37, 133, 0.7)' }; break;
-                case 'oceanDeep': config = { count: 100, shape: 'circle', speed: 0.5, maxSize: 8, color: 'rgba(224, 244, 242, 0.5)', vertical: true }; break;
-                case 'sakuraBlossom': config = { count: 30, shape: 'text', text: '🌸', speed: 1, maxSize: 25, color: '#FFB7C5' }; break;
-                case 'dynamicGrid': config = { count: 40, shape: 'grid', speed: 0.5, maxSize: 1.5, color: 'rgba(247, 37, 133, 0.5)'}; break;
-                case 'aurora': config = { shape: 'aurora' }; break;
-                case 'mouseGlow': config = { shape: 'mouseGlow' }; break;
-                case 'staticNoise': config = { shape: 'staticNoise' }; break;
-                default: stopAllParticles(); return;
-            }
-            if(config.count) {
-                for (let i = 0; i < config.count; i++) { particles.push({ x: Math.random() * canvasEl.width, y: Math.random() * canvasEl.height, size: Math.random() * config.maxSize + 1, speedX: (Math.random() * 2 - 1) * config.speed, speedY: (Math.random() * 2 - 1) * config.speed, ...config }); }
-            } else {
-                particles.push(config);
-            }
-            animateParticles();
-        }
-
-        let auroraTime = 0;
-        function animateParticles() {
-            canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-            
-            if (particles.length > 0) {
-                const p = particles[0];
-                if (p.shape === 'mouseGlow') {
-                    const gradient = canvasCtx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 300);
-                    const accentColor = document.documentElement.style.getPropertyValue('--current-theme-accent') || '#7F5AF0';
-                    const accentRGB = hexToRgb(accentColor);
-                    if (accentRGB) {
-                        gradient.addColorStop(0, `rgba(${accentRGB.r}, ${accentRGB.g}, ${accentRGB.b}, 0.3)`);
-                        gradient.addColorStop(1, `rgba(${accentRGB.r}, ${accentRGB.g}, ${accentRGB.b}, 0)`);
-                        canvasCtx.fillStyle = gradient;
-                        canvasCtx.fillRect(0, 0, canvasEl.width, canvasEl.height);
-                    }
-                    particleAnimationId = requestAnimationFrame(animateParticles);
-                    return; 
-                } else if (p.shape === 'staticNoise') {
-                    const imageData = canvasCtx.createImageData(canvasEl.width, canvasEl.height);
-                    const buffer = new Uint32Array(imageData.data.buffer);
-                    const len = buffer.length - 1;
-                    for(let i=0; i < len; i++) {
-                        if (Math.random() < 0.5) {
-                            buffer[i] = 0xffffffff;
-                        } else {
-                            buffer[i] = 0xff000000;
-                        }
-                    }
-                    canvasCtx.putImageData(imageData, 0, 0);
-                    particleAnimationId = requestAnimationFrame(animateParticles);
-                    return;
-                }
-            }
-
-
-            for (let i = 0; i < particles.length; i++) {
-                let p = particles[i];
-
-                if(p.shape === 'aurora'){
-                    auroraTime += 0.01;
-                    const gradient = canvasCtx.createLinearGradient(0, 0, canvasEl.width, canvasEl.height);
-                    const color1 = `hsla(${180 + Math.sin(auroraTime) * 20}, 100%, 50%, 0.3)`;
-                    const color2 = `hsla(${260 + Math.cos(auroraTime) * 20}, 100%, 50%, 0.3)`;
-                    gradient.addColorStop(0, color1);
-                    gradient.addColorStop(1, color2);
-                    canvasCtx.fillStyle = gradient;
-                    canvasCtx.fillRect(0, 0, canvasEl.width, canvasEl.height);
-                    continue;
-                }
-
-                p.x += p.speedX; p.y += p.speedY;
-                if (p.x > canvasEl.width + p.size) p.x = -p.size; else if (p.x < -p.size) p.x = canvasEl.width + p.size;
-                if (p.y > canvasEl.height + p.size) p.y = -p.size; else if (p.y < -p.size) p.y = canvasEl.height + p.size;
-                
-                canvasCtx.fillStyle = p.color; canvasCtx.strokeStyle = p.color;
-
-                if (p.shape === 'circle') { canvasCtx.beginPath(); canvasCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2); canvasCtx.fill(); } 
-                else if (p.shape === 'line') { canvasCtx.lineWidth = p.size / 2; canvasCtx.beginPath(); canvasCtx.moveTo(p.x, p.y); canvasCtx.lineTo(p.x + p.speedX * 5, p.y + p.speedY * 5); canvasCtx.stroke(); } 
-                else if (p.shape === 'text') { canvasCtx.font = p.size + 'px sans-serif'; canvasCtx.fillText(p.text, p.x, p.y); }
-                else if (p.shape === 'grid') {
-                    canvasCtx.beginPath();
-                    canvasCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    canvasCtx.fill();
-                    for (let j = i + 1; j < particles.length; j++) {
-                        const other = particles[j];
-                        const dist = Math.hypot(p.x - other.x, p.y - other.y);
-                        if(dist < 150){
-                            canvasCtx.beginPath();
-                            canvasCtx.moveTo(p.x, p.y);
-                            canvasCtx.lineTo(other.x, other.y);
-                            canvasCtx.lineWidth = 0.5;
-                            canvasCtx.strokeStyle = `rgba(247, 37, 133, ${1 - dist / 150})`;
-                            canvasCtx.stroke();
-                        }
-                    }
-                }
-            }
-            particleAnimationId = requestAnimationFrame(animateParticles);
-        }
 
         // --- AD BLOCKER LOGIC ---
         function runAdBlocker(iframe) {
-            const isAdFreeEnabled = localStorage.getItem('vernAdFreeToggle') === 'true';
-            if (!isAdFreeEnabled) return;
+            const adBlockLevel = localStorage.getItem('vernAdBlockLevel') || 'standard';
+            if (adBlockLevel === 'off') return;
 
             try {
                 const doc = iframe.contentDocument;
                 if (!doc || !doc.body) return;
 
-                const removeAds = (documentNode) => {
-                    let adsFound = 0;
-                    adBlockerSelectors.forEach(selector => {
+                const removeElements = (documentNode, selectors, reason) => {
+                    let elementsFound = 0;
+                    selectors.forEach(selector => {
                         try {
                             const elements = documentNode.querySelectorAll(selector);
                             elements.forEach(el => {
                                 if (el.style.display !== 'none') {
                                     el.style.setProperty('display', 'none', 'important');
-                                    adsFound++;
+                                    elementsFound++;
                                 }
                             });
                         } catch (e) {
-                            // Non-critical error, selector might be invalid in some contexts
+                            // Non-critical error
                         }
                     });
-                    if (adsFound > 0) {
-                        console.log(`[AdBlock] Hid ${adsFound} ad element(s).`);
+                    if (elementsFound > 0) {
+                        console.log(`[AdBlock] Hid ${elementsFound} element(s) matching ${reason}.`);
                     }
                 };
 
-                // Create an observer to watch for dynamically added ads
+                const neutralizeScripts = (documentNode) => {
+                    let scriptsNeutralized = 0;
+                    const scripts = documentNode.getElementsByTagName('script');
+                    for (const script of scripts) {
+                        if (antiAdBlockerScripts.some(keyword => script.src.includes(keyword))) {
+                            script.type = 'text/javascript-blocked';
+                            script.innerHTML = '';
+                            script.removeAttribute('src');
+                            scriptsNeutralized++;
+                        }
+                    }
+                     if (scriptsNeutralized > 0) {
+                        console.log(`[AdBlock] Neutralized ${scriptsNeutralized} anti-ad-block script(s).`);
+                    }
+                };
+                
+                const processPage = () => {
+                    // Always hide standard ad elements
+                    removeElements(doc, adBlockerSelectors, "ad selectors");
+
+                    // Aggressive mode enhancements
+                    if (adBlockLevel === 'aggressive') {
+                        // Hide anti-ad-blocker overlays
+                        removeElements(doc, antiAdBlockerSelectors, "anti-ad-block selectors");
+                        
+                        // Attempt to neutralize known anti-ad-block scripts
+                        neutralizeScripts(doc);
+                        
+                        // Restore scrolling if disabled by an overlay
+                        if (doc.body.style.overflow === 'hidden') {
+                           doc.body.style.overflow = 'auto';
+                           console.log("[AdBlock] Restored page scrolling.");
+                        }
+                    }
+                };
+
                 const observer = new MutationObserver((mutations) => {
-                    // Re-run the ad remover if new nodes are added to the page
                     if (mutations.some(m => m.addedNodes.length > 0)) {
-                         removeAds(doc);
+                         processPage();
                     }
                 });
                 
-                // Initial run on the document
-                removeAds(doc);
-
-                // Start observing the body for changes
-                observer.observe(doc.body, {
-                    childList: true,
-                    subtree: true
-                });
+                processPage();
+                observer.observe(doc.body, { childList: true, subtree: true });
 
             } catch (e) {
-                console.warn("Ad blocker could not access iframe content. This is often expected due to security policies.", e);
+                console.warn("Ad blocker could not access iframe content.", e);
             }
         }
 
@@ -1377,23 +862,15 @@
             historyListPopupEl = document.getElementById('history-list-popup'); historySearchBarEl = document.getElementById('history-search-bar');
             themeSelectorEl = document.getElementById('theme-selector'); searchEngineSelectorEl = document.getElementById('search-engine-selector'); historyLifespanSelectorEl = document.getElementById('history-lifespan-selector');
             clearBrowserDataButtonEl = document.getElementById('clear-browser-data-button');
-            bookmarkItemTemplate = document.getElementById('bookmark-item-template');
-            historyItemTemplate = document.getElementById('history-item-template');
-            historyGroupTemplate = document.getElementById('history-group-template');
-            homepageEl = document.getElementById('homepage'); homepageSearchBarEl = document.getElementById('homepage-search-bar'); homepageSearchSuggestionsEl = document.getElementById('homepage-search-suggestions');
-            topSearchSuggestionsEl = document.getElementById('top-search-suggestions'); // ADDED
+            bookmarkItemTemplate = document.getElementById('bookmark-item-template'); historyItemTemplate = document.getElementById('history-item-template'); historyGroupTemplate = document.getElementById('history-group-template');
+            homepageEl = document.getElementById('homepage'); homepageSearchBarEl = document.getElementById('homepage-search-bar'); searchSuggestionsEl = document.getElementById('search-suggestions');
+            topSearchSuggestionsEl = document.getElementById('top-search-suggestions');
             homepageSearchIconEl = document.getElementById('homepage-search-icon');
-            adFreeToggleEl = document.getElementById('ad-free-toggle');
-            saveConfigButtonEl = document.getElementById('save-config-button');
-            saveTimestampEl = document.getElementById('save-timestamp');
-
+            adBlockLevelSelectorEl = document.getElementById('ad-block-level-selector');
+            saveConfigButtonEl = document.getElementById('save-config-button'); saveTimestampEl = document.getElementById('save-timestamp');
             customThemeSettingsContainerEl = document.getElementById('custom-theme-settings-container');
-            customThemeBgBaseEl = document.getElementById('custom-theme-bg-base');
-            customThemeAccentBaseEl = document.getElementById('custom-theme-accent-base');
-            applyCustomThemeButtonEl = document.getElementById('apply-custom-theme-button');
-            customHistoryDaysContainerEl = document.getElementById('custom-history-days-container');
-            customHistoryDaysInputEl = document.getElementById('custom-history-days-input');
-            applyCustomHistoryDaysButtonEl = document.getElementById('apply-custom-history-days-button');
+            customThemeBgBaseEl = document.getElementById('custom-theme-bg-base'); customThemeAccentBaseEl = document.getElementById('custom-theme-accent-base'); applyCustomThemeButtonEl = document.getElementById('apply-custom-theme-button');
+            customHistoryDaysContainerEl = document.getElementById('custom-history-days-container'); customHistoryDaysInputEl = document.getElementById('custom-history-days-input'); applyCustomHistoryDaysButtonEl = document.getElementById('apply-custom-history-days-button');
             httpsEnforceToggleEl = document.getElementById('https-enforce-toggle');
             homepageUrlInputEl = document.getElementById('homepage-url-input');
             setCurrentPageAsHomepageButtonEl = document.getElementById('set-current-page-as-homepage-button');
@@ -1403,11 +880,8 @@
             clearAllBrowserCookiesButtonEl = document.getElementById('clear-all-browser-cookies-button');
             blockThirdPartyCookiesToggleEl = document.getElementById('block-third-party-cookies-toggle');
             cookieManagementContainerEl = document.getElementById('cookie-management-container');
-            
-            // ADDED: Error Page Elements
-            errorPageEl = document.getElementById('error-page');
-            errorMessageEl = document.getElementById('error-message');
-            errorReturnHomeButtonEl = document.getElementById('error-return-home-button');
+            errorOverlayEl = document.getElementById('error-overlay');
+            errorHomeButtonEl = document.getElementById('error-home-button');
         }
         
         async function initUV() { try { await registerSW(); } catch (err) { console.error("SW registration failed:", err); }}
@@ -1417,7 +891,8 @@
             const savedTheme = localStorage.getItem('vernTheme') || 'main';
             applyTheme(savedTheme);
             themeSelectorEl.value = savedTheme;
-            toggleCustomThemeView(false);
+            toggleCustomThemeView(savedTheme === 'custom');
+            
             customThemeBgBaseEl.value = localStorage.getItem('vernCustomThemeBaseBg') || '#23272A';
             customThemeAccentBaseEl.value = localStorage.getItem('vernCustomThemeBaseAccent') || '#7F5AF0';
 
@@ -1441,17 +916,17 @@
                 toggleCustomHistoryView(true);
             }
             
-            adFreeToggleEl.checked = localStorage.getItem('vernAdFreeToggle') === 'true';
-
-            // DELETED: Cloak loading logic removed
-            updateTitleAndFavicon(); // Set initial title
-
+            adBlockLevelSelectorEl.value = localStorage.getItem('vernAdBlockLevel') || 'standard';
             blockThirdPartyCookiesToggleEl.checked = localStorage.getItem('vernBlockThirdPartyCookies') === 'true';
+            
+            // Set default document title
+            document.title = 'VERN MAX';
         }
 
         function setupEventListeners() {
             fullscreenButtonEl.addEventListener('click', toggleIframeFullscreen); document.addEventListener('fullscreenchange', handleFullscreenChange);
-            searchBarEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigateTo(e.target.value); });
+            searchBarEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { navigateTo(e.target.value); topSearchSuggestionsEl.style.display = 'none'; } });
+            searchBarEl.addEventListener('input', () => handleSearchInput(searchBarEl, topSearchSuggestionsEl));
             homeButtonEl.addEventListener('click', () => navigateTo(getHomepageUrl()));
             backButtonEl.addEventListener('click', () => contentIframeEl.contentWindow.history.back()); forwardButtonEl.addEventListener('click', () => contentIframeEl.contentWindow.history.forward());
             refreshButtonEl.addEventListener('click', () => { if (contentIframeEl.src !== 'about:blank' && !contentIframeEl.src.endsWith('#')) { const icon = refreshButtonEl.querySelector('.icon-img'); icon.classList.add('spinning'); isRefreshing = true; contentIframeEl.contentWindow.location.reload(true); } });
@@ -1460,18 +935,10 @@
             settingsButtonEl.addEventListener('click', (e) => { e.stopPropagation(); toggleSettingsMenu(); });
             bookmarkButtonEl.addEventListener('click', (e) => { e.stopPropagation(); toggleBookmarkMenu(); });
             historyButtonEl.addEventListener('click', (e) => { e.stopPropagation(); toggleHistoryMenu(); });
-            
-            // MODIFIED: Global click listener to hide all suggestion lists
             document.addEventListener('click', (e) => {
                 closeAllMenus(e);
-                const homepageSearchContainer = document.getElementById('homepage-search-container');
-                if (homepageSearchContainer && !homepageSearchContainer.contains(e.target)) {
-                    homepageSearchSuggestionsEl.style.display = 'none';
-                }
-                const topSearchContainer = document.getElementById('top-search-container');
-                if (topSearchContainer && !topSearchContainer.contains(e.target)) {
-                    topSearchSuggestionsEl.style.display = 'none';
-                }
+                if (!homepageSearchBarEl.contains(e.target)) searchSuggestionsEl.style.display = 'none';
+                if (!searchBarEl.contains(e.target)) topSearchSuggestionsEl.style.display = 'none';
             });
             
             addCurrentBookmarkButtonPopupEl.addEventListener('click', handleAddCurrentBookmark);
@@ -1495,77 +962,33 @@
                     loadHistory();
                 }
             });
-            adFreeToggleEl.addEventListener('change', (e) => { 
-                localStorage.setItem('vernAdFreeToggle', e.target.checked);
-                if (e.target.checked) {
-                    runAdBlocker(contentIframeEl);
+            adBlockLevelSelectorEl.addEventListener('change', (e) => { 
+                localStorage.setItem('vernAdBlockLevel', e.target.value);
+                // Reload current page to apply new ad-block setting
+                if (currentUrl && !currentUrl.startsWith('about:')) {
+                    contentIframeEl.contentWindow.location.reload(true);
                 }
              });
-
-            // DELETED: Cloak related event listeners
 
             applyCustomThemeButtonEl.addEventListener('click', applyAndSaveCustomTheme);
             applyCustomHistoryDaysButtonEl.addEventListener('click', applyAndSaveCustomHistoryDays);
             
             clearBrowserDataButtonEl.addEventListener('click', clearAllData);
             saveConfigButtonEl.addEventListener('click', saveConfiguration);
-            
-            // ADDED/MODIFIED: Search suggestion listeners for both bars
-            searchBarEl.addEventListener('input', () => fetchAndShowSuggestions(searchBarEl.value, topSearchSuggestionsEl));
-            homepageSearchBarEl.addEventListener('input', () => fetchAndShowSuggestions(homepageSearchBarEl.value, homepageSearchSuggestionsEl));
 
-            homepageSearchBarEl.addEventListener('focus', () => { if(document.body.classList.contains('theme-typewriter')) { startTypewriter(homepageSearchBarEl, homepageSearchBarEl.placeholder); } });
-            searchBarEl.addEventListener('focus', () => { if(document.body.classList.contains('theme-typewriter')) { startTypewriter(searchBarEl, searchBarEl.placeholder); } });
-            
+            homepageSearchBarEl.addEventListener('input', () => handleSearchInput(homepageSearchBarEl, searchSuggestionsEl));
             homepageSearchBarEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigateTo(e.target.value); });
             homepageSearchIconEl.addEventListener('click', () => navigateTo(homepageSearchBarEl.value));
             
-            homepageSearchSuggestionsEl.addEventListener('mousedown', (e) => {
-                if (e.target.tagName === 'LI') {
-                    navigateTo(e.target.textContent);
-                    homepageSearchSuggestionsEl.style.display = 'none';
-                }
+            searchSuggestionsEl.addEventListener('mousedown', (e) => {
+                if (e.target.tagName === 'LI') navigateTo(e.target.textContent);
             });
             topSearchSuggestionsEl.addEventListener('mousedown', (e) => {
-                if (e.target.tagName === 'LI') {
-                    navigateTo(e.target.textContent);
-                    topSearchSuggestionsEl.style.display = 'none';
-                }
+                if (e.target.tagName === 'LI') navigateTo(e.target.textContent);
             });
-            
-            // ADDED: Error page button listener
-            errorReturnHomeButtonEl.addEventListener('click', () => navigateTo(getHomepageUrl()));
 
             document.addEventListener('keydown', handleGlobalKeyDown);
-            window.addEventListener('resize', () => {
-                resizeCanvas();
-                if (document.querySelector('.mini-menu.show')) closeAllMenus(new MouseEvent('click'));
-            });
-
-            window.addEventListener('mousemove', (e) => {
-                const bodyClassList = document.body.classList;
-                const r = document.documentElement;
-                if (bodyClassList.contains('theme-mouseglow')) {
-                    mouse.x = e.clientX;
-                    mouse.y = e.clientY;
-                }
-                if (bodyClassList.contains('theme-tilt3d')) {
-                    const x = (e.clientX / window.innerWidth - 0.5) * 2;
-                    const y = (e.clientY / window.innerHeight - 0.5) * 2;
-                    r.style.setProperty('--tilt-x', `${-y * 10}deg`);
-                    r.style.setProperty('--tilt-y', `${x * 10}deg`);
-                }
-                if (bodyClassList.contains('theme-spotlight')) {
-                    r.style.setProperty('--spotlight-x', e.clientX + 'px');
-                    r.style.setProperty('--spotlight-y', e.clientY + 'px');
-                }
-                if (bodyClassList.contains('theme-lensflare')) {
-                    const x = (e.clientX / window.innerWidth) * 100;
-                    const y = (e.clientY / window.innerHeight) * 100;
-                    r.style.setProperty('--flare-x', x + '%');
-                    r.style.setProperty('--flare-y', y + '%');
-                }
-            });
+            window.addEventListener('resize', () => { if (document.querySelector('.mini-menu.show')) closeAllMenus(new MouseEvent('click')); });
 
             httpsEnforceToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernHttpsEnforce', e.target.checked); });
             homepageUrlInputEl.addEventListener('input', () => { localStorage.setItem('vernCustomHomepage', homepageUrlInputEl.value.trim()); });
@@ -1575,7 +998,7 @@
                     localStorage.setItem('vernCustomHomepage', currentUrl);
                     alert('Current page set as homepage!');
                 } else {
-                    alert('Cannot set "about:blank" or empty page as homepage.');
+                    alert('Cannot set this page as homepage.');
                 }
             });
             resetHomepageButtonEl.addEventListener('click', () => {
@@ -1585,21 +1008,35 @@
             });
 
             restoreSessionToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernRestoreSession', e.target.checked); });
+            
+            errorHomeButtonEl.addEventListener('click', () => navigateTo(getHomepageUrl()));
 
-            clearCurrentSiteCookiesButtonEl.addEventListener('click', () => { if (confirm("Are you sure you want to clear cookies for the current site? This may log you out of the site.")) { clearCookiesForCurrentSite(); alert("Attempted to clear cookies for the current site."); } });
-            clearAllBrowserCookiesButtonEl.addEventListener('click', () => { if (confirm("Are you sure you want to clear ALL browser cookies? This will log you out of all sites.")) { clearAllBrowserCookies(); alert("All browser cookies cleared."); } });
-            blockThirdPartyCookiesToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernBlockThirdPartyCookies', e.target.checked); alert("Please note: Blocking third-party cookies is highly browser-dependent and may not be fully effective in all proxy environments. It's primarily a preference setting."); });
+            clearCurrentSiteCookiesButtonEl.addEventListener('click', () => {
+                if (confirm("Are you sure you want to clear cookies for the current site?")) {
+                    clearCookiesForCurrentSite();
+                    alert("Attempted to clear cookies for the current site.");
+                }
+            });
+            clearAllBrowserCookiesButtonEl.addEventListener('click', () => {
+                if (confirm("Are you sure you want to clear ALL browser cookies?")) {
+                    clearAllBrowserCookies();
+                    alert("All browser cookies cleared.");
+                }
+            });
+            blockThirdPartyCookiesToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernBlockThirdPartyCookies', e.target.checked); });
         }
 
         // --- NAVIGATION & PROXY ---
         function navigateTo(urlInput) {
             isLoading = true;
-            homepageSearchSuggestionsEl.style.display = 'none'; // Hide all suggestions on nav
+            errorOverlayEl.style.display = 'none'; // Hide error page on new navigation
+            searchSuggestionsEl.style.display = 'none';
             topSearchSuggestionsEl.style.display = 'none';
-            let targetUrl = urlInput ? urlInput.trim() : '';
-            const isAdFreeEnabled = localStorage.getItem('vernAdFreeToggle') === 'true';
 
-            if (isAdFreeEnabled && targetUrl) {
+            let targetUrl = urlInput ? urlInput.trim() : '';
+            const adBlockLevel = localStorage.getItem('vernAdBlockLevel') || 'standard';
+
+            if (adBlockLevel !== 'off' && targetUrl) {
                 try {
                     const urlHostname = new URL(formatUrlInput(targetUrl) || targetUrl).hostname;
                     if (adBlockerDomains.some(domain => urlHostname.includes(domain))) {
@@ -1607,13 +1044,11 @@
                         isLoading = false;
                         return;
                     }
-                } catch (e) { /* Not a full URL, ignore */ }
+                } catch (e) {}
             }
 
             if (localStorage.getItem('vernHttpsEnforce') === 'true') {
-                if (targetUrl.startsWith('http://')) {
-                    targetUrl = 'https://' + targetUrl.substring(7);
-                }
+                if (targetUrl.startsWith('http://')) targetUrl = 'https://' + targetUrl.substring(7);
             }
             
             if (targetUrl !== '' && targetUrl !== 'about:blank' && targetUrl !== 'about:blank#') {
@@ -1621,58 +1056,53 @@
                 targetUrl = formatted ? formatted : searchEngines[currentSearchEngineKey].url.replace('%s', encodeURIComponent(targetUrl));
             }
             
-            lastAttemptedUrl = targetUrl; // Store the URL we are trying to visit
-
             if (targetUrl === 'about:blank' || targetUrl === 'about:blank#') {
                 showHomepage();
                 searchBarEl.value = '';
                 currentUrl = 'about:blank';
             } else {
                 hideHomepage();
-                hideErrorPage(); // Hide error page before trying a new URL
                 contentIframeEl.src = proxyUrl(targetUrl);
             }
         }
 
-        // MODIFIED: handleIframeLoad with error page logic
         function handleIframeLoad() {
             isLoading = false;
             if (isRefreshing) { const icon = refreshButtonEl.querySelector('.icon-img'); icon.classList.remove('spinning'); isRefreshing = false; }
             
             let finalUrl = 'about:blank', finalTitle = 'New Tab';
             try {
-                if(contentIframeEl.contentWindow.location.href === "about:blank") throw new Error();
+                if(contentIframeEl.contentWindow.location.href === "about:blank" || contentIframeEl.contentWindow.location.href === "about:srcdoc") throw new Error("Blank page loaded");
+                
                 if (contentIframeEl.contentWindow && contentIframeEl.contentWindow.__uv && contentIframeEl.contentWindow.__uv.location.href !== 'about:blank') {
                     finalUrl = contentIframeEl.contentWindow.__uv.location.href;
                     finalTitle = contentIframeEl.contentDocument.title || new URL(finalUrl).hostname;
+                } else {
+                     throw new Error("Proxy location not found");
                 }
             } catch (e) { 
+                // This is our error condition. If we tried to navigate somewhere but ended up blank, show error.
+                if(currentUrl !== 'about:blank' && !contentIframeEl.src.startsWith('about:blank')){
+                    showErrorPage();
+                    return;
+                }
                 finalUrl = 'about:blank';
                 finalTitle = 'New Tab';
             }
 
-            const isAdFreeEnabled = localStorage.getItem('vernAdFreeToggle') === 'true';
-
-            if (isAdFreeEnabled && finalUrl.includes('#google_vignette')) {
+            const adBlockLevel = localStorage.getItem('vernAdBlockLevel') || 'standard';
+            if (adBlockLevel !== 'off' && finalUrl.includes('#google_vignette')) {
                 const cleanUrl = finalUrl.split('#google_vignette')[0];
                 navigateTo(cleanUrl);
                 return;
             }
             
-            const isError = (finalUrl === 'about:blank' && lastAttemptedUrl && !lastAttemptedUrl.includes('about:blank'));
-
-            if (isError) {
-                let domain;
-                try { domain = new URL(lastAttemptedUrl).hostname; } catch { domain = lastAttemptedUrl; }
-                showErrorPage(`The page at "${domain}" could not be loaded or was blocked by the network.`);
-            } else if (finalUrl === 'about:blank' || contentIframeEl.src.endsWith('#')) {
+            if(finalUrl === 'about:blank' || contentIframeEl.src.endsWith('#')){
                 showHomepage();
-                hideErrorPage();
                 searchBarEl.value = '';
                 currentUrl = 'about:blank';
             } else {
                 hideHomepage();
-                hideErrorPage();
                 currentUrl = finalUrl;
                 searchBarEl.value = finalUrl;
             }
@@ -1681,13 +1111,11 @@
             if (localStorage.getItem('vernRestoreSession') === 'true') {
                 localStorage.setItem('vernLastUrl', currentUrl);
             }
-            updateTitleAndFavicon(); // MODIFIED
             if (currentUrl && !currentUrl.startsWith('about:')) addToHistory(currentTitle, currentUrl);
 
-            if (isAdFreeEnabled && finalUrl !== 'about:blank') {
+            if (adBlockLevel !== 'off' && finalUrl !== 'about:blank') {
                 runAdBlocker(contentIframeEl);
             }
-            lastAttemptedUrl = ''; // Reset for the next navigation
         }
 
         function proxyUrl(urlToProxy) {
@@ -1699,63 +1127,49 @@
         }
         
         function formatUrlInput(input) { const trimmed = input.trim(); if (/^(?:[a-z]+:)?\/\//i.test(trimmed)) return trimmed; if (/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)*$/.test(trimmed)) return 'https://' + trimmed; return null; }
+        function getHomepageUrl() { const customHomepage = localStorage.getItem('vernCustomHomepage'); return customHomepage && customHomepage.trim() !== '' ? customHomepage : 'about:blank'; }
+        function saveSession() { if (localStorage.getItem('vernRestoreSession') === 'true') localStorage.setItem('vernLastUrl', currentUrl); }
 
-        function getHomepageUrl() {
-            const customHomepage = localStorage.getItem('vernCustomHomepage');
-            return customHomepage && customHomepage.trim() !== '' ? customHomepage : 'about:blank';
-        }
-
-        function saveSession() {
-            if (localStorage.getItem('vernRestoreSession') === 'true') {
-                localStorage.setItem('vernLastUrl', currentUrl);
-            }
-        }
-
-        // --- HOMEPAGE & UI TOGGLES ---
+        // --- HOMEPAGE, ERROR PAGE, & SEARCH SUGGESTIONS ---
         function showHomepage() {
             homepageEl.style.display = 'flex';
             contentIframeEl.style.display = 'none';
-            errorPageEl.style.display = 'none';
+            errorOverlayEl.style.display = 'none';
             if(contentIframeEl.src !== 'about:blank#') contentIframeEl.src = 'about:blank#';
         }
 
         function hideHomepage() {
             homepageEl.style.display = 'none';
             contentIframeEl.style.display = 'block';
-        }
-        
-        // ADDED: Error page functions
-        function showErrorPage(message = 'The requested page could not be loaded.') {
-            homepageEl.style.display = 'none';
-            contentIframeEl.style.display = 'none';
-            errorPageEl.style.display = 'flex';
-            errorMessageEl.textContent = message;
-            if(contentIframeEl.src !== 'about:blank#') contentIframeEl.src = 'about:blank#';
-        }
-        function hideErrorPage() {
-            errorPageEl.style.display = 'none';
+            errorOverlayEl.style.display = 'none';
         }
 
-        // ADDED: Refactored search suggestion logic
-        function fetchAndShowSuggestions(query, suggestionsEl) {
+        function showErrorPage() {
+            homepageEl.style.display = 'none';
+            contentIframeEl.style.display = 'none';
+            errorOverlayEl.style.display = 'flex';
+        }
+
+        function handleSearchInput(inputElement, suggestionsElement) {
+            const query = inputElement.value;
             if (query.length > 0) {
                 fetch(`https://api.allorigins.win/raw?url=https://duckduckgo.com/ac/?q=${encodeURIComponent(query)}&type=json`)
-                    .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok.'))
+                    .then(response => response.ok ? response.json() : Promise.reject('Network error'))
                     .then(data => {
                         const suggestions = data.map(item => item.phrase);
-                        suggestionsEl.innerHTML = '';
+                        suggestionsElement.innerHTML = '';
                         suggestions.forEach(suggestion => {
                             const li = document.createElement('li');
                             li.textContent = suggestion;
-                            suggestionsEl.appendChild(li);
+                            suggestionsElement.appendChild(li);
                         });
-                        suggestionsEl.style.display = 'block';
+                        suggestionsElement.style.display = 'block';
                     }).catch(error => {
                         console.warn("Could not fetch search suggestions:", error);
-                        suggestionsEl.style.display = 'none';
+                        suggestionsElement.style.display = 'none';
                     });
             } else {
-                suggestionsEl.style.display = 'none';
+                suggestionsElement.style.display = 'none';
             }
         }
 
@@ -1779,7 +1193,7 @@
             if (history.length === 0) { const li = document.createElement('li'); li.textContent = 'No history found.'; li.style.cssText = 'cursor: default; text-align: center; opacity: 0.7;'; fragment.appendChild(li); } 
             else { const grouped = {}; [...history].reverse().forEach(item => { const groupKey = new Date(item.timestamp).toDateString(); if (!grouped[groupKey]) grouped[groupKey] = []; grouped[groupKey].push(item); });
                 for (const groupKey in grouped) { const headerTpl = historyGroupTemplate.content.cloneNode(true); headerTpl.querySelector('.history-group-header').textContent = groupKey; fragment.appendChild(headerTpl); 
-                    grouped[groupKey].forEach(item => { const itemTpl = historyItemTemplate.content.cloneNode(true); const li = itemTpl.querySelector('li'); li.dataset.url = item.url; li.title = `${item.title}\\n${item.url}`; li.querySelector('.item-name').textContent = item.title; li.querySelector('.item-url').textContent = item.url; fragment.appendChild(itemTpl); }); }
+                    grouped[groupKey].forEach(item => { const itemTpl = historyItemTemplate.content.cloneNode(true); const li = itemTpl.querySelector('li'); li.dataset.url = item.url; li.title = `${item.title}\n${item.url}`; li.querySelector('.item-name').textContent = item.title; li.querySelector('.item-url').textContent = item.url; fragment.appendChild(itemTpl); }); }
             }
             historyListPopupEl.innerHTML = ''; historyListPopupEl.appendChild(fragment);
         }
@@ -1802,54 +1216,47 @@
                 alert("All browser data has been cleared."); window.location.reload();
             }
         }
-        
-        // DELETED: applyAndSaveCustomCloak function
-
+       
         function clearCookiesForCurrentSite() {
             const cookies = document.cookie.split(';');
-            const currentDomain = window.location.hostname;
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i];
                 const eqPos = cookie.indexOf("=");
                 const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
                 document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + currentDomain;
-                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + currentDomain;
             }
             if (contentIframeEl.contentWindow && contentIframeEl.contentWindow.location.href !== 'about:blank') {
-                    try {
-                        contentIframeEl.contentWindow.document.cookie.split(';').forEach(function(c) {
-                            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-                        });
-                        contentIframeEl.contentWindow.location.reload(true);
-                    } catch (e) {
-                        console.warn("Could not directly clear iframe cookies due to security restrictions:", e);
-                        alert("Note: Clearing cookies for the proxied site might be limited by browser security policies. You may need to manually clear site data.");
-                    }
+                try {
+                    contentIframeEl.contentWindow.document.cookie.split(';').forEach(function(c) {
+                        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                    });
+                    contentIframeEl.contentWindow.location.reload(true);
+                } catch (e) {
+                    console.warn("Could not directly clear iframe cookies due to security restrictions:", e);
+                }
             }
         }
 
         function clearAllBrowserCookies() {
             const allCookies = document.cookie.split(';');
             for (let i = 0; i < allCookies.length; i++) {
-                const cookie = allCookies[i];
-                const eqPos = cookie.indexOf("=");
-                const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-            }
-            if (contentIframeEl.contentWindow) {
-                try {
-                    contentIframeEl.contentWindow.document.cookie.split(';').forEach(function(c) {
-                        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-                    });
-                } catch (e) { console.warn("Could not directly clear iframe cookies during all-clear:", e); }
+                document.cookie = allCookies[i].split('=')[0] + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
             }
             window.location.reload();
         }
 
         // --- NEW THEME GENERATION LOGIC ---
-        function hexToRgb(hex) { let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null; }
-        function getLuminance(hex) { const rgb = hexToRgb(hex); if (!rgb) return 0; const a = [rgb.r, rgb.g, rgb.b].map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722; }
+        function hexToRgb(hex) {
+            let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
+        }
+
+        function getLuminance(hex) {
+            const rgb = hexToRgb(hex); if (!rgb) return 0;
+            const a = [rgb.r, rgb.g, rgb.b].map(v => (v /= 255) <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+            return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+        }
+        
         function adjustColor(hex, percent) {
             const rgb = hexToRgb(hex); if(!rgb) return hex;
             const amount = Math.floor(2.55 * percent);
@@ -1859,6 +1266,7 @@
             const toHex = c => ('00' + c.toString(16)).slice(-2);
             return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
         }
+        
         function generateSmartTheme(baseBg, baseAccent) {
             const bgLuminance = getLuminance(baseBg);
             const accentLuminance = getLuminance(baseAccent);
@@ -1867,6 +1275,7 @@
             const btnTextColor = accentLuminance > 0.4 ? '#111111' : '#FFFFFF';
             return { bg: baseBg, text: textColor, accent: baseAccent, neutral: neutral, btnText: btnTextColor };
         }
+
         function applyAndSaveCustomTheme() {
             localStorage.setItem('vernCustomThemeBaseBg', customThemeBgBaseEl.value);
             localStorage.setItem('vernCustomThemeBaseAccent', customThemeAccentBaseEl.value);
@@ -1877,6 +1286,7 @@
             applyTheme('custom');
             alert('Smart theme applied and saved!');
         }
+
         function applyAndSaveCustomHistoryDays() {
             const days = parseInt(customHistoryDaysInputEl.value, 10);
             if (isNaN(days) || days < 0 || days > 14) { alert('Please enter a number between 0 and 14.'); return; }
@@ -1886,6 +1296,7 @@
             loadHistory();
             alert(`History lifespan set to ${days} days.`);
         }
+
         function saveConfiguration() {
             const now = new Date();
             localStorage.setItem('vernConfigSaveTimestamp', now.toISOString());
@@ -1894,58 +1305,20 @@
             saveConfigButtonEl.firstChild.textContent = 'Configuration Saved! ';
             setTimeout(() => { saveConfigButtonEl.firstChild.textContent = originalText; }, 1500);
         }
+
         function updateSaveButtonText() {
             const savedTimestampISO = localStorage.getItem('vernConfigSaveTimestamp');
             if (!savedTimestampISO) { saveTimestampEl.textContent = ''; return; }
             const savedDate = new Date(savedTimestampISO);
             const now = new Date();
             const isToday = savedDate.toDateString() === now.toDateString();
-            let formattedTimestamp;
-            if (isToday) {
-                const hours = String(savedDate.getHours()).padStart(2, '0');
-                const minutes = String(savedDate.getMinutes()).padStart(2, '0');
-                const seconds = String(savedDate.getSeconds()).padStart(2, '0');
-                formattedTimestamp = `${hours}:${minutes}:${seconds}`;
-            } else {
-                const month = savedDate.getMonth() + 1;
-                const day = savedDate.getDate();
-                const year = savedDate.getFullYear();
-                formattedTimestamp = `${month}/${day}/${year}`;
-            }
+            let formattedTimestamp = isToday ? savedDate.toLocaleTimeString() : savedDate.toLocaleDateString();
             saveTimestampEl.textContent = `(${formattedTimestamp})`;
         }
 
         // --- UI, MENU, & THEME HELPERS ---
-        function clearSpecialFeatures() {
-            const existingSpotlight = document.getElementById('spotlight-overlay');
-            if (existingSpotlight) existingSpotlight.remove();
-            if(typewriterInterval) clearInterval(typewriterInterval);
-            document.querySelectorAll('.shortcut-text').forEach(el => el.remove());
-            document.querySelectorAll('.nav-button, .toolbar-button').forEach(btn => {
-                const icon = btn.querySelector('.icon-img');
-                if (icon) icon.style.display = 'block';
-            });
-        }
-        function applyKeyboardShortcuts() {
-            const shortcuts = { 'back-button': 'Alt+←', 'forward-button': 'Alt+→', 'refresh-button': 'Ctrl+R', };
-            for(const [id, key] of Object.entries(shortcuts)) {
-                const btn = document.getElementById(id);
-                if(btn) { btn.querySelector('.icon-img').style.display = 'none'; const span = document.createElement('span'); span.className = 'shortcut-text'; span.textContent = key; btn.appendChild(span); }
-            }
-        }
-        function startTypewriter(element, text) {
-            if (typewriterInterval) clearInterval(typewriterInterval);
-            let i = 0; element.value = '';
-            typewriterInterval = setInterval(() => {
-                if (i < text.length) { element.value += text.charAt(i); i++; } 
-                else { clearInterval(typewriterInterval); }
-            }, 50);
-        }
-        
         function toggleCustomThemeView(show) { customThemeSettingsContainerEl.classList.toggle('visible', show); }
         function toggleCustomHistoryView(show) { customHistoryDaysContainerEl.classList.toggle('visible', show); }
-        function toggleCookieManagementView(show) { cookieManagementContainerEl.classList.toggle('visible', show); }
-
 
         function closeAllMenus(event) {
              if (!event || (bookmarkMenuEl.classList.contains('show') && !bookmarkMenuEl.contains(event?.target) && !bookmarkButtonEl.contains(event?.target))) bookmarkMenuEl.classList.remove('show');
@@ -1954,16 +1327,17 @@
         }
         function positionMenuUnderButton(menuEl, buttonEl) {
             const btnRect = buttonEl.getBoundingClientRect();
-            const isBottomBar = document.body.classList.contains('theme-bottom-bar');
-            if (isBottomBar) { menuEl.style.top = 'auto'; menuEl.style.bottom = (window.innerHeight - btnRect.top + 5) + 'px'; } 
-            else { menuEl.style.bottom = 'auto'; menuEl.style.top = (btnRect.bottom + 5) + 'px'; }
+            menuEl.style.top = (btnRect.bottom + 5) + 'px';
             menuEl.style.right = (document.documentElement.clientWidth - btnRect.right) + 'px';
             menuEl.style.left = 'auto';
         }
         function toggleMenu(menuEl, buttonEl) {
             const isShowing = menuEl.classList.contains('show');
             closeAllMenus();
-            if (!isShowing) { menuEl.classList.add('show'); positionMenuUnderButton(menuEl, buttonEl); }
+            if (!isShowing) {
+                menuEl.classList.add('show');
+                positionMenuUnderButton(menuEl, buttonEl);
+            }
         }
         function toggleBookmarkMenu() { toggleMenu(bookmarkMenuEl, bookmarkButtonEl); }
         function toggleHistoryMenu() { toggleMenu(historyMenuEl, historyButtonEl); if(historyMenuEl.classList.contains('show')) historySearchBarEl.focus(); }
@@ -1971,61 +1345,43 @@
         
         function populateThemeSelector() {
             themeSelectorEl.innerHTML = '';
-            const customThemesGroup = document.createElement('optgroup'); customThemesGroup.label = 'Custom';
+            const customThemesGroup = document.createElement('optgroup');
+            customThemesGroup.label = 'Custom';
             customThemesGroup.appendChild(new Option('Custom Theme', 'custom'));
             themeSelectorEl.appendChild(customThemesGroup);
-            const standardThemesGroup = document.createElement('optgroup'); standardThemesGroup.label = 'Standard Themes';
-            const specialThemesGroup = document.createElement('optgroup'); specialThemesGroup.label = 'Special Themes';
+
+            const standardThemesGroup = document.createElement('optgroup');
+            standardThemesGroup.label = 'Standard Themes';
+            
             Object.keys(THEMES).forEach(key => {
                 const theme = THEMES[key];
                 const option = new Option(theme.name, key);
-                if (theme.feature) { specialThemesGroup.appendChild(option); } 
-                else { standardThemesGroup.appendChild(option); }
+                standardThemesGroup.appendChild(option);
             });
             themeSelectorEl.appendChild(standardThemesGroup);
-            themeSelectorEl.appendChild(specialThemesGroup);
         }
+
         function applyTheme(themeKey) {
             const r = document.documentElement;
-            clearSpecialFeatures(); stopAllParticles(); document.body.className = '';
-            r.style.setProperty('--font-family-main', "'PrimaryFont', sans-serif");
-            r.style.removeProperty('--tilt-x'); r.style.removeProperty('--tilt-y');
+            document.body.className = '';
+            
             let theme;
             if (themeKey === 'custom') {
                 const customColorsJSON = localStorage.getItem('vernCustomThemeColors');
-                if (customColorsJSON) { theme = { name: "Custom", colors: JSON.parse(customColorsJSON) }; } 
-                else { theme = { name: "Custom (Default)", colors: { bg: '#23272A', text: '#E0E1DD', accent: '#7F5AF0', neutral: '#2C2F33', btnText: '#FFFFFF' } }; }
-            } else { theme = THEMES[themeKey] || THEMES.main; }
-
-            if (theme.feature === 'systemMatch') {
-                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                theme.colors = prefersDark ? THEMES.dark.colors : THEMES.light.colors;
+                theme = { name: "Custom", colors: customColorsJSON ? JSON.parse(customColorsJSON) : THEMES.main.colors };
+            } else {
+                theme = THEMES[themeKey] || THEMES.main;
             }
+
             const colors = theme.colors;
             r.style.setProperty('--current-theme-bg', colors.bg); r.style.setProperty('--current-theme-text', colors.text);
             r.style.setProperty('--current-theme-accent', colors.accent); r.style.setProperty('--current-theme-neutral', colors.neutral);
             r.style.setProperty('--current-theme-button-text', colors.btnText);
-            if (theme.feature) {
-                const featureClassName = `theme-${theme.feature.toLowerCase().replace(/_/g, '')}`;
-                document.body.classList.add(featureClassName);
-                if (['particleFlow', 'oceanDeep', 'sakuraBlossom', 'dynamicGrid', 'aurora', 'mouseGlow', 'staticNoise'].includes(theme.feature)) { startParticleEffect(theme.feature); }
-                if(theme.feature === 'spotlight') { const spotlight = document.createElement('div'); spotlight.id = 'spotlight-overlay'; document.body.appendChild(spotlight); }
-                if(theme.feature === 'keyboardShortcuts') { applyKeyboardShortcuts(); }
-            }
         }
-
-        // DELETED: populateCloakSelector function
-
+        
         function populateSearchEngineSelector() { 
             searchEngineSelectorEl.innerHTML = '';
             Object.keys(searchEngines).forEach(key => searchEngineSelectorEl.add(new Option(searchEngines[key].name, key))); 
-        }
-
-        // ADDED: Simplified title/favicon updater
-        function updateTitleAndFavicon() {
-            const appFaviconEl = document.getElementById('app-favicon');
-            document.title = currentTitle || 'VERN MAX';
-            appFaviconEl.href = '../images/favicon.png';
         }
         
         // --- EVENT HANDLERS & UTILITIES ---
