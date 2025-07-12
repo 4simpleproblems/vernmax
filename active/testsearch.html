@@ -285,18 +285,6 @@
         @keyframes spinRefreshIcon { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         body.app-ui-hidden #toolbar { display: none !important; }
 
-        /* --- REDESIGNED/MODIFIED THEME CSS --- */
-
-        @keyframes construction-anim {
-            0% { background-position: 0 0; }
-            100% { background-position: 56px 0; }
-        }
-        body.theme-underconstruction #toolbar {
-            background-image: repeating-linear-gradient(45deg, #fdd835, #fdd835 20px, #212121 20px, #212121 40px);
-            background-size: 56px 56px;
-            animation: construction-anim 1s linear infinite;
-        }
-        
         /* Homepage Styles */
         #homepage {
             display: none;
@@ -682,22 +670,26 @@
         let currentSearchEngineKey = 'duckduckgo';
 
         const THEMES = {
-            // --- Normal Themes ---
             main: { name: "Main (Default)", colors: { bg: '#23272A', text: '#E0E1DD', accent: '#7F5AF0', neutral: '#2C2F33', btnText: '#FFFFFF' } },
-            light: { name: "Light (New)", colors: { bg: '#FFFFFF', text: '#212121', accent: '#A0A0A0', neutral: '#F1F1F1', btnText: '#FFFFFF' } },
-            dark: { name: "Dark (New)", colors: { bg: '#121212', text: '#EAEAEA', accent: '#BB86FC', neutral: '#1E1E1E', btnText: '#000000' } },
-            oceanic: { name: "Serene Coast (New)", colors: { bg: '#F0F4F8', text: '#334E68', accent: '#48BB78', neutral: '#E2E8F0', btnText: '#FFFFFF' } },
-            sunset: { name: "Amber Twilight (New)", colors: { bg: '#4C1D42', text: '#FDECB7', accent: '#F56565', neutral: '#6B315B', btnText: '#FFFFFF' } },
-            forest: { name: "Evergreen (New)", colors: { bg: '#2F4858', text: '#F7FAFC', accent: '#38A169', neutral: '#3A5B70', btnText: '#FFFFFF' } },
-            rose: { name: "Sakura (New)", colors: { bg: '#FFF5F7', text: '#702459', accent: '#ED64A6', neutral: '#FED7E2', btnText: '#FFFFFF' } },
-            coffee: { name: "Latte (New)", colors: { bg: '#F7F2ED', text: '#694A37', accent: '#A88B79', neutral: '#EFEAE4', btnText: '#FFFFFF' } },
-            matrix: { name: "Terminal (New)", colors: { bg: '#0A192F', text: '#64FFDA', accent: '#64FFDA', neutral: '#172A45', btnText: '#0A192F' } },
-            cyberpunk: { name: "Neon District (New)", colors: { bg: '#1A202C', text: '#A0AEC0', accent: '#38B2AC', neutral: '#2D3748', btnText: '#EDF2F7' } },
-            dracula: { name: "Midnight (New)", colors: { bg: '#282A36', text: '#F8F8F2', accent: '#BD93F9', neutral: '#44475A', btnText: '#F8F8F2' } },
-            nord: { name: "Arctic (New)", colors: { bg: '#2E3440', text: '#D8DEE9', accent: '#88C0D0', neutral: '#3B4252', btnText: '#2E3440' } },
-            gruvbox: { name: "Groove (New)", colors: { bg: '#282828', text: '#EBDBB2', accent: '#FABD2F', neutral: '#3C3836', btnText: '#282828' } },
-            tokyo: { name: "Tokyo Night (New)", colors: { bg: '#1A1B26', text: '#A9B1D6', accent: '#7AA2F7', neutral: '#292E42', btnText: '#FFFFFF' } },
-            under_construction: { name: "Under Construction", colors: { bg: '#424242', text: '#ffffff', accent: '#fdd835', neutral: '#313131', btnText: '#000000' } },
+            '4sp_purple': { name: "4SP Purple", colors: { bg: '#100D14', text: '#EAEAEA', accent: '#6720BD', neutral: '#1C1A21', btnText: '#FFFFFF' } },
+            light: { name: "Light", colors: { bg: '#FFFFFF', text: '#222222', accent: '#EAEAEA', neutral: '#F5F5F5', btnText: '#222222' } },
+            dark: { name: "Dark", colors: { bg: '#000000', text: '#EAEAEA', accent: '#FFFFFF', neutral: '#111111', btnText: '#000000' } },
+            oceanic: { name: "Serene Coast", colors: { bg: '#F0F4F8', text: '#334E68', accent: '#48BB78', neutral: '#E2E8F0', btnText: '#FFFFFF' } },
+            sunset: { name: "Amber Twilight", colors: { bg: '#4C1D42', text: '#FDECB7', accent: '#F56565', neutral: '#6B315B', btnText: '#FFFFFF' } },
+            forest: { name: "Evergreen", colors: { bg: '#2F4858', text: '#F7FAFC', accent: '#38A169', neutral: '#3A5B70', btnText: '#FFFFFF' } },
+            rose: { name: "Sakura", colors: { bg: '#FFF5F7', text: '#702459', accent: '#ED64A6', neutral: '#FED7E2', btnText: '#FFFFFF' } },
+            coffee: { name: "Latte", colors: { bg: '#F7F2ED', text: '#694A37', accent: '#A88B79', neutral: '#EFEAE4', btnText: '#FFFFFF' } },
+            matrix: { name: "Terminal", colors: { bg: '#0A192F', text: '#64FFDA', accent: '#64FFDA', neutral: '#172A45', btnText: '#0A192F' } },
+            cyberpunk: { name: "Neon District", colors: { bg: '#1A202C', text: '#A0AEC0', accent: '#38B2AC', neutral: '#2D3748', btnText: '#EDF2F7' } },
+            dracula: { name: "Midnight", colors: { bg: '#282A36', text: '#F8F8F2', accent: '#BD93F9', neutral: '#44475A', btnText: '#F8F8F2' } },
+            nord: { name: "Arctic", colors: { bg: '#2E3440', text: '#D8DEE9', accent: '#88C0D0', neutral: '#3B4252', btnText: '#2E3440' } },
+            gruvbox: { name: "Groove", colors: { bg: '#282828', text: '#EBDBB2', accent: '#FABD2F', neutral: '#3C3836', btnText: '#282828' } },
+            tokyo: { name: "Tokyo Night", colors: { bg: '#1A1B26', text: '#A9B1D6', accent: '#7AA2F7', neutral: '#292E42', btnText: '#FFFFFF' } },
+            maroon: { name: "Maroon", colors: { bg: '#5D0000', text: '#FDE2E2', accent: '#800000', neutral: '#4E0000', btnText: '#FFFFFF' } },
+            olive: { name: "Olive", colors: { bg: '#4D5D2E', text: '#F5FBEF', accent: '#6B8E23', neutral: '#3E4A2A', btnText: '#FFFFFF' } },
+            teal: { name: "Teal", colors: { bg: '#004D4D', text: '#D6F5F5', accent: '#008080', neutral: '#003838', btnText: '#FFFFFF' } },
+            slate: { name: "Slate", colors: { bg: '#2F3T4F', text: '#EAEAEA', accent: '#708090', neutral: '#36454F', btnText: '#FFFFFF' } },
+            indigo: { name: "Indigo", colors: { bg: '#1A1B36', text: '#C5C8E6', accent: '#6A79F7', neutral: '#292E52', btnText: '#FFFFFF' } },
         };
 
         // --- AD BLOCKER VARIABLES ---
@@ -1314,10 +1306,6 @@
                 theme = { name: "Custom", colors: customColorsJSON ? JSON.parse(customColorsJSON) : THEMES.main.colors };
             } else {
                 theme = THEMES[themeKey] || THEMES.main;
-            }
-
-            if (theme.feature === 'underConstruction') {
-                document.body.classList.add('theme-underconstruction');
             }
 
             const colors = theme.colors;
