@@ -47,7 +47,7 @@
             --menu-text-color: var(--text-color);
             --menu-shadow: 0 4px 12px rgba(var(--current-theme-shadow-rgb), var(--current-theme-shadow-opacity-strong));
             --menu-border-color: var(--button-outline-color);
-        }
+         }
 
         /* Base Styles */
         html, body {
@@ -56,7 +56,7 @@
             font-family: var(--font-family-main);
             background-color: var(--bg-color); color: var(--text-color);
             display: flex; flex-direction: column;
-        }
+         }
         canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: none; pointer-events: none; }
 
         /* Toolbar */
@@ -64,25 +64,25 @@
             display: flex; align-items: center; padding: 8px 10px;
             background-color: var(--toolbar-bg); box-shadow: var(--toolbar-shadow);
             border-bottom: 1px solid var(--toolbar-border-color); z-index: 1000; position: relative;
-        }
+         }
         .nav-button, .toolbar-button {
             width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
             margin-right: 8px; border-radius: 25%; background-color: var(--button-bg);
             cursor: pointer; color: var(--button-text-color); transition: background-color 0.2s, color 0.2s;
             box-shadow: 0 0 0 1px var(--button-outline-color); font-size: 20px;
             position: relative; flex-shrink: 0;
-        }
+         }
         .nav-button:hover, .toolbar-button:hover { background-color: var(--button-hover-bg); }
         .nav-button .icon-img, .toolbar-button .icon-img {
             width: 20px; height: 20px; user-select: none; pointer-events: none;
-        }
+         }
         #search-bar-container { flex: 1; position: relative; margin-right: 8px; }
         #search-bar {
             width: 100%; height: 36px; border-radius: 8px; border: none; background-color: var(--input-bg);
             color: var(--text-color); padding: 0 15px; font-size: 14px;
             box-shadow: 0 0 0 1px var(--button-outline-color); font-family: var(--font-family-main);
             box-sizing: border-box;
-        }
+         }
         #search-bar:focus { outline: none; background-color: var(--input-focus-bg); box-shadow: var(--input-focus-shadow); }
         #settings-button { margin-right: 0; }
 
@@ -96,16 +96,16 @@
             color: var(--menu-text-color); opacity: 0; visibility: hidden;
             transform: translateY(-10px) scale(0.98);
             transition: opacity 0.25s ease-out, transform 0.25s ease-out, visibility 0s linear 0.25s;
-        }
+         }
         .mini-menu.show {
             opacity: 1; visibility: visible; transform: translateY(0) scale(1);
             transition: opacity 0.25s ease-out, transform 0.25s ease-out, visibility 0s linear 0s;
-        }
+         }
         .mini-menu h3 {
             margin-top: 0; margin-bottom: 10px; font-size: 1.1em;
             border-bottom: 1px solid var(--toolbar-border-color); padding-bottom: 8px;
             font-weight: 600; display: flex; align-items: center; gap: 8px;
-        }
+         }
         .mini-menu ul { list-style: none; padding: 0; margin: 0; }
         .mini-menu::-webkit-scrollbar, .mini-menu ul::-webkit-scrollbar { width: 5px; }
         .mini-menu::-webkit-scrollbar-thumb, .mini-menu ul::-webkit-scrollbar-thumb { background-color: var(--button-outline-color); border-radius: 8px; }
@@ -117,27 +117,27 @@
             transition: background-color 0.2s ease, color 0.2s ease;
             background-color: color-mix(in srgb, var(--current-theme-neutral) 70%, var(--current-theme-bg));
             color: var(--text-color); position: relative;
-        }
+         }
         .mini-menu li:hover { background-color: var(--menu-item-hover-bg); color: var(--button-text-color); }
         .mini-menu li .item-url { font-size: 0.75em; opacity: 0.7; display: block; margin-top: 2px; }
         .mini-menu .item-remove-button {
             position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; padding: 5px;
             opacity: 0.7; display:inline-flex; align-items:center; justify-content:center;
             background: none; border: none; color: inherit;
-        }
+         }
         .mini-menu .item-remove-button:hover { opacity: 1; background-color: rgba(var(--current-theme-shadow-rgb),0.1); border-radius: 50%; }
         .mini-menu .item-remove-icon { width: 12px; height: 12px; display: block; }
         .history-group-header {
             font-size: 0.8em; font-weight: bold; color: var(--text-color);
             opacity: 0.7; padding: 10px 15px 5px; text-transform: uppercase;
-        }
+         }
         .mini-menu .menu-action-bar { margin-top:15px; padding-top:10px; border-top: 1px solid var(--toolbar-border-color); }
         .mini-menu .menu-input, .mini-menu .menu-select {
             width: 100%; height: 38px; padding: 0 15px; margin-bottom: 10px;
             background-color: var(--input-bg); color: var(--text-color);
             border: none; border-radius: 12px; font-family: var(--font-family-main);
             box-sizing: border-box; box-shadow: 0 0 0 1px var(--button-outline-color); font-size: 0.9em;
-        }
+         }
         .mini-menu .menu-input:focus, .mini-menu .menu-select:focus { outline: none; background-color: var(--input-focus-bg); box-shadow: var(--input-focus-shadow); }
         .mini-menu .menu-button {
             width: 100%; height: 38px; padding: 0 15px; background-color: var(--button-bg);
@@ -145,7 +145,7 @@
             transition: background-color 0.2s ease; font-family: var(--font-family-main);
             box-shadow: 0 0 0 1px var(--button-outline-color); display: flex;
             align-items: center; justify-content: center; font-size: 0.9em; font-weight: 500;
-        }
+         }
         .mini-menu .menu-button:hover { background-color: var(--button-hover-bg); }
         .mini-menu .menu-button .icon-img { width: 16px; height: 16px; margin-right: 8px; }
         .mini-menu .menu-button.clear-button { background-color: color-mix(in srgb, var(--current-theme-accent) 60%, #c0392b); }
@@ -162,13 +162,13 @@
             border: 1px solid var(--button-outline-color); color: var(--text-color);
             border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold;
             display: flex; align-items: center; justify-content: center;
-        }
+         }
         .details-button:hover { background-color: var(--current-theme-neutral); }
 
         /* Toggle Switch Styles */
         .menu-setting-item.toggle-item {
             flex-direction: row; justify-content: space-between; align-items: center; padding: 4px 5px;
-        }
+         }
         .toggle-label-container { display: flex; flex-direction: column; gap: 4px; margin-right: 10px; }
         .menu-setting-item.toggle-item .toggle-label-container label { padding-left: 0; margin-bottom: 0; cursor: pointer; }
         .toggle-description { font-size: 0.8em; opacity: 0.7; pointer-events: none; }
@@ -178,11 +178,11 @@
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
             background-color: color-mix(in srgb, var(--current-theme-neutral) 70%, var(--current-theme-bg));
             transition: .3s; border-radius: 24px; border: 1px solid var(--button-outline-color);
-        }
+         }
         .toggle-switch .slider:before {
             position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px;
             background-color: var(--text-color); transition: .3s; border-radius: 50%;
-        }
+         }
         .toggle-switch input:checked + .slider { background-color: var(--current-theme-accent); }
         .toggle-switch input:checked + .slider:before { transform: translateX(20px); background-color: var(--current-theme-button-text); }
         #save-timestamp { font-size: 0.8em; opacity: 0.8; margin-left: 8px; }
@@ -192,18 +192,18 @@
         #custom-history-days-container {
             opacity: 0; max-height: 0; overflow: hidden; margin-top: 0; padding-top: 0; border-top: none;
             transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out, margin-top 0.3s, padding-top 0.3s, border-top 0.3s;
-        }
+         }
         #custom-theme-settings-container.visible,
         #custom-history-days-container.visible {
             opacity: 1; max-height: 500px; margin-top: 15px; padding-top: 10px;
             border-top: 1px solid var(--toolbar-border-color);
-        }
+         }
         
         /* Style for color inputs to match other inputs */
         .mini-menu .menu-input[type="color"] {
             -webkit-appearance: none; -moz-appearance: none; appearance: none;
             width: 100%; height: 38px; padding: 0; border: none; background: transparent; cursor: pointer;
-        }
+         }
         .mini-menu .menu-input[type="color"]::-webkit-color-swatch-wrapper { padding: 4px; }
         .mini-menu .menu-input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
         .mini-menu .menu-input[type="color"]::-moz-color-swatch { border: none; border-radius: 8px; }
@@ -220,23 +220,23 @@
             display: none; flex-direction: column; justify-content: center; align-items: center;
             height: 100%; text-align: center; background-color: var(--bg-color);
             padding: 20px; box-sizing: border-box;
-        }
+         }
         #homepage-logo { max-width: 280px; height: auto; margin-bottom: 30px; }
         #homepage-search-container {
             position: relative; width: 100%; max-width: 584px; height: 38px;
             display: flex; align-items: center; border-radius: 8px;
             background-color: var(--input-bg); border: none;
             box-shadow: 0 0 0 1px var(--button-outline-color); transition: background-color 0.2s, box-shadow 0.2s;
-        }
+         }
         #homepage-search-container:focus-within { background-color: var(--input-focus-bg); box-shadow: var(--input-focus-shadow); }
         #homepage-search-bar {
             flex: 1; height: 36px; border: none; background: transparent; color: var(--text-color);
             padding: 0 15px; font-size: 14px; box-sizing: border-box; outline: none; font-family: var(--font-family-main);
-        }
+         }
         #homepage-search-icon {
             width: 18px; height: 18px; padding: 9px; border-radius: 50%;
             margin-right: 5px; cursor: pointer; transition: background-color 0.2s;
-        }
+         }
         #homepage-search-icon:hover { background-color: rgba(var(--current-theme-shadow-rgb), 0.1); }
         
         /* Search Suggestions & Explanations */
@@ -244,29 +244,29 @@
             display: none; position: absolute; top: calc(100% + 5px); left: 0; right: 0;
             background-color: var(--menu-bg); border: 1px solid var(--menu-border-color); border-radius: 12px;
             list-style: none; padding: 10px 0; margin: 0; text-align: left; z-index: 1010; box-shadow: var(--menu-shadow);
-        }
+         }
         .search-suggestions-list li { padding: 10px 20px; cursor: pointer; color: var(--text-color); }
         .search-suggestions-list li:hover { background-color: var(--menu-item-hover-bg); color: var(--button-text-color); }
         .search-engine-explanation, .setting-explanation {
             font-size: 0.8em; color: var(--text-color); opacity: 0.7;
             margin-top: -8px; margin-bottom: 10px; padding-left: 5px;
-        }
+         }
 
         /* Settings Sections */
         .settings-section {
             margin-bottom: 20px; padding-top: 10px; border-top: 1px solid var(--toolbar-border-color);
-        }
+         }
         .settings-section:first-child { border-top: none; padding-top: 0; }
         .settings-section h3 {
             margin-top: 0; margin-bottom: 10px; font-size: 1.1em; border-bottom: none;
             padding-bottom: 0; display: flex; align-items: center; gap: 8px; padding-left: 5px;
-        }
+         }
         #settings-menu .menu-setting-item,
         #settings-menu .menu-action-bar {
             padding: 8px 10px; border-radius: 8px;
             background-color: color-mix(in srgb, var(--current-theme-neutral) 50%, var(--current-theme-bg) 20%);
             margin-bottom: 10px;
-        }
+         }
         #settings-menu .menu-setting-item:last-child { margin-bottom: 0; }
         
         /* Ad Block Counter & Details Modal */
@@ -275,20 +275,20 @@
             background-color: color-mix(in srgb, var(--current-theme-accent) 20%, transparent);
             border: 1px solid var(--button-outline-color); text-align: center; font-size: 0.9em;
             display: none; color: color-mix(in srgb, var(--text-color) 80%, transparent);
-        }
+         }
         #ad-block-counter-container .blocked-count {
             color: var(--text-color); font-weight: 600; font-size: 1.1em;
-        }
+         }
         #ad-blocker-details-modal {
             display: none; position: fixed; z-index: 9998; left: 0; top: 0;
             width: 100%; height: 100%; overflow: auto; background-color: rgba(var(--current-theme-shadow-rgb), 0.6);
             backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-        }
+         }
         .ad-blocker-details-content {
             background-color: var(--current-theme-bg); margin: 10% auto; padding: 25px;
             border: 1px solid var(--button-outline-color); border-radius: 16px;
             width: 80%; max-width: 550px; box-shadow: var(--menu-shadow);
-        }
+         }
         .ad-blocker-details-content h4 { margin-top: 0; color: var(--current-theme-accent); }
         .ad-blocker-details-content p { font-size: 0.9em; line-height: 1.5; }
         .ad-blocker-details-content ul { list-style: disc; padding-left: 20px; }
@@ -296,7 +296,7 @@
         .ad-blocker-details-close {
             color: var(--text-color); float: right; font-size: 28px; font-weight: bold;
             line-height: 1; cursor: pointer; transition: color 0.3s;
-        }
+         }
         .ad-blocker-details-close:hover, .ad-blocker-details-close:focus { color: var(--current-theme-accent); text-decoration: none; }
         .details-list-heading { font-weight: bold; margin-top: 15px; margin-bottom: 5px; opacity: 0.9; }
 
@@ -306,7 +306,7 @@
             background-color: var(--bg-color); color: var(--text-color);
             flex-direction: column; justify-content: center; align-items: center;
             text-align: center; z-index: 2000; padding: 20px; box-sizing: border-box;
-        }
+         }
         #error-overlay h2 { font-size: 2em; margin-bottom: 15px; color: var(--current-theme-accent); }
         #error-overlay p { font-size: 1.1em; margin-bottom: 30px; }
         #error-home-button {
@@ -315,7 +315,7 @@
             transition: background-color 0.2s ease; font-family: var(--font-family-main);
             box-shadow: 0 0 0 1px var(--button-outline-color);
             align-items: center; justify-content: center; font-size: 1em; font-weight: 500;
-        }
+         }
          #error-home-button:hover { background-color: var(--button-hover-bg); }
 
     </style>
@@ -330,7 +330,10 @@
         </li>
     </template>
     <template id="history-item-template">
-        <li><span class="item-name"></span><span class="item-url"></span></li>
+        <li>
+            <span class="item-name"></span><span class="item-url"></span>
+            <button class="item-remove-button" title="Remove From History"><img src="../images/cross-white.png" alt="Remove" class="item-remove-icon"></button>
+        </li>
     </template>
     <template id="history-group-template">
         <div class="history-group-header"></div>
@@ -363,8 +366,11 @@
     
     <div id="history-menu" class="mini-menu">
         <h3>History</h3>
-        <input type="text" id="history-search-bar" class="menu-input" placeholder="Search history">
+        <input type="text" id="history-search-bar" class="menu-input" placeholder="Search history...">
         <ul id="history-list-popup"></ul>
+        <div class="menu-action-bar">
+             <button id="clear-all-history-button" class="menu-button clear-button">Clear All History</button>
+        </div>
     </div>
 
     <div id="settings-menu" class="mini-menu">
@@ -447,6 +453,17 @@
 
             <div id="ad-block-counter-container">
                 VERN MAX has blocked <span class="blocked-count">0</span> ads & trackers on this page!
+            </div>
+
+            <div class="menu-setting-item toggle-item">
+                <div class="toggle-label-container">
+                    <label for="pause-history-toggle" style="cursor: pointer;">Pause Search History</label>
+                    <small class="toggle-description">Stops recording new pages in your history.</small>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="pause-history-toggle">
+                    <span class="slider"></span>
+                </label>
             </div>
 
             <div class="menu-setting-item">
@@ -625,7 +642,8 @@
             restoreSessionToggleEl, clearCurrentSiteCookiesButtonEl, clearAllBrowserCookiesButtonEl,
             blockThirdPartyCookiesToggleEl, cookieManagementContainerEl,
             topSearchSuggestionsEl, errorOverlayEl, errorHomeButtonEl, adBlockCounterContainerEl,
-            adBlockerDetailsButtonEl, adBlockerDetailsModalEl, adBlockerDetailsCloseEl, adBlockerDetailsTextEl;
+            adBlockerDetailsButtonEl, adBlockerDetailsModalEl, adBlockerDetailsCloseEl, adBlockerDetailsTextEl,
+            pauseHistoryToggleEl, clearAllHistoryButtonEl;
 
         let bookmarkItemTemplate, historyItemTemplate, historyGroupTemplate;
         
@@ -634,6 +652,7 @@
             if (!element) return false;
             let current = element;
             let containerFound = false;
+            // Traverse up the DOM tree a few levels to find a likely container
             for (let i = 0; i < 5 && current.parentElement; i++) {
                 const id = current.id || '';
                 const className = current.className || '';
@@ -648,15 +667,18 @@
         }
 
         function forcefullyRemoveElement(element) {
+            // Check if the element is valid and hasn't already been processed
             if (!element || element.classList.contains('vern-removed')) return false;
             try {
+                // Apply aggressive CSS to hide the element immediately
                 element.style.setProperty('display', 'none', 'important');
                 element.style.setProperty('visibility', 'hidden', 'important');
                 element.style.setProperty('height', '0', 'important');
                 element.style.setProperty('max-height', '0', 'important');
                 element.style.setProperty('overflow', 'hidden', 'important');
                 element.style.setProperty('pointer-events', 'none', 'important');
-                element.classList.add('vern-removed');
+                element.classList.add('vern-removed'); // Mark as processed
+                // Physically remove from the DOM
                 if (element.parentNode) {
                     element.parentNode.removeChild(element);
                 }
@@ -675,19 +697,21 @@
             adBlockCounterContainerEl.innerHTML = `VERN MAX has blocked <span class="blocked-count">${vernBlockedItems}</span> ads & trackers on this page!`;
         }
 
-        function runScan(doc) {
+        function scanAndRemoveAds(doc) {
             if (!doc || !doc.body) return;
             let newlyRemoved = 0;
             const allSelectors = [...blockedSelectors, ...antiAdBlockerSelectors];
 
+            // Scan for and remove elements matching the blocklists
             allSelectors.forEach(selector => {
                 try {
                     doc.querySelectorAll(selector + ':not(.vern-removed)').forEach(el => {
                         if (findAndDestroyAdContainer(el)) newlyRemoved++;
                     });
-                } catch (e) { /* ignore */ }
+                } catch (e) { /* ignore errors from invalid selectors on certain pages */ }
             });
             
+            // For more aggressive modes, also block known ad scripts
             const adBlockLevel = localStorage.getItem('vernAdBlockLevel');
             if(adBlockLevel === 'aggressive' || adBlockLevel === 'annihilator') {
                  doc.querySelectorAll('script:not(.vern-removed)').forEach(script => {
@@ -698,6 +722,7 @@
                 });
             }
 
+            // Attempt to fix pages broken by adblocker-blockers
             if (doc.body && doc.body.style.overflow === 'hidden') {
                 doc.body.style.setProperty('overflow', 'auto', 'important');
             }
@@ -711,7 +736,7 @@
             }
         }
 
-        function runAdBlocker(iframe) {
+        function initializeAdBlocker(iframe) {
             const adBlockLevel = localStorage.getItem('vernAdBlockLevel') || 'standard';
             if (adBlockLevel === 'off') {
                 updateBlockCounterDisplay();
@@ -721,16 +746,20 @@
                 const doc = iframe.contentDocument;
                 if (!doc || !doc.body) return;
 
+                // Disconnect any previous observer to prevent duplicates
                 if (adBlockerObserver) adBlockerObserver.disconnect();
-                adBlockerObserver = new MutationObserver(() => runScan(doc));
+                // Use MutationObserver to react to dynamically added ads
+                adBlockerObserver = new MutationObserver(() => scanAndRemoveAds(doc));
                 adBlockerObserver.observe(doc.body, { childList: true, subtree: true });
 
-                runScan(doc);
+                // Run an initial scan as soon as the page is ready
+                scanAndRemoveAds(doc);
 
+                // For the most aggressive modes, also run a timed, repeating scan
                 if (adBlockLevel === 'annihilator') {
-                    adBlockerInterval = setInterval(() => runScan(doc), 10);
+                    adBlockerInterval = setInterval(() => scanAndRemoveAds(doc), 100); // Hyper-aggressive check
                 } else if (adBlockLevel === 'aggressive') {
-                     adBlockerInterval = setInterval(() => runScan(doc), 250);
+                    adBlockerInterval = setInterval(() => scanAndRemoveAds(doc), 250); // Aggressive check
                 }
             } catch (e) {
                 console.warn("Ad blocker could not access iframe content.", e);
@@ -777,7 +806,7 @@
             toolbarEl = document.getElementById('toolbar'); contentIframeEl = document.getElementById('content-iframe'); searchBarEl = document.getElementById('search-bar'); homeButtonEl = document.getElementById('home-button'); backButtonEl = document.getElementById('back-button'); forwardButtonEl = document.getElementById('forward-button'); refreshButtonEl = document.getElementById('refresh-button'); fullscreenButtonEl = document.getElementById('fullscreen-button'); settingsButtonEl = document.getElementById('settings-button'); bookmarkButtonEl = document.getElementById('bookmark-button'); historyButtonEl = document.getElementById('history-button');
             bookmarkMenuEl = document.getElementById('bookmark-menu'); historyMenuEl = document.getElementById('history-menu'); settingsMenuEl = document.getElementById('settings-menu');
             bookmarksListPopupEl = document.getElementById('bookmarks-list-popup'); newBookmarkNameInputPopupEl = document.getElementById('new-bookmark-name-popup'); addCurrentBookmarkButtonPopupEl = document.getElementById('add-current-bookmark-button-popup');
-            historyListPopupEl = document.getElementById('history-list-popup'); historySearchBarEl = document.getElementById('history-search-bar');
+            historyListPopupEl = document.getElementById('history-list-popup'); historySearchBarEl = document.getElementById('history-search-bar'); clearAllHistoryButtonEl = document.getElementById('clear-all-history-button');
             themeSelectorEl = document.getElementById('theme-selector'); searchEngineSelectorEl = document.getElementById('search-engine-selector'); historyLifespanSelectorEl = document.getElementById('history-lifespan-selector');
             clearBrowserDataButtonEl = document.getElementById('clear-browser-data-button');
             bookmarkItemTemplate = document.getElementById('bookmark-item-template'); historyItemTemplate = document.getElementById('history-item-template'); historyGroupTemplate = document.getElementById('history-group-template');
@@ -799,6 +828,7 @@
             setCurrentPageAsHomepageButtonEl = document.getElementById('set-current-page-as-homepage-button');
             resetHomepageButtonEl = document.getElementById('reset-homepage-button');
             restoreSessionToggleEl = document.getElementById('restore-session-toggle');
+            pauseHistoryToggleEl = document.getElementById('pause-history-toggle');
             clearCurrentSiteCookiesButtonEl = document.getElementById('clear-current-site-cookies-button');
             clearAllBrowserCookiesButtonEl = document.getElementById('clear-all-browser-cookies-button');
             blockThirdPartyCookiesToggleEl = document.getElementById('block-third-party-cookies-toggle');
@@ -821,6 +851,7 @@
             httpsEnforceToggleEl.checked = localStorage.getItem('vernHttpsEnforce') === 'true';
             homepageUrlInputEl.value = localStorage.getItem('vernCustomHomepage') || '';
             restoreSessionToggleEl.checked = localStorage.getItem('vernRestoreSession') === 'true';
+            pauseHistoryToggleEl.checked = localStorage.getItem('vernHistoryPaused') === 'true';
             const savedLifespan = localStorage.getItem('vernHistoryLifespan') || '14';
             const standardLifespans = ['0', '1', '3', '7', '14'];
             if (standardLifespans.includes(savedLifespan)) {
@@ -857,6 +888,7 @@
             bookmarksListPopupEl.addEventListener('click', handleBookmarkClick);
             historyListPopupEl.addEventListener('click', handleHistoryClick);
             historySearchBarEl.addEventListener('input', () => loadHistory(historySearchBarEl.value));
+            clearAllHistoryButtonEl.addEventListener('click', clearAllHistory);
             themeSelectorEl.addEventListener('change', (e) => {
                 const themeKey = e.target.value;
                 applyTheme(themeKey);
@@ -879,9 +911,13 @@
                 updateBlockCounterDisplay();
              });
              adBlockerDetailsButtonEl.addEventListener('click', showBlockerDetails);
-             adBlockerDetailsCloseEl.addEventListener('click', () => adBlockerDetailsModalEl.style.display = "none");
+             adBlockerDetailsCloseEl.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevents document click listener from firing
+                adBlockerDetailsModalEl.style.display = "none";
+            });
              window.addEventListener('click', (event) => {
                 if (event.target == adBlockerDetailsModalEl) {
+                    event.stopPropagation(); // Prevents document click listener from firing
                     adBlockerDetailsModalEl.style.display = "none";
                 }
             });
@@ -913,6 +949,7 @@
                 alert('Homepage reset to default.');
             });
             restoreSessionToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernRestoreSession', e.target.checked); });
+            pauseHistoryToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernHistoryPaused', e.target.checked); });
             errorHomeButtonEl.addEventListener('click', () => navigateTo(getHomepageUrl()));
             clearCurrentSiteCookiesButtonEl.addEventListener('click', () => {
                 if (confirm("Are you sure you want to clear cookies for the current site?")) {
@@ -938,23 +975,23 @@
                     break;
                 case 'standard':
                     content = `<h4>Mode: Standard</h4><p>Provides basic, lightweight blocking. It hides the most common types of ads without affecting page performance. This mode is always running via a MutationObserver.</p>
-                               <p class="details-list-heading">What it blocks:</p>
-                               <ul><li>Common banner and sidebar ads</li><li>Basic pop-up ads</li></ul>`;
+                                <p class="details-list-heading">What it blocks:</p>
+                                <ul><li>Common banner and sidebar ads</li><li>Basic pop-up ads</li></ul>`;
                     break;
                 case 'aggressive':
                     content = `<h4>Mode: Aggressive</h4><p>A strong, persistent blocker that removes a wide range of ads and trackers. It actively removes ad containers to prevent them from reappearing and runs on a constant quarter-second timer.</p>
-                               <p class="details-list-heading">What it blocks:</p>
-                               <ul><li>All 'Standard' targets</li><li>Video ads (pre-roll, mid-roll)</li><li>Sticky and floating ads</li><li>Most anti-ad-block scripts</li><li>Many analytics trackers</li></ul>`;
+                                <p class="details-list-heading">What it blocks:</p>
+                                <ul><li>All 'Standard' targets</li><li>Video ads (pre-roll, mid-roll)</li><li>Sticky and floating ads</li><li>Most anti-ad-block scripts</li><li>Many analytics trackers</li></ul>`;
                     break;
                 case 'annihilator':
                     content = `<h4>Mode: Ad Annihilator</h4><p>The most extreme level of blocking. This mode uses a hyper-aggressive, constant scan to find and destroy almost all forms of advertising, trackers, and annoyances at the centisecond level (100 times per second).</p>
-                               <p><b>Warning:</b> This mode is very powerful and may cause some websites to load or function incorrectly.</p>
-                               <p class="details-list-heading">Simple Ads Blocked:</p>
-                               <ul><li>Banner, sidebar, footer, header, pop-up, pop-under, interstitial, in-page text, search engine, and all forms of video ads (pre-roll, mid-roll, post-roll, overlay).</li></ul>
-                               <p class="details-list-heading">Advanced Ads Blocked:</p>
-                               <ul><li>Floating, sticky, expandable, collapsible, native ads, sponsored articles, promoted posts/tweets, suggested video ads, and all types of in-app and in-feed mobile ads.</li></ul>
-                               <p class="details-list-heading">Extreme Threats Targeted:</p>
-                               <ul><li>Scripts associated with server-side ads, programmatic ad channels, and user fingerprinting.</li><li>Patterns of CDN-injected content and known ad-related WebRTC streams.</li><li><b>Note:</b> True DNS hijacking or P2P injection are network-level threats and cannot be fully blocked by a webpage alone, but this mode blocks their known patterns and scripts.</li></ul>`;
+                                <p><b>Warning:</b> This mode is very powerful and may cause some websites to load or function incorrectly.</p>
+                                <p class="details-list-heading">Simple Ads Blocked:</p>
+                                <ul><li>Banner, sidebar, footer, header, pop-up, pop-under, interstitial, in-page text, search engine, and all forms of video ads (pre-roll, mid-roll, post-roll, overlay).</li></ul>
+                                <p class="details-list-heading">Advanced Ads Blocked:</p>
+                                <ul><li>Floating, sticky, expandable, collapsible, native ads, sponsored articles, promoted posts/tweets, suggested video ads, and all types of in-app and in-feed mobile ads.</li></ul>
+                                <p class="details-list-heading">Extreme Threats Targeted:</p>
+                                <ul><li>Scripts associated with server-side ads, programmatic ad channels, and user fingerprinting.</li><li>Patterns of CDN-injected content and known ad-related WebRTC streams.</li><li><b>Note:</b> True DNS hijacking or P2P injection are network-level threats and cannot be fully blocked by a webpage alone, but this mode blocks their known patterns and scripts.</li></ul>`;
                     break;
             }
             adBlockerDetailsTextEl.innerHTML = content;
@@ -1044,7 +1081,7 @@
             if (localStorage.getItem('vernRestoreSession') === 'true') localStorage.setItem('vernLastUrl', currentUrl);
             if (currentUrl && !currentUrl.startsWith('about:')) addToHistory(currentTitle, currentUrl);
             if (adBlockLevel !== 'off' && finalUrl !== 'about:blank') {
-                setTimeout(() => runAdBlocker(contentIframeEl), 150);
+                setTimeout(() => initializeAdBlocker(contentIframeEl), 150);
             }
             updateBlockCounterDisplay();
         }
@@ -1102,12 +1139,25 @@
         function getHistory() { return JSON.parse(localStorage.getItem('vernHistory') || '[]'); }
         function saveHistory(history) { localStorage.setItem('vernHistory', JSON.stringify(history)); }
         function addToHistory(title, url) {
+            if (localStorage.getItem('vernHistoryPaused') === 'true') return;
             if (localStorage.getItem('vernHistoryLifespan') === '0') return;
             let history = getHistory();
             if (history.length > 0 && history[history.length - 1].url === url) return;
             history.push({ title: title || url, url, timestamp: new Date().toISOString() });
             saveHistory(history);
             loadHistory(historySearchBarEl.value);
+        }
+        function removeHistoryItem(timestamp) {
+            let history = getHistory();
+            const newHistory = history.filter(item => item.timestamp !== timestamp);
+            saveHistory(newHistory);
+            loadHistory(historySearchBarEl.value); // Refresh the visible list
+        }
+        function clearAllHistory() {
+            if (confirm("Are you sure you want to clear your entire search history? This cannot be undone.")) {
+                saveHistory([]);
+                loadHistory(); // Refresh the visible list
+            }
         }
         function loadHistory(searchTerm = '') {
             const filtered = getHistory().filter(item => searchTerm ? ((item.title && item.title.toLowerCase().includes(searchTerm.toLowerCase())) || (item.url && item.url.toLowerCase().includes(searchTerm.toLowerCase()))) : true);
@@ -1118,7 +1168,22 @@
             if (history.length === 0) { const li = document.createElement('li'); li.textContent = 'No history found.'; li.style.cssText = 'cursor: default; text-align: center; opacity: 0.7;'; fragment.appendChild(li); } 
             else { const grouped = {}; [...history].reverse().forEach(item => { const groupKey = new Date(item.timestamp).toDateString(); if (!grouped[groupKey]) grouped[groupKey] = []; grouped[groupKey].push(item); });
                 for (const groupKey in grouped) { const headerTpl = historyGroupTemplate.content.cloneNode(true); headerTpl.querySelector('.history-group-header').textContent = groupKey; fragment.appendChild(headerTpl); 
-                    grouped[groupKey].forEach(item => { const itemTpl = historyItemTemplate.content.cloneNode(true); const li = itemTpl.querySelector('li'); li.dataset.url = item.url; li.title = `${item.title}\n${item.url}`; li.querySelector('.item-name').textContent = item.title; li.querySelector('.item-url').textContent = item.url; fragment.appendChild(itemTpl); }); }
+                    grouped[groupKey].forEach(item => { 
+                        const itemTpl = historyItemTemplate.content.cloneNode(true); 
+                        const li = itemTpl.querySelector('li'); 
+                        li.dataset.url = item.url;
+                        li.dataset.timestamp = item.timestamp; // Use timestamp for unique identification
+                        li.title = `${item.title}\n${item.url}`; 
+                        li.querySelector('.item-name').textContent = item.title; 
+                        li.querySelector('.item-url').textContent = item.url;
+                        // Add click handler for the new remove button
+                        li.querySelector('.item-remove-button').onclick = (e) => {
+                            e.stopPropagation();
+                            removeHistoryItem(item.timestamp);
+                        };
+                        fragment.appendChild(itemTpl); 
+                    }); 
+                }
             }
             historyListPopupEl.innerHTML = ''; historyListPopupEl.appendChild(fragment);
         }
@@ -1277,7 +1342,12 @@
             Object.keys(searchEngines).forEach(key => searchEngineSelectorEl.add(new Option(searchEngines[key].name, key))); 
         }
         function handleBookmarkClick(e) { const li = e.target.closest('li[data-url]'); if (li) { navigateTo(li.dataset.url); closeAllMenus(); } }
-        function handleHistoryClick(e) { const li = e.target.closest('li[data-url]'); if (li) { navigateTo(li.dataset.url); closeAllMenus(); } }
+        function handleHistoryClick(e) { 
+            // Ensure clicks on the remove button don't trigger navigation
+            if (e.target.closest('.item-remove-button')) return;
+            const li = e.target.closest('li[data-url]'); 
+            if (li) { navigateTo(li.dataset.url); closeAllMenus(); } 
+        }
         function handleGlobalKeyDown(e) { if (e.target.tagName === 'INPUT' || e.target.isContentEditable) return; if (e.altKey && e.key === 'ArrowLeft') backButtonEl.click(); if (e.altKey && e.key === 'ArrowRight') forwardButtonEl.click(); if ((e.ctrlKey || e.metaKey) && e.key === 'r') { e.preventDefault(); refreshButtonEl.click(); } if ((e.ctrlKey || e.metaKey) && e.key === 'l') { e.preventDefault(); searchBarEl.select(); }}
         function toggleIframeFullscreen() { if (!document.fullscreenElement) contentIframeEl.requestFullscreen(); else document.exitFullscreen(); }
         function handleFullscreenChange() {
