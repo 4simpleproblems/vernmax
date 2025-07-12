@@ -580,7 +580,8 @@
             'propellerads.com', 'adcash.com', 'yllix.com', 'exoclick.com', 'adsterra.com', 'onclickads.net', 'media.net',
             'sovrn.com', 'infolinks.com', 'contextweb.com', 'chitika.com', 'buysellads.com', 'advertising.com', 'moatads.com',
             'yieldlab.net', 'spotxchange.com', 'smartadserver.com', 'quantserve.com', 'chartbeat.com', 'mixpanel.com', 'optimizely.com',
-            'kissmetrics.com', 'crazyegg.com', 'mouseflow.com', 'vwo.com', 'fullstory.com', 'loggly.com', 'newrelic.com'
+            'kissmetrics.com', 'crazyegg.com', 'mouseflow.com', 'vwo.com', 'fullstory.com', 'loggly.com', 'newrelic.com',
+            '12ezo5v60.com', 'ybs2ffs7v.com', 'fvcwqkkqmuv.com'
         ];
         const blockedSelectors = [
             '.ad', '.ads', '.advert', '.advertisement', '.banner-ad', '.google-ad', '.g-ad', 'div[data-google-query-id]',
@@ -588,13 +589,15 @@
             '.ad-banner', '.ad-container', '.ad-wrapper', '.advertisement', '.advertising', '[data-ad-slot]', '[id*="ad-slot"]',
             '#google_vignette', 'div[id^="ad_"]', 'ins.adsbygoogle', 'a[href*="/ads/"]', 'a[href*="?ad-id="]', 'a[data-ad-id]',
             'div[data-ad-format]', 'div[data-ad-unit-path]', '[aria-label="advertisement"]', 'div[data-ad-name]',
-            '.ytp-ad-module', '.video-ads', '.ytp-ad-player-overlay', '.ytp-ad-skip-button-container', '.ytp-ad-preview-container', '.ytp-ad-text-overlay', // YouTube
+            '.ytp-ad-module', '.video-ads', '.ytp-ad-player-overlay', '.ytp-ad-skip-button-container', '.ytp-ad-preview-container', '.ytp-ad-text-overlay',
+            '.fluid_ad_com_container', // Video ad specific
             '[id^="div-gpt-ad-"]', '[class*="Display_ad_"]', '.ad-rotator', '.sidebar-ad', '.skyscraper-ad', 'div[id*="sticky_ad"]', '.sticky-ad',
             '[class*="overlay-ad"]', '[class*="ad-overlay"]', '#ad_position_box', '.ad_sponsorship', '.ad-banner-container',
             '[id^="ad-sense-"]', '[id*="ad_unit"]', '.trc_rbox_div', '.OUTBRAIN', 'div[widget-id^="outbrain_widget_"]', '[class*="native-ad"]',
             '.ad-placeholder', '.pub_300x250', '.text-ad', '.sponsored-post', '.ads-box', 'div[aria-label="Ads"]', 'div[data-ad-manager-id]',
             'object[data*="ad.swf"]', 'embed[src*="ad.swf"]', 'div[id*="taboola"]', 'div[data-content-ad]', 'div[class*="ad-blocker-wrapper"]',
-            '[class*="expandable-ad"]', '[class*="interstitial-ad"]', 'div[id*="interstitial"]', 'div[class*="pop-up-ad"]', 'div.pn-widget', '#inpage-push'
+            '[class*="expandable-ad"]', '[class*="interstitial-ad"]', 'div[id*="interstitial"]', 'div[class*="pop-up-ad"]',
+            'div.pn-widget', '#inpage-push', '[class*="push-prompt"]', '[id*="notification-prompt"]' // Specific to screenshot
         ];
         const antiAdBlockerSelectors = [
             'div[class*="adblock"]', 'div[class*="ad-block"]', 'div[id*="adblock"]', 'div[id*="ad-block"]',
@@ -634,7 +637,7 @@
             for (let i = 0; i < 5 && current.parentElement; i++) {
                 const id = current.id || '';
                 const className = current.className || '';
-                if (id.includes('ad') || className.includes('ad') || id.includes('banner') || className.includes('banner') || id.includes('sponsor') || className.includes('sponsor')) {
+                 if (id.includes('ad') || className.includes('ad') || id.includes('banner') || className.includes('banner') || id.includes('sponsor') || className.includes('sponsor') || id.includes('interstitial') || className.includes('interstitial') || className.includes('code-block')) {
                     containerFound = true;
                     break;
                 }
@@ -689,7 +692,7 @@
             if(adBlockLevel === 'aggressive' || adBlockLevel === 'annihilator') {
                  doc.querySelectorAll('script:not(.vern-removed)').forEach(script => {
                     const scriptSrc = script.src || '';
-                    if (blockedScriptKeywords.some(keyword => scriptSrc.includes(keyword))) {
+                    if (blockedScriptKeywords.some(keyword => scriptSrc.includes(keyword) || blockedDomains.some(domain => scriptSrc.includes(domain)) )) {
                         if (forcefullyRemoveElement(script)) newlyRemoved++;
                     }
                 });
