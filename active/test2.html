@@ -2,6 +2,11 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 
+        SECURITY ENHANCEMENT: Content Security Policy (CSP)
+        This is a critical security feature to prevent XSS and other injection attacks.
+        It strictly controls the sources of content that can be loaded.
+    -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         script-src 'self' 'unsafe-inline' blob:;
@@ -15,14 +20,19 @@
         form-action 'none';
     ">
 
+    <!-- 
+        SECURITY ENHANCEMENT: Permissions Policy
+        This header provides control over which browser features can be used on the page.
+        By explicitly disabling these, we enhance security and privacy.
+    -->
     <meta http-equiv="Permissions-Policy" content="
         accelerometer=(),
-        autoplay=(),
+        autoplay=*,
         camera=(),
         display-capture=(),
         document-domain=(),
         encrypted-media=(),
-        fullscreen=(),
+        fullscreen=*,
         geolocation=(),
         gyroscope=(),
         magnetometer=(),
@@ -335,15 +345,32 @@
         .ad-blocker-details-close:hover, .ad-blocker-details-close:focus { color: var(--current-theme-accent); text-decoration: none; }
         .details-list-heading { font-weight: bold; margin-top: 15px; margin-bottom: 5px; opacity: 0.9; }
 
-        /* Error Page */
-        #error-overlay {
+        /* Loading & Error Overlays */
+        #loading-overlay, #error-overlay {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--bg-color); color: var(--text-color);
             flex-direction: column; justify-content: center; align-items: center;
             text-align: center; z-index: 2000; padding: 20px; box-sizing: border-box;
-           }
-        #error-overlay h2 { font-size: 2em; margin-bottom: 15px; color: var(--current-theme-accent); }
-        #error-overlay p { font-size: 1.1em; margin-bottom: 30px; }
+        }
+        #loading-overlay p, #error-overlay p {
+            font-size: 1.1em; margin-bottom: 30px;
+        }
+        #error-overlay h2 {
+            font-size: 2em; margin-bottom: 15px; color: var(--current-theme-accent);
+        }
+        #error-overlay .invalid-url {
+            font-family: monospace;
+            background-color: var(--toolbar-bg);
+            padding: 5px 10px;
+            border-radius: 8px;
+            margin-top: -15px;
+            margin-bottom: 25px;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
+        }
         #error-home-button {
              height: 42px; padding: 0 25px; background-color: var(--button-bg);
             color: var(--button-text-color); border: none; border-radius: 12px; cursor: pointer;
@@ -565,10 +592,20 @@
                 <ul id="search-suggestions" class="search-suggestions-list"></ul>
             </div>
         </div>
-        <iframe id="content-iframe" title="Content View" sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-presentation allow-same-origin allow-scripts allow-downloads"></iframe>
+        <!-- 
+            ENHANCEMENT: Iframe Sandbox for Interactive Content
+            'allow-fullscreen' and 'allow-pointer-lock' have been added.
+            - allow-fullscreen: Necessary for game and video fullscreen functionality.
+            - allow-pointer-lock: Critical for many browser games (like Happy Wheels) to capture mouse controls correctly.
+        -->
+        <iframe id="content-iframe" title="Content View" sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-presentation allow-same-origin allow-scripts allow-downloads allow-fullscreen"></iframe>
+        <div id="loading-overlay">
+            <p>Loading page...</p>
+        </div>
         <div id="error-overlay">
             <h2>Oops! Something went wrong.</h2>
-            <p>We couldn't load the page you requested. It might be down or blocking proxy access.</p>
+            <p>We couldn't load the page for the following address:</p>
+            <div class="invalid-url" id="invalid-url-display"></div>
             <button id="error-home-button">Return to Home</button>
         </div>
     </div>
@@ -585,6 +622,7 @@
         let adBlockerInterval = null;
         let adBlockerObserver = null;
         let vernBlockedItems = 0;
+        let lastInvalidUrl = '';
 
 
         const searchEngines = {
@@ -689,7 +727,7 @@
             blockThirdPartyCookiesToggleEl, cookieManagementContainerEl,
             topSearchSuggestionsEl, errorOverlayEl, errorHomeButtonEl, adBlockCounterContainerEl,
             adBlockerDetailsButtonEl, adBlockerDetailsModalEl, adBlockerDetailsCloseEl, adBlockerDetailsTextEl,
-            pauseHistoryToggleEl, clearAllHistoryButtonEl;
+            pauseHistoryToggleEl, clearAllHistoryButtonEl, loadingOverlayEl, invalidUrlDisplayEl;
 
         let bookmarkItemTemplate, historyItemTemplate, historyGroupTemplate;
         
@@ -882,6 +920,8 @@
             cookieManagementContainerEl = document.getElementById('cookie-management-container');
             errorOverlayEl = document.getElementById('error-overlay');
             errorHomeButtonEl = document.getElementById('error-home-button');
+            loadingOverlayEl = document.getElementById('loading-overlay');
+            invalidUrlDisplayEl = document.getElementById('invalid-url-display');
         }
         
         async function initUV() { try { await registerSW(); } catch (err) { console.error("SW registration failed:", err); }}
@@ -1048,11 +1088,13 @@
         function navigateTo(urlInput) {
             stopAdBlockerInstances();
             isLoading = true;
-            errorOverlayEl.style.display = 'none';
+            showLoadingOverlay();
+
             searchSuggestionsEl.style.display = 'none';
             topSearchSuggestionsEl.style.display = 'none';
 
             let targetUrl = urlInput ? urlInput.trim() : '';
+            lastInvalidUrl = targetUrl; // Store the attempted URL for the error message
             const adBlockLevel = localStorage.getItem('vernAdBlockLevel') || 'standard';
 
             if (adBlockLevel !== 'off' && targetUrl) {
@@ -1061,6 +1103,7 @@
                     if (blockedDomains.some(domain => urlHostname.includes(domain))) {
                         console.log(`[AdBlock] Blocked navigation to ad/tracker domain: ${targetUrl}`);
                         isLoading = false;
+                        showErrorPage();
                         return;
                     }
                 } catch (e) {}
@@ -1086,8 +1129,8 @@
         }
 
         function handleIframeLoad() {
-            stopAdBlockerInstances();
             isLoading = false;
+            hideLoadingOverlay();
             if (isRefreshing) { refreshButtonEl.querySelector('.icon-img').classList.remove('spinning'); isRefreshing = false; }
             
             let finalUrl = 'about:blank', finalTitle = 'New Tab';
@@ -1146,6 +1189,7 @@
         function saveSession() { if (localStorage.getItem('vernRestoreSession') === 'true') localStorage.setItem('vernLastUrl', currentUrl); }
 
         function showHomepage() {
+            hideLoadingOverlay();
             homepageEl.style.display = 'flex';
             contentIframeEl.style.display = 'none';
             errorOverlayEl.style.display = 'none';
@@ -1156,10 +1200,25 @@
             contentIframeEl.style.display = 'block';
             errorOverlayEl.style.display = 'none';
         }
+        function showLoadingOverlay() {
+            loadingOverlayEl.style.display = 'flex';
+            homepageEl.style.display = 'none';
+            contentIframeEl.style.display = 'none';
+            errorOverlayEl.style.display = 'none';
+        }
+        function hideLoadingOverlay() {
+            loadingOverlayEl.style.display = 'none';
+        }
         function showErrorPage() {
+            hideLoadingOverlay();
             homepageEl.style.display = 'none';
             contentIframeEl.style.display = 'none';
             errorOverlayEl.style.display = 'flex';
+            let truncatedUrl = lastInvalidUrl;
+            if (truncatedUrl.length > 40) {
+                truncatedUrl = truncatedUrl.substring(0, 37) + '...';
+            }
+            invalidUrlDisplayEl.textContent = truncatedUrl;
         }
         function handleSearchInput(inputElement, suggestionsElement) {
             const query = inputElement.value;
@@ -1396,7 +1455,15 @@
             if (li) { navigateTo(li.dataset.url); closeAllMenus(); } 
         }
         function handleGlobalKeyDown(e) { if (e.target.tagName === 'INPUT' || e.target.isContentEditable) return; if (e.altKey && e.key === 'ArrowLeft') backButtonEl.click(); if (e.altKey && e.key === 'ArrowRight') forwardButtonEl.click(); if ((e.ctrlKey || e.metaKey) && e.key === 'r') { e.preventDefault(); refreshButtonEl.click(); } if ((e.ctrlKey || e.metaKey) && e.key === 'l') { e.preventDefault(); searchBarEl.select(); }}
-        function toggleIframeFullscreen() { if (!document.fullscreenElement) contentIframeEl.requestFullscreen(); else document.exitFullscreen(); }
+        function toggleIframeFullscreen() { 
+            if (!document.fullscreenElement) {
+                contentIframeEl.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
+                });
+            } else { 
+                document.exitFullscreen(); 
+            } 
+        }
         function handleFullscreenChange() {
             const isFullscreen = !!document.fullscreenElement;
             document.body.classList.toggle('app-ui-hidden', isFullscreen);
