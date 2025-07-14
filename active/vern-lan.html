@@ -151,7 +151,7 @@
             <form id="join-temp-chat-form">
                 <div class="mb-4">
                     <label for="temp-chat-code" class="block text-sm font-medium text-neutral-700 mb-1">Enter 6-Digit Code</label>
-                    <input type="text" id="temp-chat-code" class="w-full bg-neutral-100 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" required placeholder="123-456">
+                    <input type="text" id="temp-chat-code" class="w-full bg-neutral-100 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-black tracking-widest text-center" required placeholder="123-456" maxlength="7" inputmode="numeric">
                 </div>
                 <div class="flex justify-end space-x-2">
                     <button type="button" class="cancel-modal-btn px-4 py-2 rounded-md bg-neutral-200 hover:bg-neutral-300 text-sm">Cancel</button>
@@ -200,23 +200,24 @@ document.addEventListener('DOMContentLoaded', () => {
     ].map(id => document.getElementById(id));
     
     // --- State Variables ---
-    let peer = null; // Permanent peer object for friends
-    let tempPeer = null; // Disposable peer object for anonymous chats
+    let peer = null;
+    let tempPeer = null;
     let myPeerId = null, myName = '';
     let contacts = {}, connections = {};
-    let tempConnection = null; // Only one temp connection at a time
-    let activeChat = { id: null, type: null, history: [] }; // type: 'permanent' or 'anonymous'
+    let tempConnection = null;
+    let activeChat = { id: null, type: null, history: [] };
     let peerIdToDelete = null;
 
-    // --- Utils ---
-    const generateRandomLetters = (length) => {
-        let result = '';
-        const characters = 'abcdefghijklmnopqrstuvwxyz';
-        for (let i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * characters.length));
-        }
-        return result;
-    }
+    // --- Utils for Memorable IDs ---
+    const ADJECTIVES = ['swift', 'silent', 'brave', 'calm', 'bright', 'dark', 'gentle', 'sharp', 'quiet', 'lone', 'red', 'blue', 'green', 'iron', 'gold', 'silver', 'wild', 'clear', 'lost', 'risen'];
+    const NOUNS = ['river', 'fox', 'wolf', 'storm', 'sun', 'moon', 'star', 'tree', 'wind', 'shadow', 'blade', 'arrow', 'ember', 'stone', 'echo', 'dust', 'dawn', 'fire', 'peak', 'void'];
+
+    const generateMemorableId = () => {
+        const adj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+        const noun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+        const num = Math.floor(10 + Math.random() * 90);
+        return `${adj}-${noun}-${num}`;
+    };
 
     // --- Crypto & Image Utils ---
     const cryptoOps = {
@@ -269,14 +270,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Local Storage ---
-    const PERMANENT_ID_KEY = 'ssc-permanent-id-v2';
+    const PERMANENT_ID_KEY = 'ssc-memorable-id-v1';
     const saveState = () => {
-        localStorage.setItem('ssc-contacts-v2', JSON.stringify(contacts));
-        localStorage.setItem('ssc-username-v2', myName);
+        localStorage.setItem('ssc-contacts-v3', JSON.stringify(contacts));
+        localStorage.setItem('ssc-username-v3', myName);
     };
     const loadState = () => {
-        contacts = JSON.parse(localStorage.getItem('ssc-contacts-v2') || '{}');
-        myName = localStorage.getItem('ssc-username-v2') || '';
+        contacts = JSON.parse(localStorage.getItem('ssc-contacts-v3') || '{}');
+        myName = localStorage.getItem('ssc-username-v3') || '';
         userNameInput.value = myName;
     };
     const getPermanentId = () => localStorage.getItem(PERMANENT_ID_KEY);
@@ -437,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const initializePeer = () => {
         let persistentId = getPermanentId();
         if (!persistentId) {
-            persistentId = `chat-${generateRandomLetters(4)}`;
+            persistentId = generateMemorableId();
             setPermanentId(persistentId);
         }
         peer = new Peer(persistentId, {});
@@ -506,8 +507,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const conn = peer.connect(targetId, { reliable: true });
             conn.on('open', () => {
                 conn.send(JSON.stringify({ type: 'friend-request', payload: { name: myName } }));
-                // You may want to close this transient connection if it's only for the request
-                // conn.close(); 
             });
 
             addContactForm.reset();
@@ -527,7 +526,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             connectToPeer(peerId);
             
-            // Wait for connection to be ready before sending
             const checkConnection = setInterval(() => {
                 if (connections[peerId] && connections[peerId].open) {
                     clearInterval(checkConnection);
@@ -610,7 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         tempPeer.on('connection', conn => {
-            if(tempConnection) conn.close(); // Allow only one connection
+            if(tempConnection) conn.close(); 
             tempConnection = conn;
             appendMessage({type: 'system', content: 'A stranger has connected. This chat is anonymous and will be deleted when either person leaves.'}, 'left');
             setupConnection(conn, {}, false, handleTempData);
@@ -624,21 +622,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const targetId = `anon-host-${code.replace('-', '')}`;
         
         showToast(`Joining Anonymous Chat...`);
-        tempPeer = new Peer(null, {}); // Create a disposable peer with a random ID
+        tempPeer = new Peer(null, {});
 
         tempPeer.on('open', id => {
-            const conn = tempPeer.connect(targetId, { reliable: true });
-            tempConnection = conn;
-            
-            showChatView({
-                id: targetId, name: 'Anonymous Chat', type: 'anonymous',
-                history: [{ type: 'system', content: `Connecting to chat ${code}...` }]
-            });
+            setTimeout(() => {
+                const conn = tempPeer.connect(targetId, { reliable: true });
+                tempConnection = conn;
+                
+                showChatView({
+                    id: targetId, name: 'Anonymous Chat', type: 'anonymous',
+                    history: [{ type: 'system', content: `Connecting to chat ${code}...` }]
+                });
 
-            conn.on('open', () => {
-                appendMessage({type: 'system', content: `Connected! This chat is anonymous and will be deleted when either person leaves.`}, 'left');
-            });
-            setupConnection(conn, {}, false, handleTempData);
+                conn.on('open', () => {
+                    appendMessage({type: 'system', content: `Connected! This chat is anonymous and will be deleted when either person leaves.`}, 'left');
+                });
+                
+                setupConnection(conn, {}, false, handleTempData);
+            }, 500);
         });
         
         tempPeer.on('error', (err) => { showToast(`Error: ${err.type}`); showContactsView(); });
@@ -665,7 +666,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (isEncrypted) {
-             if (!contacts[peerId]?.key) return; // Cannot decrypt without a key
+             if (!contacts[peerId]?.key) return;
              data = await cryptoOps.decrypt(rawData, await cryptoOps.importKey(contacts[peerId].key));
         }
 
@@ -809,6 +810,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (peerIdToDelete) handleDeleteContact(peerIdToDelete);
         deleteConfirmModal.classList.add('hidden');
         peerIdToDelete = null;
+    });
+
+    // Auto-format the temp chat code input
+    tempChatCodeInput.addEventListener('input', (e) => {
+        let input = e.target.value.replace(/\D/g, '').substring(0,6); // Remove non-digits and limit length
+        if (input.length > 3) {
+            input = input.substring(0, 3) + '-' + input.substring(3);
+        }
+        e.target.value = input;
     });
 
     // --- Initialization ---
