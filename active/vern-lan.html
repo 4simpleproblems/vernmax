@@ -27,20 +27,32 @@
         .contact.active {
             background-color: #4a5568;
         }
+        .delete-btn {
+            display: none;
+        }
+        .contact:hover .delete-btn {
+            display: block;
+        }
+        /* Hide the main chat area on mobile by default */
+        @media (max-width: 767px) {
+            #chat-area.mobile-hidden {
+                display: none;
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200 font-sans flex h-screen antialiased">
+<body class="bg-gray-900 text-gray-200 font-sans flex h-screen antialiased overflow-hidden">
 
     <!-- Main container -->
-    <div class="flex h-full w-full max-w-7xl mx-auto">
+    <div class="flex h-full w-full max-w-7xl mx-auto relative">
 
         <!-- Sidebar for contacts -->
-        <div id="sidebar" class="w-1/3 bg-gray-800 flex flex-col border-r border-gray-700">
+        <div id="sidebar" class="w-full md:w-1/3 bg-gray-800 flex flex-col border-r-0 md:border-r border-gray-700 h-full">
             <!-- Header with User ID -->
-            <div class="p-4 border-b border-gray-700">
+            <div class="p-4 border-b border-gray-700 flex-shrink-0">
                 <h2 class="text-lg font-bold">Your ID</h2>
                 <div class="flex items-center mt-2 bg-gray-900 p-2 rounded-lg">
-                    <input id="my-peer-id" type="text" readonly class="bg-transparent w-full text-sm text-gray-400 focus:outline-none" value="Connecting...">
+                    <input id="my-peer-id" type="text" readonly class="bg-transparent w-full text-sm text-gray-400 focus:outline-none" value="Initializing...">
                     <button id="copy-id-btn" class="ml-2 p-1 text-gray-400 hover:text-white" title="Copy ID">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                     </button>
@@ -50,7 +62,7 @@
 
             <!-- Contacts List -->
             <div class="flex-1 overflow-y-auto">
-                <div class="p-4 flex justify-between items-center">
+                <div class="p-4 flex justify-between items-center flex-shrink-0">
                     <h3 class="font-bold">Contacts</h3>
                     <button id="add-contact-btn" class="p-2 rounded-full hover:bg-gray-700" title="Add Contact">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
@@ -63,9 +75,9 @@
         </div>
 
         <!-- Chat Area -->
-        <div id="chat-area" class="w-2/3 flex flex-col bg-gray-900">
+        <div id="chat-area" class="w-full md:w-2/3 flex flex-col bg-gray-900 h-full absolute md:relative inset-0 mobile-hidden">
             <!-- Welcome / No Chat Selected Screen -->
-            <div id="welcome-screen" class="flex flex-col items-center justify-center h-full text-center">
+            <div id="welcome-screen" class="hidden md:flex flex-col items-center justify-center h-full text-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
                 <h2 class="mt-4 text-2xl font-semibold">Secure LAN Chat</h2>
                 <p class="text-gray-400 mt-2">Select a contact to start messaging.</p>
@@ -75,15 +87,20 @@
             <!-- Main Chat View (hidden by default) -->
             <div id="chat-view" class="hidden flex-col h-full">
                 <!-- Chat Header -->
-                <div class="p-4 border-b border-gray-800 flex items-center">
-                    <h3 id="chat-header-name" class="text-lg font-bold"></h3>
+                <div class="p-4 border-b border-gray-800 flex items-center justify-between flex-shrink-0">
+                    <div class="flex items-center">
+                        <button id="back-to-contacts-btn" class="p-2 rounded-full hover:bg-gray-700 md:hidden mr-2" title="Back to Contacts">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                        </button>
+                        <h3 id="chat-header-name" class="text-lg font-bold"></h3>
+                    </div>
                 </div>
                 <!-- Messages -->
                 <div id="messages-container" class="flex-1 p-4 overflow-y-auto">
                     <!-- Messages will be dynamically inserted here -->
                 </div>
                 <!-- Message Input -->
-                <div class="p-4 border-t border-gray-800">
+                <div class="p-4 border-t border-gray-800 flex-shrink-0">
                     <form id="message-form" class="flex items-center bg-gray-800 rounded-lg p-2">
                         <input id="message-input" type="text" placeholder="Type an encrypted message..." class="bg-transparent w-full focus:outline-none px-2" autocomplete="off">
                         <button type="submit" class="p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white" title="Send Message">
@@ -97,7 +114,7 @@
 
     <!-- Add Contact Modal -->
     <div id="add-contact-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-        <div class="bg-gray-800 rounded-lg p-8 w-full max-w-md">
+        <div class="bg-gray-800 rounded-lg p-8 w-full max-w-md mx-4">
             <h3 class="text-2xl font-bold mb-6">Add New Contact</h3>
             <form id="add-contact-form">
                 <div class="mb-4">
@@ -113,6 +130,18 @@
                     <button type="submit" class="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700">Add Contact</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-8 w-full max-w-md mx-4">
+            <h3 class="text-2xl font-bold mb-4">Confirm Deletion</h3>
+            <p id="delete-confirm-text" class="mb-6">Are you sure you want to remove this contact? This action cannot be undone.</p>
+            <div class="flex justify-end space-x-4">
+                <button type="button" id="cancel-delete-btn" class="px-4 py-2 rounded-md bg-gray-600 hover:bg-gray-500">Cancel</button>
+                <button type="button" id="confirm-delete-btn" class="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700">Delete</button>
+            </div>
         </div>
     </div>
 
@@ -135,16 +164,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const welcomeScreen = document.getElementById('welcome-screen');
     const chatView = document.getElementById('chat-view');
     const chatHeaderName = document.getElementById('chat-header-name');
+    const backToContactsBtn = document.getElementById('back-to-contacts-btn');
     const messagesContainer = document.getElementById('messages-container');
     const messageForm = document.getElementById('message-form');
     const messageInput = document.getElementById('message-input');
     
-    // Modal elements
+    // Add Contact Modal elements
     const addContactModal = document.getElementById('add-contact-modal');
     const addContactForm = document.getElementById('add-contact-form');
     const cancelAddContactBtn = document.getElementById('cancel-add-contact');
     const contactNameInput = document.getElementById('contact-name');
     const contactIdInput = document.getElementById('contact-id');
+
+    // Delete Contact Modal elements
+    const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+    const deleteConfirmText = document.getElementById('delete-confirm-text');
+    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
 
     // Notification Toast
     const notificationToast = document.getElementById('notification-toast');
@@ -155,88 +191,45 @@ document.addEventListener('DOMContentLoaded', () => {
     let contacts = {}; // { peerId: { name: '..', key: '..', history: [] } }
     let connections = {}; // { peerId: connectionObject }
     let activeChatPeerId = null;
+    let peerIdToDelete = null;
 
     // --- Crypto Module ---
-    // This object encapsulates all cryptographic operations using the Web Crypto API.
     const cryptoOps = {
-        // Generates a new AES-GCM key for encryption.
-        async generateKey() {
-            return await window.crypto.subtle.generateKey(
-                { name: 'AES-GCM', length: 256 },
-                true, // key is extractable
-                ['encrypt', 'decrypt']
-            );
-        },
-        // Exports a CryptoKey into a storable JSON Web Key (JWK) format.
-        async exportKey(key) {
-            return await window.crypto.subtle.exportKey('jwk', key);
-        },
-        // Imports a JWK back into a CryptoKey object.
-        async importKey(jwk) {
-            return await window.crypto.subtle.importKey(
-                'jwk',
-                jwk,
-                { name: 'AES-GCM', length: 256 },
-                true,
-                ['encrypt', 'decrypt']
-            );
-        },
-        // Encrypts a message string with a given key.
+        async generateKey() { return await window.crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']); },
+        async exportKey(key) { return await window.crypto.subtle.exportKey('jwk', key); },
+        async importKey(jwk) { return await window.crypto.subtle.importKey('jwk', jwk, { name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']); },
         async encrypt(message, key) {
             const encoded = new TextEncoder().encode(message);
-            // The Initialization Vector (IV) must be unique for each encryption.
             const iv = window.crypto.getRandomValues(new Uint8Array(12));
-            const ciphertext = await window.crypto.subtle.encrypt(
-                { name: 'AES-GCM', iv: iv },
-                key,
-                encoded
-            );
-            // We combine IV and ciphertext for easy transmission.
-            // IV is 12 bytes, so we can slice it off during decryption.
+            const ciphertext = await window.crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, encoded);
             const combined = new Uint8Array(iv.length + ciphertext.byteLength);
             combined.set(iv, 0);
             combined.set(new Uint8Array(ciphertext), iv.length);
-            return btoa(String.fromCharCode.apply(null, combined)); // Base64 encode for transport
+            return btoa(String.fromCharCode.apply(null, combined));
         },
-        // Decrypts a base64 encoded string with a given key.
         async decrypt(encryptedData, key) {
             try {
                 const combined = new Uint8Array(atob(encryptedData).split('').map(c => c.charCodeAt(0)));
                 const iv = combined.slice(0, 12);
                 const ciphertext = combined.slice(12);
-                const decrypted = await window.crypto.subtle.decrypt(
-                    { name: 'AES-GCM', iv: iv },
-                    key,
-                    ciphertext
-                );
+                const decrypted = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, ciphertext);
                 return new TextDecoder().decode(decrypted);
-            } catch (e) {
-                console.error("Decryption failed:", e);
-                return "⚠️ Could not decrypt message.";
-            }
+            } catch (e) { console.error("Decryption failed:", e); return "⚠️ Could not decrypt message."; }
         }
     };
 
     // --- Local Storage ---
-    function saveContactsToStorage() {
-        localStorage.setItem('secure-lan-chat-contacts', JSON.stringify(contacts));
-    }
-
-    function loadContactsFromStorage() {
-        const storedContacts = localStorage.getItem('secure-lan-chat-contacts');
-        if (storedContacts) {
-            contacts = JSON.parse(storedContacts);
-        }
-    }
+    function saveContactsToStorage() { localStorage.setItem('secure-lan-chat-contacts', JSON.stringify(contacts)); }
+    function loadContactsFromStorage() { const stored = localStorage.getItem('secure-lan-chat-contacts'); if (stored) { contacts = JSON.parse(stored); } }
+    function getPersistentPeerId() { return localStorage.getItem('secure-lan-chat-peer-id'); }
+    function setPersistentPeerId(id) { localStorage.setItem('secure-lan-chat-peer-id', id); }
 
     // --- UI Functions ---
     function showToast(message, isError = false) {
         notificationToast.textContent = message;
         notificationToast.classList.remove('hidden', 'bg-green-500', 'bg-red-500');
         notificationToast.classList.add(isError ? 'bg-red-500' : 'bg-green-500');
-        setTimeout(() => {
-            notificationToast.classList.add('hidden');
-        }, 3000);
+        setTimeout(() => { notificationToast.classList.add('hidden'); }, 3000);
     }
 
     function renderContacts() {
@@ -248,38 +241,30 @@ document.addEventListener('DOMContentLoaded', () => {
         for (const peerId in contacts) {
             const contact = contacts[peerId];
             const contactEl = document.createElement('div');
-            contactEl.className = `contact p-3 flex items-center cursor-pointer hover:bg-gray-700 rounded-md mx-2 mb-1`;
+            contactEl.className = `contact p-3 flex items-center justify-between cursor-pointer hover:bg-gray-700 rounded-md mx-2 mb-1`;
             contactEl.dataset.peerId = peerId;
-            if (peerId === activeChatPeerId) {
-                contactEl.classList.add('active');
-            }
-            
-            // Connection status dot
+            if (peerId === activeChatPeerId) { contactEl.classList.add('active'); }
             const statusDot = connections[peerId] && connections[peerId].open ? 'bg-green-500' : 'bg-gray-500';
-
             contactEl.innerHTML = `
-                <div class="relative">
-                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold text-xl">${contact.name.charAt(0).toUpperCase()}</div>
-                    <span class="absolute bottom-0 right-0 block h-3 w-3 ${statusDot} rounded-full border-2 border-gray-800"></span>
+                <div class="flex items-center overflow-hidden">
+                    <div class="relative flex-shrink-0">
+                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold text-xl">${contact.name.charAt(0).toUpperCase()}</div>
+                        <span class="absolute bottom-0 right-0 block h-3 w-3 ${statusDot} rounded-full border-2 border-gray-800"></span>
+                    </div>
+                    <div class="ml-3 truncate"><p class="font-semibold truncate">${contact.name}</p></div>
                 </div>
-                <div class="ml-3">
-                    <p class="font-semibold">${contact.name}</p>
-                </div>
-            `;
-            contactEl.addEventListener('click', () => selectChat(peerId));
+                <button class="delete-btn p-1 text-gray-500 hover:text-red-400 flex-shrink-0" data-peer-id="${peerId}" data-contact-name="${contact.name}" title="Remove Contact">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>`;
+            contactEl.addEventListener('click', (e) => { if (e.target.closest('.delete-btn')) return; selectChat(peerId); });
             contactsListEl.appendChild(contactEl);
         }
     }
 
     function renderMessages() {
         messagesContainer.innerHTML = '';
-        if (!activeChatPeerId || !contacts[activeChatPeerId] || !contacts[activeChatPeerId].history) {
-            return;
-        }
-        const messageHistory = contacts[activeChatPeerId].history;
-        messageHistory.forEach(msg => {
-            appendMessage(msg.sender, msg.text, msg.timestamp);
-        });
+        if (!activeChatPeerId || !contacts[activeChatPeerId] || !contacts[activeChatPeerId].history) return;
+        contacts[activeChatPeerId].history.forEach(msg => appendMessage(msg.sender, msg.text, msg.timestamp));
         scrollToBottom();
     }
     
@@ -287,238 +272,191 @@ document.addEventListener('DOMContentLoaded', () => {
         const msgEl = document.createElement('div');
         const isMe = sender === myPeerId;
         const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
         msgEl.className = `flex mb-4 items-end ${isMe ? 'justify-end' : 'justify-start'}`;
         msgEl.innerHTML = `
             <div class="max-w-xs lg:max-w-md">
                 <div class="px-4 py-2 rounded-lg ${isMe ? 'bg-blue-600 rounded-br-none' : 'bg-gray-700 rounded-bl-none'}">
-                    <p class="text-sm">${text}</p>
+                    <p class="text-sm break-words">${text}</p>
                 </div>
                 <p class="text-xs text-gray-500 mt-1 ${isMe ? 'text-right' : 'text-left'}">${time}</p>
-            </div>
-        `;
+            </div>`;
         messagesContainer.appendChild(msgEl);
     }
 
-    function scrollToBottom() {
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    function scrollToBottom() { messagesContainer.scrollTop = messagesContainer.scrollHeight; }
+
+    function showChatViewOnMobile() {
+        if (window.innerWidth < 768) {
+            sidebar.classList.add('hidden');
+            chatArea.classList.remove('mobile-hidden');
+        }
+    }
+
+    function showSidebarOnMobile() {
+        if (window.innerWidth < 768) {
+            sidebar.classList.remove('hidden');
+            chatArea.classList.add('mobile-hidden');
+            activeChatPeerId = null;
+            renderContacts();
+        }
     }
 
     // --- Main Logic ---
     function initializePeer() {
-        peer = new Peer({
-            // For local development, leave host/port. For LAN, it should auto-discover.
-            // You might need to run a local PeerServer if auto-discovery fails on your network.
-            // `npm install peer -g` and then run `peerjs --port 9000 --key peerjs`
-            // host: 'localhost',
-            // port: 9000,
-            // path: '/myapp'
-        });
-
+        const persistentId = getPersistentPeerId();
+        peer = new Peer(persistentId, {});
         peer.on('open', id => {
-            console.log('My peer ID is: ' + id);
             myPeerId = id;
             myPeerIdEl.value = id;
+            if (!persistentId || persistentId !== id) { setPersistentPeerId(id); }
             connectionStatusEl.textContent = 'Status: Online';
-            connectionStatusEl.classList.remove('text-gray-500');
-            connectionStatusEl.classList.add('text-green-400');
+            connectionStatusEl.classList.replace('text-gray-500', 'text-green-400');
         });
-
-        peer.on('connection', conn => {
-            console.log(`Incoming connection from ${conn.peer}`);
-            setupConnection(conn);
-        });
-        
+        peer.on('connection', conn => { console.log(`Incoming connection from ${conn.peer}`); setupConnection(conn); });
         peer.on('error', err => {
             console.error('PeerJS error:', err);
             connectionStatusEl.textContent = `Status: Error - ${err.type}`;
-            connectionStatusEl.classList.remove('text-green-400');
-            connectionStatusEl.classList.add('text-red-400');
-            showToast(`Connection error: ${err.message}`, true);
+            connectionStatusEl.classList.replace('text-green-400', 'text-red-400');
+            if (err.type === 'unavailable-id') {
+                showToast('ID is already in use. Generating a new one.', true);
+                localStorage.removeItem('secure-lan-chat-peer-id');
+                peer.destroy();
+                initializePeer();
+            } else { showToast(`Connection error: ${err.message}`, true); }
         });
     }
 
     function setupConnection(conn) {
-        // Only accept connections from known contacts
-        if (!contacts[conn.peer]) {
-            console.warn(`Rejecting connection from unknown peer: ${conn.peer}`);
-            conn.close();
-            return;
-        }
-
+        if (!contacts[conn.peer]) { console.warn(`Rejecting connection from unknown peer: ${conn.peer}`); conn.close(); return; }
         connections[conn.peer] = conn;
         console.log(`Connection established with ${conn.peer}`);
-        renderContacts(); // Update connection status dot
-
+        renderContacts(); 
         conn.on('data', async (data) => {
-            console.log('Received data from ' + conn.peer, data);
-            
-            // Assuming data is an encrypted message
             const contact = contacts[conn.peer];
             if (contact && contact.key) {
                 const cryptoKey = await cryptoOps.importKey(contact.key);
                 const decryptedMessage = await cryptoOps.decrypt(data, cryptoKey);
-                
-                const message = {
-                    sender: conn.peer,
-                    text: decryptedMessage,
-                    timestamp: Date.now()
-                };
-                
+                const message = { sender: conn.peer, text: decryptedMessage, timestamp: Date.now() };
                 contact.history.push(message);
                 saveContactsToStorage();
-                
-                if (conn.peer === activeChatPeerId) {
-                    appendMessage(message.sender, message.text, message.timestamp);
-                    scrollToBottom();
-                } else {
-                    showToast(`New message from ${contact.name}`);
-                }
+                if (conn.peer === activeChatPeerId) { appendMessage(message.sender, message.text, message.timestamp); scrollToBottom(); } 
+                else { showToast(`New message from ${contact.name}`); }
             }
         });
-
-        conn.on('close', () => {
-            console.log(`Connection with ${conn.peer} closed.`);
-            delete connections[conn.peer];
-            renderContacts(); // Update status dot
-        });
-        
-        conn.on('error', (err) => {
-            console.error(`Connection error with ${conn.peer}:`, err);
-            delete connections[conn.peer];
-            renderContacts();
-        });
+        conn.on('close', () => { console.log(`Connection with ${conn.peer} closed.`); delete connections[conn.peer]; renderContacts(); });
+        conn.on('error', (err) => { console.error(`Connection error with ${conn.peer}:`, err); delete connections[conn.peer]; renderContacts(); });
     }
 
     async function handleAddContact(e) {
         e.preventDefault();
         const name = contactNameInput.value.trim();
         const id = contactIdInput.value.trim();
-
         if (name && id) {
-            if (contacts[id]) {
-                showToast('Contact with this ID already exists.', true);
-                return;
-            }
-            if (id === myPeerId) {
-                showToast("You can't add yourself as a contact.", true);
-                return;
-            }
-
-            // Generate and store a shared secret key for this contact
+            if (contacts[id]) { showToast('Contact with this ID already exists.', true); return; }
+            if (id === myPeerId) { showToast("You can't add yourself as a contact.", true); return; }
             const key = await cryptoOps.generateKey();
             const exportedKey = await cryptoOps.exportKey(key);
-
-            contacts[id] = {
-                name: name,
-                key: exportedKey,
-                history: []
-            };
-
+            contacts[id] = { name: name, key: exportedKey, history: [] };
             saveContactsToStorage();
             renderContacts();
-            connectToPeer(id); // Attempt to connect right away
-
+            connectToPeer(id);
             addContactForm.reset();
             addContactModal.classList.add('hidden');
             showToast(`Contact "${name}" added.`);
         }
     }
 
+    function handleDeleteContact(peerId) {
+        if (connections[peerId]) { connections[peerId].close(); delete connections[peerId]; }
+        delete contacts[peerId];
+        saveContactsToStorage();
+        if (activeChatPeerId === peerId) {
+            activeChatPeerId = null;
+            chatView.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+            showSidebarOnMobile();
+        }
+        renderContacts();
+        showToast("Contact removed.");
+    }
+
     function selectChat(peerId) {
         activeChatPeerId = peerId;
         const contact = contacts[peerId];
-        
         chatHeaderName.textContent = contact.name;
         welcomeScreen.classList.add('hidden');
         chatView.classList.remove('hidden');
         chatView.classList.add('flex');
-        
         renderMessages();
-        renderContacts(); // To update active state styling
-        
-        // Connect if not already connected
-        if (!connections[peerId] || !connections[peerId].open) {
-            connectToPeer(peerId);
-        }
+        renderContacts();
+        showChatViewOnMobile();
+        if (!connections[peerId] || !connections[peerId].open) { connectToPeer(peerId); }
     }
     
     function connectToPeer(peerId) {
-        if (!peer) {
-            showToast('Peer connection not initialized.', true);
-            return;
-        }
-        if (connections[peerId] && connections[peerId].open) {
-            console.log(`Already connected to ${peerId}`);
-            return;
-        }
-        
+        if (!peer || peer.destroyed) { showToast('Peer connection not ready. Please wait.', true); return; }
+        if (connections[peerId] && connections[peerId].open) return;
         console.log(`Attempting to connect to ${peerId}`);
         const conn = peer.connect(peerId, { reliable: true });
-        
-        // The 'open' event for the new connection is crucial
-        conn.on('open', () => {
-            setupConnection(conn);
-        });
+        conn.on('open', () => setupConnection(conn));
     }
 
     async function handleSendMessage(e) {
         e.preventDefault();
         const messageText = messageInput.value.trim();
-
         if (messageText && activeChatPeerId) {
             const conn = connections[activeChatPeerId];
             if (conn && conn.open) {
                 const contact = contacts[activeChatPeerId];
                 const cryptoKey = await cryptoOps.importKey(contact.key);
                 const encryptedMessage = await cryptoOps.encrypt(messageText, cryptoKey);
-
                 conn.send(encryptedMessage);
-
-                const message = {
-                    sender: myPeerId,
-                    text: messageText,
-                    timestamp: Date.now()
-                };
+                const message = { sender: myPeerId, text: messageText, timestamp: Date.now() };
                 contact.history.push(message);
                 saveContactsToStorage();
-                
                 appendMessage(message.sender, message.text, message.timestamp);
                 scrollToBottom();
-                
                 messageInput.value = '';
-            } else {
-                showToast('Not connected to contact. Trying to reconnect...', true);
-                connectToPeer(activeChatPeerId);
-            }
+            } else { showToast('Not connected to contact. Trying to reconnect...', true); connectToPeer(activeChatPeerId); }
         }
     }
 
     // --- Event Listeners ---
-    copyIdBtn.addEventListener('click', () => {
-        myPeerIdEl.select();
-        document.execCommand('copy');
-        showToast('Your ID has been copied to the clipboard!');
-    });
-
-    addContactBtn.addEventListener('click', () => {
-        addContactModal.classList.remove('hidden');
-        contactNameInput.focus();
-    });
-
-    cancelAddContactBtn.addEventListener('click', () => {
-        addContactModal.classList.add('hidden');
-        addContactForm.reset();
-    });
-
+    copyIdBtn.addEventListener('click', () => { myPeerIdEl.select(); document.execCommand('copy'); showToast('Your ID has been copied to the clipboard!'); });
+    addContactBtn.addEventListener('click', () => { addContactModal.classList.remove('hidden'); contactNameInput.focus(); });
+    cancelAddContactBtn.addEventListener('click', () => { addContactModal.classList.add('hidden'); addContactForm.reset(); });
     addContactForm.addEventListener('submit', handleAddContact);
     messageForm.addEventListener('submit', handleSendMessage);
+    backToContactsBtn.addEventListener('click', showSidebarOnMobile);
+
+    contactsListEl.addEventListener('click', (e) => {
+        const deleteButton = e.target.closest('.delete-btn');
+        if (deleteButton) {
+            peerIdToDelete = deleteButton.dataset.peerId;
+            const contactName = deleteButton.dataset.contactName;
+            deleteConfirmText.textContent = `Are you sure you want to remove "${contactName}"? This action cannot be undone.`;
+            deleteConfirmModal.classList.remove('hidden');
+        }
+    });
+
+    cancelDeleteBtn.addEventListener('click', () => { deleteConfirmModal.classList.add('hidden'); peerIdToDelete = null; });
+    confirmDeleteBtn.addEventListener('click', () => {
+        if (peerIdToDelete) { handleDeleteContact(peerIdToDelete); }
+        deleteConfirmModal.classList.add('hidden');
+        peerIdToDelete = null;
+    });
 
     // --- Initialization ---
     function init() {
         loadContactsFromStorage();
         initializePeer();
         renderContacts();
+        // Set initial view based on screen size
+        if (window.innerWidth >= 768) {
+            welcomeScreen.classList.remove('hidden');
+            welcomeScreen.classList.add('flex');
+            chatArea.classList.remove('mobile-hidden');
+        }
     }
 
     init();
