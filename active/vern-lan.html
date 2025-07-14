@@ -7,31 +7,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        /* A simple, minimalist aesthetic */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
-
-        /* Custom scrollbar for a cleaner look */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #b0b0b0; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #555; }
-
-        /* Style for the active contact in the list */
         .contact.active { background-color: #e0e0e0; }
-        
-        /* Hide default file input */
         #image-input { display: none; }
-
-        /* Animation for toast notifications */
         @keyframes fadeInOut {
             0%, 100% { opacity: 0; transform: translateY(20px); }
             10%, 90% { opacity: 1; transform: translateY(0); }
         }
-        #notification-toast {
+        #notification-toast.show {
              animation: fadeInOut 4s ease-in-out forwards;
         }
     </style>
@@ -44,18 +35,29 @@
 
             <div id="contacts-view" class="flex flex-col h-full">
                 <div class="p-4 border-b border-neutral-200 flex-shrink-0">
-                    <h1 class="text-xl font-bold">Secure Chat</h1>
-                    <div class="flex items-center mt-2 bg-neutral-100 p-2 rounded-md">
-                        <input id="my-peer-id" type="text" readonly class="bg-transparent w-full text-sm text-neutral-600 focus:outline-none" value="Initializing...">
-                        <button id="copy-id-btn" class="ml-2 p-1 text-neutral-500 hover:text-black" title="Copy ID">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                        </button>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h1 class="text-xl font-bold">Secure Chat</h1>
+                             <div id="connection-status" class="text-xs text-neutral-500 mt-1">Status: Disconnected</div>
+                        </div>
+                        <div class="flex space-x-2">
+                             <button id="create-temp-chat-btn" class="text-sm bg-neutral-100 hover:bg-neutral-200 px-3 py-2 rounded-md">Anonymous Chat</button>
+                             <button id="join-temp-chat-btn" class="text-sm bg-black text-white hover:bg-neutral-800 px-3 py-2 rounded-md">Join Chat</button>
+                        </div>
                     </div>
-                     <div id="connection-status" class="text-xs text-neutral-500 mt-1">Status: Disconnected</div>
-                     <div class="mt-3">
-                         <label for="user-name" class="block text-sm font-medium text-neutral-700 mb-1">Your Name</label>
-                         <input type="text" id="user-name" class="w-full bg-neutral-100 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="Enter your name">
-                     </div>
+                    <div class="mt-4">
+                        <label for="user-name" class="block text-sm font-medium text-neutral-700 mb-1">Your Name (for friends)</label>
+                        <input type="text" id="user-name" class="w-full bg-neutral-100 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" placeholder="Enter your name">
+                    </div>
+                    <div class="mt-3">
+                        <label for="my-peer-id" class="block text-sm font-medium text-neutral-700 mb-1">Your Permanent ID (for friends)</label>
+                        <div class="flex items-center bg-neutral-100 p-2 rounded-md">
+                            <input id="my-peer-id" type="text" readonly class="bg-transparent w-full text-sm text-neutral-600 focus:outline-none" value="Initializing...">
+                            <button id="copy-id-btn" class="ml-2 p-1 text-neutral-500 hover:text-black" title="Copy ID">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="p-2 border-b border-neutral-200 flex-shrink-0">
@@ -67,7 +69,7 @@
                     </div>
                 </div>
 
-                <div class="flex-1 overflow-y-auto">
+                <div id="contacts-scroll-area" class="flex-1 overflow-y-auto">
                     <div id="friend-requests-section" class="px-2">
                         <h4 class="px-3 text-xs font-semibold uppercase text-neutral-500 my-2">Friend Requests</h4>
                         <div id="friend-requests-list"></div>
@@ -86,13 +88,13 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                         </button>
                         <h3 id="chat-header-name" class="text-lg font-bold"></h3>
+                        <span id="chat-type-indicator" class="text-xs bg-neutral-200 text-neutral-600 px-2 py-0.5 rounded-full ml-3"></span>
                     </div>
                 </div>
-                <div id="messages-container" class="flex-1 p-4 overflow-y-auto space-y-4">
-                    </div>
+                <div id="messages-container" class="flex-1 p-4 overflow-y-auto space-y-4"></div>
                 <div class="p-2 border-t border-neutral-200 flex-shrink-0">
                     <form id="message-form" class="flex items-center bg-neutral-100 rounded-lg p-1">
-                         <label for="image-input" class="p-2 rounded-full hover:bg-neutral-200 text-neutral-600 cursor-pointer" title="Attach Image">
+                         <label id="attach-image-label" for="image-input" class="p-2 rounded-full hover:bg-neutral-200 text-neutral-600 cursor-pointer" title="Attach Image">
                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
                         </label>
                         <input id="image-input" type="file" accept="image/*">
@@ -111,12 +113,28 @@
             <h3 class="text-xl font-bold mb-4">Send Friend Request</h3>
             <form id="add-contact-form">
                 <div class="mb-4">
-                    <label for="contact-id" class="block text-sm font-medium text-neutral-700 mb-1">Contact's Peer ID</label>
+                    <label for="contact-id" class="block text-sm font-medium text-neutral-700 mb-1">Contact's Permanent ID</label>
                     <input type="text" id="contact-id" class="w-full bg-neutral-100 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" required>
                 </div>
                 <div class="flex justify-end space-x-2">
-                    <button type="button" id="cancel-add-contact" class="px-4 py-2 rounded-md bg-neutral-200 hover:bg-neutral-300 text-sm">Cancel</button>
+                    <button type="button" class="cancel-modal-btn px-4 py-2 rounded-md bg-neutral-200 hover:bg-neutral-300 text-sm">Cancel</button>
                     <button type="submit" class="px-4 py-2 rounded-md bg-black text-white hover:bg-neutral-800 text-sm">Send Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="temp-chat-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-xl font-bold mb-4">Join Anonymous Chat</h3>
+            <form id="join-temp-chat-form">
+                <div class="mb-4">
+                    <label for="temp-chat-code" class="block text-sm font-medium text-neutral-700 mb-1">Enter 6-Digit Code</label>
+                    <input type="text" id="temp-chat-code" class="w-full bg-neutral-100 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-black" required placeholder="123-456">
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" class="cancel-modal-btn px-4 py-2 rounded-md bg-neutral-200 hover:bg-neutral-300 text-sm">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-md bg-black text-white hover:bg-neutral-800 text-sm">Join</button>
                 </div>
             </form>
         </div>
@@ -125,52 +143,57 @@
     <div id="delete-confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-sm">
             <h3 class="text-xl font-bold mb-2">Confirm Deletion</h3>
-            <p id="delete-confirm-text" class="mb-4 text-sm text-neutral-600">Are you sure you want to remove this contact?</p>
+            <p id="delete-confirm-text" class="mb-4 text-sm text-neutral-600">Are you sure?</p>
             <div class="flex justify-end space-x-2">
-                <button type="button" id="cancel-delete-btn" class="px-4 py-2 rounded-md bg-neutral-200 hover:bg-neutral-300 text-sm">Cancel</button>
+                <button type="button" class="cancel-modal-btn px-4 py-2 rounded-md bg-neutral-200 hover:bg-neutral-300 text-sm">Cancel</button>
                 <button type="button" id="confirm-delete-btn" class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 text-sm">Delete</button>
             </div>
         </div>
     </div>
 
-    <div id="notification-toast" class="hidden fixed bottom-5 right-5 bg-black text-white py-2 px-4 rounded-lg shadow-lg text-sm"></div>
+    <div id="notification-toast" class="fixed bottom-5 right-5 bg-black text-white py-2 px-4 rounded-lg shadow-lg text-sm opacity-0 transition-opacity"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
-    const contactsView = document.getElementById('contacts-view');
-    const chatView = document.getElementById('chat-view');
-    const myPeerIdEl = document.getElementById('my-peer-id');
-    const copyIdBtn = document.getElementById('copy-id-btn');
-    const userNameInput = document.getElementById('user-name');
-    const connectionStatusEl = document.getElementById('connection-status');
-    const addContactBtn = document.getElementById('add-contact-btn');
-    const friendRequestsListEl = document.getElementById('friend-requests-list');
-    const contactsListEl = document.getElementById('contacts-list');
-    const chatHeaderName = document.getElementById('chat-header-name');
-    const backToContactsBtn = document.getElementById('back-to-contacts-btn');
-    const messagesContainer = document.getElementById('messages-container');
-    const messageForm = document.getElementById('message-form');
-    const messageInput = document.getElementById('message-input');
-    const imageInput = document.getElementById('image-input');
-    const addContactModal = document.getElementById('add-contact-modal');
-    const addContactForm = document.getElementById('add-contact-form');
-    const cancelAddContactBtn = document.getElementById('cancel-add-contact');
-    const contactIdInput = document.getElementById('contact-id');
-    const deleteConfirmModal = document.getElementById('delete-confirm-modal');
-    const deleteConfirmText = document.getElementById('delete-confirm-text');
-    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-    const notificationToast = document.getElementById('notification-toast');
-
+    const [
+        contactsView, chatView, myPeerIdEl, copyIdBtn, userNameInput,
+        connectionStatusEl, contactsListEl, friendRequestsListEl,
+        chatHeaderName, chatTypeIndicator, backToContactsBtn,
+        messagesContainer, messageForm, messageInput, imageInput,
+        attachImageLabel, notificationToast, addContactBtn,
+        createTempChatBtn, joinTempChatBtn, addContactModal,
+        tempChatModal, deleteConfirmModal, addContactForm, joinTempChatForm,
+        confirmDeleteBtn, tempChatCodeInput, contactIdInput, deleteConfirmText
+    ] = [
+        'contacts-view', 'chat-view', 'my-peer-id', 'copy-id-btn', 'user-name',
+        'connection-status', 'contacts-list', 'friend-requests-list',
+        'chat-header-name', 'chat-type-indicator', 'back-to-contacts-btn',
+        'messages-container', 'message-form', 'message-input', 'image-input',
+        'attach-image-label', 'notification-toast', 'add-contact-btn',
+        'create-temp-chat-btn', 'join-temp-chat-btn', 'add-contact-modal',
+        'temp-chat-modal', 'delete-confirm-modal', 'add-contact-form', 'join-temp-chat-form',
+        'confirm-delete-btn', 'temp-chat-code', 'contact-id', 'delete-confirm-text'
+    ].map(id => document.getElementById(id));
+    
     // --- State Variables ---
-    let peer = null;
-    let myPeerId = null;
-    let myName = '';
-    let contacts = {};
-    let connections = {};
-    let activeChatPeerId = null;
+    let peer = null; // Permanent peer object for friends
+    let tempPeer = null; // Disposable peer object for anonymous chats
+    let myPeerId = null, myName = '';
+    let contacts = {}, connections = {};
+    let tempConnection = null; // Only one temp connection at a time
+    let activeChat = { id: null, type: null, history: [] }; // type: 'permanent' or 'anonymous'
     let peerIdToDelete = null;
+
+    // --- Utils ---
+    const generateRandomLetters = (length) => {
+        let result = '';
+        const characters = 'abcdefghijklmnopqrstuvwxyz';
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
+    }
 
     // --- Crypto & Image Utils ---
     const cryptoOps = {
@@ -195,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return JSON.parse(new TextDecoder().decode(decrypted));
             } catch (e) {
                 console.error("Decryption failed:", e);
-                return { type: 'text', content: "⚠️ Could not decrypt message." };
+                return { type: 'system', content: "⚠️ Could not decrypt message." };
             }
         }
     };
@@ -222,33 +245,28 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     };
 
-
     // --- Local Storage ---
-    const PEER_ID_STORAGE_KEY = 'ssc-persistent-peer-id';
+    const PERMANENT_ID_KEY = 'ssc-permanent-id-v2';
     const saveState = () => {
-        localStorage.setItem('ssc-contacts', JSON.stringify(contacts));
-        localStorage.setItem('ssc-username', myName);
+        localStorage.setItem('ssc-contacts-v2', JSON.stringify(contacts));
+        localStorage.setItem('ssc-username-v2', myName);
     };
     const loadState = () => {
-        const storedContacts = localStorage.getItem('ssc-contacts');
-        if (storedContacts) contacts = JSON.parse(storedContacts);
-        const storedName = localStorage.getItem('ssc-username');
-        if (storedName) {
-            myName = storedName;
-            userNameInput.value = myName;
-        }
+        contacts = JSON.parse(localStorage.getItem('ssc-contacts-v2') || '{}');
+        myName = localStorage.getItem('ssc-username-v2') || '';
+        userNameInput.value = myName;
     };
-    const getPersistentPeerId = () => localStorage.getItem(PEER_ID_STORAGE_KEY);
-    const setPersistentPeerId = (id) => localStorage.setItem(PEER_ID_STORAGE_KEY, id);
-
+    const getPermanentId = () => localStorage.getItem(PERMANENT_ID_KEY);
+    const setPermanentId = (id) => localStorage.setItem(PERMANENT_ID_KEY, id);
 
     // --- UI Functions ---
     const showToast = (message) => {
         notificationToast.textContent = message;
-        notificationToast.classList.remove('hidden');
+        notificationToast.classList.add('show');
         notificationToast.style.animation = 'none';
         notificationToast.offsetHeight;
-        notificationToast.style.animation = null; 
+        notificationToast.style.animation = null;
+        setTimeout(() => notificationToast.classList.remove('show'), 4000);
     };
 
     const renderAllLists = () => {
@@ -257,16 +275,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let requestsCount = 0, friendsCount = 0;
 
         Object.entries(contacts).forEach(([peerId, contact]) => {
-            if (contact.status === 'needs_approval') {
-                requestsCount++;
-                renderRequest(peerId, contact);
-            } else if (contact.status === 'pending_approval') {
-                requestsCount++;
-                renderPending(peerId, contact);
-            } else if (contact.status === 'friends') {
-                friendsCount++;
-                renderFriend(peerId, contact);
-            }
+            if (contact.status === 'needs_approval') { requestsCount++; renderRequest(peerId, contact); } 
+            else if (contact.status === 'pending_approval') { requestsCount++; renderPending(peerId, contact); }
+            else if (contact.status === 'friends') { friendsCount++; renderFriend(peerId, contact); }
         });
 
         if (requestsCount === 0) friendRequestsListEl.innerHTML = `<p class="text-center text-neutral-500 text-sm p-3">No pending requests.</p>`;
@@ -282,10 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderRequest = (peerId, contact) => {
         const el = createRequestElement(peerId, `
-            <div class="truncate">
-                <p class="font-semibold truncate">${contact.name}</p>
-                <p class="text-xs text-neutral-500">Wants to be your friend</p>
-            </div>
+            <div class="truncate"><p class="font-semibold truncate">${contact.name}</p><p class="text-xs text-neutral-500">Wants to be your friend</p></div>
             <div class="flex-shrink-0 flex space-x-2">
                 <button class="accept-request-btn p-2 bg-green-500 hover:bg-green-600 rounded-full text-white" data-peer-id="${peerId}" title="Accept"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></button>
                 <button class="decline-request-btn p-2 bg-red-500 hover:bg-red-600 rounded-full text-white" data-peer-id="${peerId}" title="Decline"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
@@ -295,10 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderPending = (peerId, contact) => {
         const el = createRequestElement(peerId, `
-            <div class="truncate">
-                <p class="font-semibold truncate">${contact.name || peerId}</p>
-                <p class="text-xs text-neutral-500">Request sent</p>
-            </div>
+            <div class="truncate"><p class="font-semibold truncate">${contact.name || peerId}</p><p class="text-xs text-neutral-500">Request sent</p></div>
             <button class="cancel-request-btn p-2 bg-neutral-200 hover:bg-neutral-300 rounded-full" data-peer-id="${peerId}" title="Cancel Request"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
         `);
         friendRequestsListEl.appendChild(el);
@@ -306,11 +311,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const renderFriend = (peerId, contact) => {
         const contactEl = document.createElement('div');
-        contactEl.className = `contact p-2 flex items-center justify-between cursor-pointer hover:bg-neutral-100 rounded-md mx-2 mb-1`;
+        contactEl.className = `contact p-2 flex items-center justify-between cursor-pointer hover:bg-neutral-100 rounded-md mx-2 mb-1 group`;
         contactEl.dataset.peerId = peerId;
-        if (peerId === activeChatPeerId) contactEl.classList.add('active');
+        if (activeChat.id === peerId) contactEl.classList.add('active');
 
-        const isOnline = connections[peerId] && connections[peerId].open;
+        const isOnline = connections[peerId]?.open;
         const statusDot = isOnline ? 'bg-green-500' : 'bg-neutral-400';
         
         contactEl.innerHTML = `
@@ -321,240 +326,142 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="ml-3 truncate"><p class="font-semibold truncate">${contact.name}</p></div>
             </div>
-            <button class="delete-btn p-2 text-neutral-400 hover:text-red-500 flex-shrink-0 opacity-0 group-hover:opacity-100" data-peer-id="${peerId}" data-contact-name="${contact.name}" title="Remove Contact">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
-            </button>`;
-
-        contactEl.classList.add('group');
-        contactEl.addEventListener('click', (e) => {
-            if (e.target.closest('.delete-btn')) {
-                peerIdToDelete = peerId;
-                deleteConfirmText.textContent = `Are you sure you want to remove "${contact.name}"? This action cannot be undone.`;
-                deleteConfirmModal.classList.remove('hidden');
-                return;
-            }
-            selectChat(peerId);
-        });
+            <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button class="details-btn p-2 text-neutral-400 hover:text-black flex-shrink-0" data-peer-id="${peerId}" title="Show Peer ID">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                </button>
+                <button class="delete-btn p-2 text-neutral-400 hover:text-red-500 flex-shrink-0" data-peer-id="${peerId}" data-contact-name="${contact.name}" title="Remove Contact">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>`;
         contactsListEl.appendChild(contactEl);
     };
 
-    const scrollToBottom = () => messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-    const renderMessages = () => {
-        messagesContainer.innerHTML = '';
-        if (!activeChatPeerId || !contacts[activeChatPeerId]?.history) return;
-        contacts[activeChatPeerId].history.forEach(msg => appendMessage(msg));
-        scrollToBottom();
-    };
-
-    const appendMessage = (msg) => {
-        const { sender, type, content, timestamp } = msg;
+    const appendMessage = (msg, align) => {
+        const { sender, type, content, timestamp, name } = msg;
         const msgEl = document.createElement('div');
-        const isMe = sender === myPeerId;
+        const isMe = align === 'right';
         const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-        msgEl.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
 
         let messageContentHTML = '';
         if (type === 'text') {
-            const textEl = document.createElement('p');
-            textEl.className = 'text-sm break-words';
-            textEl.textContent = content;
+            const textEl = document.createElement('p'); textEl.className = 'text-sm break-words'; textEl.textContent = content;
             messageContentHTML = textEl.outerHTML;
         } else if (type === 'image') {
             messageContentHTML = `<img src="${content}" alt="Sent image" class="rounded-lg max-w-xs cursor-pointer" onclick="window.open(this.src, '_blank')">`;
+        } else if (type === 'system') {
+            msgEl.className = 'text-center text-xs text-neutral-500 my-2';
+            msgEl.textContent = content;
+            messagesContainer.appendChild(msgEl);
+            return;
         }
 
+        msgEl.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
+        const displayName = isMe ? 'You' : (name || 'Stranger');
         msgEl.innerHTML = `
             <div class="max-w-sm">
+                 <p class="text-xs text-neutral-500 mb-1 px-1 ${isMe ? 'text-right' : 'text-left'}">${displayName}</p>
                 <div class="px-3 py-2 rounded-lg ${isMe ? 'bg-black text-white' : 'bg-neutral-200 text-black'}">
                     ${messageContentHTML}
                 </div>
                 <p class="text-xs text-neutral-500 mt-1 px-1 ${isMe ? 'text-right' : 'text-left'}">${time}</p>
             </div>`;
         messagesContainer.appendChild(msgEl);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
     };
     
     // --- View Management ---
     const showContactsView = () => {
         chatView.classList.add('hidden');
         contactsView.classList.remove('hidden');
-        activeChatPeerId = null;
+        activeChat = { id: null, type: null, history: [] };
+        if (tempPeer) { tempPeer.destroy(); tempPeer = null; }
+        if (tempConnection) { tempConnection.close(); tempConnection = null; }
         renderAllLists();
     };
 
-    const showChatView = (peerId) => {
-        activeChatPeerId = peerId;
-        chatHeaderName.textContent = contacts[peerId].name;
+    const showChatView = (config) => {
+        activeChat = { id: config.id, type: config.type, history: config.history || [] };
+        chatHeaderName.textContent = config.name;
+        chatTypeIndicator.textContent = config.type;
+        attachImageLabel.style.display = config.type === 'permanent' ? 'block' : 'none';
+
         contactsView.classList.add('hidden');
         chatView.classList.remove('hidden');
         chatView.classList.add('flex');
-        renderMessages();
-        renderAllLists();
+        
+        messagesContainer.innerHTML = '';
+        const myCurrentId = activeChat.type === 'anonymous' ? tempPeer?.id : myPeerId;
+        activeChat.history.forEach(msg => {
+            const align = msg.sender === myCurrentId ? 'right' : 'left';
+            const messageName = activeChat.type === 'permanent' ? contacts[msg.sender]?.name : null;
+            appendMessage({...msg, name: messageName}, align);
+        });
+        
         messageInput.focus();
+        renderAllLists();
     };
 
-
-    // --- Main Logic ---
+    /**
+     * ========================================
+     * PERMANENT PEER (FRIENDS) LOGIC
+     * ========================================
+     */
     const initializePeer = () => {
-        const persistentId = getPersistentPeerId();
-        peer = new Peer(persistentId, {}); // Request persistent ID
+        let persistentId = getPermanentId();
+        if (!persistentId) {
+            persistentId = `chat-${generateRandomLetters(4)}`;
+            setPermanentId(persistentId);
+        }
+        peer = new Peer(persistentId, {});
         
         peer.on('open', id => {
             myPeerId = id;
             myPeerIdEl.value = id;
-            if (!persistentId || persistentId !== id) {
-                setPersistentPeerId(id); // Save the new ID if it's different
-            }
+            if (persistentId !== id) setPermanentId(id);
             connectionStatusEl.textContent = 'Status: Online';
-            connectionStatusEl.classList.remove('text-neutral-500');
             connectionStatusEl.classList.add('text-green-600');
-            Object.keys(contacts).forEach(pid => {
-                if (contacts[pid].status === 'friends') connectToPeer(pid);
-            });
+            Object.keys(contacts).forEach(pid => { if (contacts[pid].status === 'friends') connectToPeer(pid); });
         });
         
-        peer.on('connection', conn => setupConnection(conn));
+        peer.on('connection', conn => setupConnection(conn, connections, true, handlePermanentData));
         
         peer.on('error', err => {
             console.error('PeerJS error:', err);
             connectionStatusEl.textContent = `Status: Error - ${err.type}`;
             connectionStatusEl.classList.remove('text-green-600');
             connectionStatusEl.classList.add('text-red-600');
-            
             if (err.type === 'unavailable-id') {
-                showToast('Your saved ID is in use. Getting a new one.', true);
-                localStorage.removeItem(PEER_ID_STORAGE_KEY); // Remove the bad ID
+                showToast('Your saved ID is in use. Getting a new one.');
+                localStorage.removeItem(PERMANENT_ID_KEY);
                 peer.destroy();
-                initializePeer(); // Restart the process
+                initializePeer();
             }
         });
     };
 
-    const setupConnection = (conn) => {
-        connections[conn.peer] = conn;
-        console.log(`Connection established with ${conn.peer}`);
+    const setupConnection = (conn, connPool, isPermanent, dataHandler) => {
+        connPool[conn.peer] = conn;
         renderAllLists();
-        conn.on('data', async (data) => handleData(conn, data));
-        conn.on('close', () => { console.log(`Connection with ${conn.peer} closed.`); delete connections[conn.peer]; renderAllLists(); });
-        conn.on('error', (err) => { console.error(`Connection error with ${conn.peer}:`, err); delete connections[conn.peer]; renderAllLists(); });
+        conn.on('data', data => dataHandler(conn, data));
+        conn.on('close', () => {
+            delete connPool[conn.peer];
+            if (!isPermanent) { showToast("Stranger disconnected."); showContactsView(); }
+            renderAllLists();
+        });
+        conn.on('error', (err) => {
+            console.error("Connection error:", err);
+            if (!isPermanent) { showToast("Connection error."); showContactsView(); }
+            renderAllLists();
+        });
     };
 
-    const handleData = async (conn, encryptedData) => {
-        const peerId = conn.peer;
-        const contact = contacts[peerId];
-        let data, cryptoKey;
-
-        if (contact && contact.status === 'friends' && contact.key) {
-            cryptoKey = await cryptoOps.importKey(contact.key);
-            data = await cryptoOps.decrypt(encryptedData, cryptoKey);
-        } else {
-            try { data = JSON.parse(encryptedData); } catch(e) { console.error("Could not parse incoming data:", e); return; }
-        }
-
-        switch (data.type) {
-            case 'friend-request':
-                if (contacts[peerId]) return;
-                contacts[peerId] = { name: data.payload.name, status: 'needs_approval' };
-                showToast(`New friend request from ${data.payload.name}`);
-                break;
-            case 'accept-request':
-                if (contact?.status === 'pending_approval') {
-                    contact.status = 'friends';
-                    contact.key = data.payload.key;
-                    contact.name = data.payload.name;
-                    contact.history = contact.history || [];
-                    showToast(`${contact.name} accepted your request!`);
-                }
-                break;
-            case 'decline-request':
-            case 'cancel-request':
-                if (contact) {
-                    const wasPending = contact.status === 'pending_approval';
-                    const contactName = contact.name;
-                    delete contacts[peerId];
-                    if (wasPending) showToast(`${contactName || 'A user'} declined your request.`);
-                }
-                break;
-            case 'chat':
-                const message = { sender: peerId, ...data.payload, timestamp: Date.now() };
-                contact.history.push(message);
-                if (peerId === activeChatPeerId) {
-                    appendMessage(message);
-                    scrollToBottom();
-                } else {
-                    showToast(`New message from ${contact.name}`);
-                }
-                break;
-        }
-        saveState();
-        renderAllLists();
-    };
-
-    const sendData = (peerId, data, isEncrypted = true) => {
-        const conn = connections[peerId];
-        if (conn && conn.open) {
-            const dataToSend = isEncrypted ? data : JSON.stringify(data);
-            conn.send(dataToSend);
-        } else {
-            console.log(`No open connection to ${peerId}, attempting to connect...`);
-            const newConn = peer.connect(peerId, { reliable: true });
-            newConn.on('open', () => {
-                setupConnection(newConn);
-                const dataToSend = isEncrypted ? data : JSON.stringify(data);
-                newConn.send(dataToSend);
-            });
-        }
-    };
-    
-    async function sendMessage(peerId, messageData) {
-        const contact = contacts[peerId];
-        if (!contact || contact.status !== 'friends') return;
-
-        const cryptoKey = await cryptoOps.importKey(contact.key);
-        const encryptedPayload = await cryptoOps.encrypt({ type: 'chat', payload: messageData });
-        
-        sendData(peerId, encryptedPayload, true);
-
-        const message = { sender: myPeerId, ...messageData, timestamp: Date.now() };
-        contact.history.push(message);
-        saveState();
-        appendMessage(message);
-        scrollToBottom();
-    }
-
-    const handleSendMessage = (e) => {
-        e.preventDefault();
-        const messageText = messageInput.value.trim();
-        if (messageText && activeChatPeerId) {
-            sendMessage(activeChatPeerId, { type: 'text', content: messageText });
-            messageInput.value = '';
-        }
-    };
-
-    const handleImageAttachment = async (e) => {
-        const file = e.target.files[0];
-        if (!file || !activeChatPeerId) return;
-
-        e.target.value = null;
-
-        if (file.size > 5 * 1024 * 1024) {
-            showToast('Image is too large (max 5MB).');
-            return;
-        }
-        
-        showToast('Compressing image...');
-        try {
-            const compressedDataUrl = await imageUtils.compress(file);
-             if (compressedDataUrl.length > 1_000_000) {
-                showToast('Compressed image is still too large to send.');
-                return;
-            }
-            showToast('Sending image...');
-            sendMessage(activeChatPeerId, { type: 'image', content: compressedDataUrl });
-        } catch (error) {
-            console.error('Image processing failed:', error);
-            showToast('Could not process image.');
+    const connectToPeer = (peerId) => {
+        if (!peer || peer.destroyed) { showToast('Main connection not ready.'); return; }
+        if (connections[peerId]?.open) return;
+        const conn = peer.connect(peerId, { reliable: true });
+        if (conn) {
+            setupConnection(conn, connections, true, handlePermanentData);
         }
     };
     
@@ -569,8 +476,11 @@ document.addEventListener('DOMContentLoaded', () => {
             saveState();
             renderAllLists();
             
-            sendData(targetId, { type: 'friend-request', payload: { name: myName } }, false);
-            
+            const conn = peer.connect(targetId, { reliable: true });
+            conn.on('open', () => {
+                conn.send(JSON.stringify({ type: 'friend-request', payload: { name: myName } }));
+            });
+
             addContactForm.reset();
             addContactModal.classList.add('hidden');
             showToast(`Friend request sent to ${targetId}`);
@@ -585,79 +495,283 @@ document.addEventListener('DOMContentLoaded', () => {
             contact.status = 'friends';
             contact.key = exportedKey;
             contact.history = [];
-            
-            sendData(peerId, { type: 'accept-request', payload: { name: myName, key: exportedKey } }, false);
+
+            connectToPeer(peerId); // Ensure connection exists before sending
+            setTimeout(() => { // Give connection a moment to establish
+                connections[peerId].send(JSON.stringify({ type: 'accept-request', payload: { name: myName, key: exportedKey } }));
+            }, 500);
             
             saveState();
             renderAllLists();
             showToast(`You are now friends with ${contact.name}!`);
         }
     }
-    
+
     const declineOrCancelRequest = (peerId, type) => {
         if (contacts[peerId]) {
-            sendData(peerId, { type }, false);
-            delete contacts[peerId];
-            saveState();
-            renderAllLists();
+            connectToPeer(peerId);
+            setTimeout(() => {
+                if (connections[peerId] && connections[peerId].open) {
+                    connections[peerId].send(JSON.stringify({ type }));
+                }
+                delete contacts[peerId];
+                saveState();
+                renderAllLists();
+            }, 500);
         }
     }
 
-    const handleDeleteContact = (peerId) => {
+    const handleDeleteContact = (peerId, options = {}) => {
+        if (!options.isNotification && connections[peerId]?.open) {
+            sendData(peerId, { type: 'unfriend' }, true);
+        }
         if (connections[peerId]) connections[peerId].close();
         delete connections[peerId];
         delete contacts[peerId];
         saveState();
-        if (activeChatPeerId === peerId) {
-            showContactsView();
-        }
+        if (activeChat.id === peerId) showContactsView();
         renderAllLists();
-        showToast("Contact removed.");
+        if (!options.isNotification) showToast("Contact removed.");
     };
 
-    const selectChat = (peerId) => {
-        const contact = contacts[peerId];
-        if (!contact || contact.status !== 'friends') return;
-        showChatView(peerId);
-        if (!connections[peerId] || !connections[peerId].open) {
-            connectToPeer(peerId);
+    const sendData = async (peerId, payload, isEncrypted) => {
+        const conn = connections[peerId];
+        if (conn?.open) {
+            let dataToSend = payload;
+            if(isEncrypted) {
+                const key = await cryptoOps.importKey(contacts[peerId].key);
+                dataToSend = await cryptoOps.encrypt(payload, key);
+            } else {
+                dataToSend = JSON.stringify(payload);
+            }
+            conn.send(dataToSend);
+        } else {
+            console.error("Cannot send data: No open connection to", peerId);
         }
     };
 
-    const connectToPeer = (peerId) => {
-        if (!peer || peer.destroyed) { showToast('Connection not ready.'); return; }
-        if (connections[peerId]?.open) return;
-        const conn = peer.connect(peerId, { reliable: true });
-        conn.on('open', () => setupConnection(conn));
+    /**
+     * ========================================
+     * ANONYMOUS CHAT LOGIC
+     * ========================================
+     */
+    const cleanupTemp = () => {
+        if (tempPeer) { tempPeer.destroy(); tempPeer = null; }
+        if (tempConnection) { tempConnection.close(); tempConnection = null; }
     };
 
+    const startTempChatHost = () => {
+        cleanupTemp();
+        const code = Math.floor(100000 + Math.random() * 900000).toString().replace(/(\d{3})/, '$1-');
+        const tempId = `anon-host-${code}`;
 
-    // --- Event Listeners ---
-    userNameInput.addEventListener('change', (e) => { myName = e.target.value; saveState(); });
-    copyIdBtn.addEventListener('click', () => { navigator.clipboard.writeText(myPeerIdEl.value).then(() => showToast('Your ID copied to clipboard!')); });
-    addContactBtn.addEventListener('click', () => { addContactModal.classList.remove('hidden'); contactIdInput.focus(); });
-    cancelAddContactBtn.addEventListener('click', () => addContactModal.classList.add('hidden'));
-    addContactForm.addEventListener('submit', sendFriendRequest);
-    messageForm.addEventListener('submit', handleSendMessage);
-    imageInput.addEventListener('change', handleImageAttachment);
+        showToast(`Creating Anonymous Chat...`);
+        tempPeer = new Peer(tempId, {});
+
+        tempPeer.on('open', () => {
+            showChatView({
+                id: tempId, name: `Anonymous Chat`, type: 'anonymous',
+                history: [{ type: 'system', content: `Share this code with someone: ${code}` }]
+            });
+        });
+
+        tempPeer.on('connection', conn => {
+            if(tempConnection) conn.close(); // Allow only one connection
+            tempConnection = conn;
+            appendMessage({type: 'system', content: 'A stranger has connected. This chat is anonymous and will be deleted when either person leaves.'}, 'left');
+            setupConnection(conn, {}, false, handleTempData);
+        });
+
+        tempPeer.on('error', (err) => { showToast(`Error: ${err.type}`); showContactsView(); });
+    };
+
+    const joinTempChat = (code) => {
+        cleanupTemp();
+        const targetId = `anon-host-${code.replace('-', '')}`;
+        
+        showToast(`Joining Anonymous Chat...`);
+        tempPeer = new Peer(null, {}); // Create a disposable peer with a random ID
+
+        tempPeer.on('open', id => {
+            const conn = tempPeer.connect(targetId, { reliable: true });
+            tempConnection = conn;
+            
+            showChatView({
+                id: targetId, name: 'Anonymous Chat', type: 'anonymous',
+                history: [{ type: 'system', content: `Connecting to chat ${code}...` }]
+            });
+
+            conn.on('open', () => {
+                appendMessage({type: 'system', content: `Connected! This chat is anonymous and will be deleted when either person leaves.`}, 'left');
+            });
+            setupConnection(conn, {}, false, handleTempData);
+        });
+        
+        tempPeer.on('error', (err) => { showToast(`Error: ${err.type}`); showContactsView(); });
+    };
+
+    // --- Data Handling ---
+    const handleTempData = (conn, data) => {
+        const message = {
+            sender: conn.peer, type: 'text', content: data.content, timestamp: Date.now()
+        };
+        activeChat.history.push(message);
+        appendMessage(message, 'left');
+    };
+
+    const handlePermanentData = async (conn, rawData) => {
+        const peerId = conn.peer;
+        
+        let data, isEncrypted = true;
+        try {
+            data = JSON.parse(rawData);
+            isEncrypted = false;
+        } catch(e) {
+            // Assumed to be encrypted
+        }
+
+        if (isEncrypted) {
+             if (!contacts[peerId]?.key) return; // Cannot decrypt without a key
+             data = await cryptoOps.decrypt(rawData, await cryptoOps.importKey(contacts[peerId].key));
+        }
+
+        switch (data.type) {
+            case 'friend-request':
+                if (contacts[peerId]) return;
+                contacts[peerId] = { name: data.payload.name, status: 'needs_approval' };
+                showToast(`New friend request from ${data.payload.name}`);
+                break;
+            case 'accept-request':
+                 if (contacts[peerId]?.status === 'pending_approval') {
+                    contacts[peerId].status = 'friends';
+                    contacts[peerId].key = data.payload.key;
+                    contacts[peerId].name = data.payload.name;
+                    contacts[peerId].history = [];
+                    showToast(`${contacts[peerId].name} accepted your request!`);
+                }
+                break;
+            case 'decline-request':
+            case 'cancel-request':
+                 if (contacts[peerId]) {
+                    const contactName = contacts[peerId].name;
+                    delete contacts[peerId];
+                    showToast(`${contactName || 'A user'} declined your request.`);
+                }
+                break;
+            case 'chat':
+                const message = { sender: peerId, ...data.payload, timestamp: Date.now() };
+                contacts[peerId].history.push(message);
+                if (activeChat.id === peerId) {
+                    appendMessage(message, 'left');
+                } else {
+                    showToast(`New message from ${contacts[peerId].name}`);
+                }
+                break;
+            case 'unfriend':
+                if (contacts[peerId]) {
+                    showToast(`${contacts[peerId].name} removed you as a friend.`);
+                    handleDeleteContact(peerId, { isNotification: true });
+                }
+                break;
+        }
+        saveState();
+        renderAllLists();
+    };
+    
+    /**
+     * ========================================
+     * EVENT LISTENERS
+     * ========================================
+     */
+    createTempChatBtn.addEventListener('click', startTempChatHost);
+    joinTempChatBtn.addEventListener('click', () => tempChatModal.classList.remove('hidden'));
+    addContactBtn.addEventListener('click', () => addContactModal.classList.remove('hidden'));
     backToContactsBtn.addEventListener('click', showContactsView);
 
-    document.getElementById('main-container').addEventListener('click', (e) => {
-        const btn = e.target.closest('button');
-        if (!btn) return;
-        const peerId = btn.dataset.peerId;
-        if (btn.matches('.accept-request-btn')) acceptRequest(peerId);
-        if (btn.matches('.decline-request-btn')) declineOrCancelRequest(peerId, 'decline-request');
-        if (btn.matches('.cancel-request-btn')) declineOrCancelRequest(peerId, 'cancel-request');
+    addContactForm.addEventListener('submit', sendFriendRequest);
+    joinTempChatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const code = tempChatCodeInput.value.trim();
+        if (code) {
+            joinTempChat(code);
+            tempChatModal.classList.add('hidden');
+            e.target.reset();
+        }
+    });
+    
+    messageForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = messageInput.value.trim();
+        if (!text || !activeChat.id) return;
+        
+        const myCurrentId = activeChat.type === 'anonymous' ? tempPeer.id : myPeerId;
+        const message = { sender: myCurrentId, type: 'text', content: text, timestamp: Date.now() };
+        
+        if (activeChat.type === 'anonymous' && tempConnection?.open) {
+            tempConnection.send({ content: text });
+            activeChat.history.push(message);
+            appendMessage(message, 'right');
+            messageInput.value = '';
+        } else if (activeChat.type === 'permanent' && connections[activeChat.id]?.open) {
+            await sendData(activeChat.id, { type: 'chat', payload: { type: 'text', content: text } }, true);
+            contacts[activeChat.id].history.push(message);
+            saveState();
+            appendMessage(message, 'right');
+            messageInput.value = '';
+        }
     });
 
-    cancelDeleteBtn.addEventListener('click', () => { deleteConfirmModal.classList.add('hidden'); peerIdToDelete = null; });
+    document.querySelectorAll('.cancel-modal-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => e.target.closest('.fixed').classList.add('hidden'));
+    });
+    
+    // Delegated listeners for dynamic content
+    document.getElementById('contacts-scroll-area').addEventListener('click', (e) => {
+        const detailsBtn = e.target.closest('.details-btn');
+        if (detailsBtn) {
+            const peerId = detailsBtn.dataset.peerId;
+            alert(`Peer ID for ${contacts[peerId].name}:\n\n${peerId}`);
+            return;
+        }
+
+        const deleteBtn = e.target.closest('.delete-btn');
+        if (deleteBtn) {
+            peerIdToDelete = deleteBtn.dataset.peerId;
+            deleteConfirmText.textContent = `Are you sure you want to remove "${deleteBtn.dataset.contactName}"? This will unfriend them.`;
+            deleteConfirmModal.classList.remove('hidden');
+            return;
+        }
+
+        const contactEl = e.target.closest('.contact');
+        if(contactEl) {
+            const peerId = contactEl.dataset.peerId;
+            if (contacts[peerId] && contacts[peerId].status === 'friends') {
+                showChatView({
+                    id: peerId,
+                    name: contacts[peerId].name,
+                    type: 'permanent',
+                    history: contacts[peerId].history || []
+                });
+            }
+            return;
+        }
+        
+        const acceptBtn = e.target.closest('.accept-request-btn');
+        if(acceptBtn) { acceptRequest(acceptBtn.dataset.peerId); return; }
+        
+        const declineBtn = e.target.closest('.decline-request-btn');
+        if(declineBtn) { declineOrCancelRequest(declineBtn.dataset.peerId, 'decline-request'); return; }
+
+        const cancelBtn = e.target.closest('.cancel-request-btn');
+        if(cancelBtn) { declineOrCancelRequest(cancelBtn.dataset.peerId, 'cancel-request'); return; }
+    });
+
     confirmDeleteBtn.addEventListener('click', () => {
         if (peerIdToDelete) handleDeleteContact(peerIdToDelete);
         deleteConfirmModal.classList.add('hidden');
         peerIdToDelete = null;
     });
-    
+
     // --- Initialization ---
     loadState();
     initializePeer();
