@@ -38,7 +38,7 @@
 </head>
 <body class="bg-white text-black flex h-screen overflow-hidden">
 
-    <div id="main-container" class="flex h-full w-full max-w-4xl mx-auto border-x border-neutral-200">
+    <div id="main-container" class="flex h-full w-full">
 
         <div class="flex flex-col w-full h-full">
 
@@ -224,6 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Local Storage ---
+    const PEER_ID_STORAGE_KEY = 'ssc-persistent-peer-id';
     const saveState = () => {
         localStorage.setItem('ssc-contacts', JSON.stringify(contacts));
         localStorage.setItem('ssc-username', myName);
@@ -237,14 +238,16 @@ document.addEventListener('DOMContentLoaded', () => {
             userNameInput.value = myName;
         }
     };
+    const getPersistentPeerId = () => localStorage.getItem(PEER_ID_STORAGE_KEY);
+    const setPersistentPeerId = (id) => localStorage.setItem(PEER_ID_STORAGE_KEY, id);
+
 
     // --- UI Functions ---
     const showToast = (message) => {
         notificationToast.textContent = message;
         notificationToast.classList.remove('hidden');
-        // The animation is handled by CSS, we just need to re-trigger it
         notificationToast.style.animation = 'none';
-        notificationToast.offsetHeight; /* trigger reflow */
+        notificationToast.offsetHeight;
         notificationToast.style.animation = null; 
     };
 
@@ -322,9 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
             </button>`;
 
-        // Add group-hover utility for delete button visibility
         contactEl.classList.add('group');
-
         contactEl.addEventListener('click', (e) => {
             if (e.target.closest('.delete-btn')) {
                 peerIdToDelete = peerId;
@@ -356,7 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let messageContentHTML = '';
         if (type === 'text') {
-            // Sanitize text content before displaying
             const textEl = document.createElement('p');
             textEl.className = 'text-sm break-words';
             textEl.textContent = content;
@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chatView.classList.add('hidden');
         contactsView.classList.remove('hidden');
         activeChatPeerId = null;
-        renderAllLists(); // Re-render to remove active state
+        renderAllLists();
     };
 
     const showChatView = (peerId) => {
@@ -390,17 +390,22 @@ document.addEventListener('DOMContentLoaded', () => {
         chatView.classList.remove('hidden');
         chatView.classList.add('flex');
         renderMessages();
-        renderAllLists(); // Re-render to show active state
+        renderAllLists();
         messageInput.focus();
     };
 
 
     // --- Main Logic ---
     const initializePeer = () => {
-        peer = new Peer(null, {}); // Let server assign ID for simplicity
+        const persistentId = getPersistentPeerId();
+        peer = new Peer(persistentId, {}); // Request persistent ID
+        
         peer.on('open', id => {
             myPeerId = id;
             myPeerIdEl.value = id;
+            if (!persistentId || persistentId !== id) {
+                setPersistentPeerId(id); // Save the new ID if it's different
+            }
             connectionStatusEl.textContent = 'Status: Online';
             connectionStatusEl.classList.remove('text-neutral-500');
             connectionStatusEl.classList.add('text-green-600');
@@ -408,12 +413,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (contacts[pid].status === 'friends') connectToPeer(pid);
             });
         });
+        
         peer.on('connection', conn => setupConnection(conn));
+        
         peer.on('error', err => {
             console.error('PeerJS error:', err);
             connectionStatusEl.textContent = `Status: Error - ${err.type}`;
             connectionStatusEl.classList.remove('text-green-600');
             connectionStatusEl.classList.add('text-red-600');
+            
+            if (err.type === 'unavailable-id') {
+                showToast('Your saved ID is in use. Getting a new one.', true);
+                localStorage.removeItem(PEER_ID_STORAGE_KEY); // Remove the bad ID
+                peer.destroy();
+                initializePeer(); // Restart the process
+            }
         });
     };
 
@@ -431,12 +445,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const contact = contacts[peerId];
         let data, cryptoKey;
 
-        // Decrypt if it's a known friend
         if (contact && contact.status === 'friends' && contact.key) {
             cryptoKey = await cryptoOps.importKey(contact.key);
             data = await cryptoOps.decrypt(encryptedData, cryptoKey);
         } else {
-             // For pre-friendship messages (requests), parse directly
             try { data = JSON.parse(encryptedData); } catch(e) { console.error("Could not parse incoming data:", e); return; }
         }
 
@@ -524,10 +536,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = e.target.files[0];
         if (!file || !activeChatPeerId) return;
 
-        // Reset file input to allow selecting the same file again
         e.target.value = null;
 
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit before compression
+        if (file.size > 5 * 1024 * 1024) {
             showToast('Image is too large (max 5MB).');
             return;
         }
@@ -535,7 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Compressing image...');
         try {
             const compressedDataUrl = await imageUtils.compress(file);
-             if (compressedDataUrl.length > 1_000_000) { // 1MB limit for dataURL
+             if (compressedDataUrl.length > 1_000_000) {
                 showToast('Compressed image is still too large to send.');
                 return;
             }
@@ -558,7 +569,6 @@ document.addEventListener('DOMContentLoaded', () => {
             saveState();
             renderAllLists();
             
-            // Friend requests are not encrypted
             sendData(targetId, { type: 'friend-request', payload: { name: myName } }, false);
             
             addContactForm.reset();
@@ -576,7 +586,6 @@ document.addEventListener('DOMContentLoaded', () => {
             contact.key = exportedKey;
             contact.history = [];
             
-            // Acceptance is not encrypted
             sendData(peerId, { type: 'accept-request', payload: { name: myName, key: exportedKey } }, false);
             
             saveState();
@@ -587,7 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const declineOrCancelRequest = (peerId, type) => {
         if (contacts[peerId]) {
-            sendData(peerId, { type }, false); // Not encrypted
+            sendData(peerId, { type }, false);
             delete contacts[peerId];
             saveState();
             renderAllLists();
