@@ -199,8 +199,12 @@
         /* Settings Menu */
         .menu-setting-item { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
         .menu-setting-item label { font-size: 0.85em; opacity: 0.8; padding-left: 5px; }
-        .menu-setting-item.with-details { flex-direction: row; align-items: center; justify-content: space-between; }
-        .menu-setting-item.with-details .menu-select { flex-grow: 1; }
+        .menu-setting-item .with-details { 
+            flex-direction: row; 
+            align-items: center; 
+            justify-content: space-between; 
+        }
+        .menu-setting-item .with-details .menu-select { flex-grow: 1; }
         .details-button {
             flex-shrink: 0; width: 28px; height: 28px; margin-left: 10px;
             background-color: color-mix(in srgb, var(--current-theme-neutral) 70%, var(--current-theme-bg));
@@ -291,8 +295,7 @@
            }
         .search-suggestions-list li { padding: 10px 20px; cursor: pointer; color: var(--text-color); }
         .search-suggestions-list li:hover, .search-suggestions-list li.selected { 
-            background-color: var(--menu-item-hover-bg); 
-            color: var(--button-text-color); 
+            background-color: var(--menu-item-hover-bg); color: var(--button-text-color); 
         }
         .search-engine-explanation, .setting-explanation {
             font-size: 0.8em; color: var(--text-color); opacity: 0.7;
@@ -381,11 +384,11 @@
             align-items: center; justify-content: center; font-size: 1em; font-weight: 500;
            }
            #error-home-button:hover { background-color: var(--button-hover-bg); }
-
-        #bookmarks-list-popup.scrollable {
+        
+        /* Bookmark Menu Scroll */
+        #bookmarks-list-popup {
             max-height: 180px; /* Approx 4 items */
             overflow-y: auto;
-            padding-right: 5px; /* space for scrollbar */
         }
 
     </style>
@@ -415,7 +418,7 @@
         <div class="nav-button" id="forward-button" title="Forward"><img src="../images/arrow-right-white.png" alt="Forward" class="icon-img"></div>
         <div class="nav-button" id="refresh-button" title="Refresh"><img src="../images/refresh-white.png" alt="Refresh" class="icon-img"></div>
         <div id="search-bar-container">
-            <input type="text" id="search-bar" placeholder="Search or type a URL">
+            <input type="text" id="search-bar" placeholder="Search or type a URL" autocomplete="off">
             <ul id="top-search-suggestions" class="search-suggestions-list"></ul>
         </div>
         
@@ -438,6 +441,9 @@
         <h3>History</h3>
         <input type="text" id="history-search-bar" class="menu-input" placeholder="Search history...">
         <ul id="history-list-popup"></ul>
+        <div class="menu-action-bar">
+             <button id="clear-all-history-button" class="menu-button clear-button">Clear All History</button>
+        </div>
     </div>
 
     <div id="settings-menu" class="mini-menu">
@@ -507,7 +513,7 @@
             <h3>Privacy</h3>
             <div class="menu-setting-item">
                 <label for="ad-block-level-selector">Smart Ad-Free</label>
-                <div class="menu-setting-item with-details">
+                <div class="with-details">
                     <select id="ad-block-level-selector" class="menu-select">
                         <option value="off">Off</option>
                         <option value="standard">Standard</option>
@@ -553,13 +559,29 @@
                 </div>
                 <button id="apply-custom-history-days-button" class="menu-button">Set Custom Days</button>
            </div>
+
+            <div class="menu-action-bar" id="cookie-management-container">
+                <h3>Cookie Management</h3>
+                <button id="clear-current-site-cookies-button" class="menu-button">Clear Current Site Cookies</button>
+                <button id="clear-all-browser-cookies-button" class="menu-button clear-button" style="margin-top:10px;">Clear All Browser Cookies</button>
+                <div class="menu-setting-item toggle-item" style="margin-top: 15px;">
+                    <div class="toggle-label-container">
+                        <label for="block-third-party-cookies-toggle" style="cursor: pointer;">Block Third-Party Cookies</label>
+                        <small class="toggle-description">Prevents third-party sites from setting cookies.</small>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="block-third-party-cookies-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
         </div>
 
         <div class="settings-section">
             <h3>Data Management</h3>
             <div class="menu-action-bar" style="display: flex; flex-direction: column; gap: 10px;">
-                 <button id="clear-all-history-button" class="menu-button clear-button">Clear All History</button>
-                 <button id="clear-browser-data-button" class="menu-button clear-button">Clear All Site Data</button>
+                <button id="settings-clear-history-button" class="menu-button clear-button">Clear All History</button>
+                <button id="clear-all-data-button" class="menu-button clear-button">Clear All Data & Settings</button>
             </div>
         </div>
     </div>
@@ -576,7 +598,7 @@
         <div id="homepage">
             <img id="homepage-logo" src="../images/title.png" alt="VERN MAX">
             <div id="homepage-search-container">
-                <input type="text" id="homepage-search-bar" placeholder="Search or type a URL">
+                <input type="text" id="homepage-search-bar" placeholder="Search or type a URL" autocomplete="off">
                 <img id="homepage-search-icon" src="../images/magnify-white.png" alt="Search">
                 <ul id="search-suggestions" class="search-suggestions-list"></ul>
             </div>
@@ -612,6 +634,7 @@
         let adBlockerObserver = null;
         let vernBlockedItems = 0;
         let lastInvalidUrl = '';
+        let suggestionFetchController;
         let suggestionIndex = -1;
 
 
@@ -653,6 +676,7 @@
 
         // --- AD BLOCKER BLOCKLISTS (MASSIVELY EXPANDED) ---
         const blockedDomains = [
+            // Major Ad Networks & Trackers
             'doubleclick.net', 'adservice.google.com', 'googleadservices.com', 'googlesyndication.com', 'google-analytics.com', 'googletagmanager.com',
             'adnxs.com', 'adroll.com', 'criteo.com', 'pubmatic.com', 'rubiconproject.com', 'youtube-nocookie.com', 'adobedtm.com', 'facebook.net', 'connect.facebook.net',
             'scorecardresearch.com', 'zedo.com', 'adsrvr.org', 'openx.net', 'yieldmo.com', 'hotjar.com', 'yandex.ru', 'vk.com', 'statcounter.com',
@@ -661,22 +685,27 @@
             'sovrn.com', 'infolinks.com', 'contextweb.com', 'chitika.com', 'buysellads.com', 'advertising.com', 'moatads.com',
             'yieldlab.net', 'spotxchange.com', 'smartadserver.com', 'quantserve.com', 'chartbeat.com', 'mixpanel.com', 'optimizely.com',
             'kissmetrics.com', 'crazyegg.com', 'mouseflow.com', 'vwo.com', 'fullstory.com', 'loggly.com', 'newrelic.com',
+            // Malicious Ad Domains & Annoyances
             '12ezo5v60.com', 'ybs2ffs7v.com', 'fvcwqkkqmuv.com', 'feed-back.systems', 'feed-back.space', 'onclickgenius.com', 'webrdr.com',
             'crptgate.com', 'coin-hive.com', 'cnhv.co', 'coinhive.com', 'load.gg', 'webmine.pro'
         ];
         const blockedSelectors = [
+            // Standard Ad Selectors
             '.ad', '.ads', '.advert', '.advertisement', '.banner-ad', '.google-ad', '.g-ad', 'div[data-google-query-id]',
             '[class*="adsbygoogle"]', '[id*="google_ads"]', '[class*="ad-"]', '[id*="ad-"]', '[class*="-ad-"]', '[id*="-ad-"]',
             '.ad-banner', '.ad-container', '.ad-wrapper', '.advertisement', '.advertising', '[data-ad-slot]', '[id*="ad-slot"]',
             '#google_vignette', 'div[id^="ad_"]', 'ins.adsbygoogle', 'a[href*="/ads/"]', 'a[href*="?ad-id="]', 'a[data-ad-id]',
             'div[data-ad-format]', 'div[data-ad-unit-path]', '[aria-label="advertisement"]', 'div[data-ad-name]',
+            // Video Ad Selectors
             '.ytp-ad-module', '.video-ads', '.ytp-ad-player-overlay', '.ytp-ad-skip-button-container', '.ytp-ad-preview-container', '.ytp-ad-text-overlay', '.ytp-ad-overlay',
             '.fluid_ad_com_container',
+            // Advanced & Institutional Ad Selectors
             '[id^="div-gpt-ad-"]', '[class*="Display_ad_"]', '.ad-rotator', '.sidebar-ad', '.skyscraper-ad', 'div[id*="sticky_ad"]', '.sticky-ad',
             '[class*="overlay-ad"]', '[class*="ad-overlay"]', '#ad_position_box', '.ad_sponsorship', '.ad-banner-container', '[id*="ad_unit"]',
             '[id^="ad-sense-"]', '.trc_rbox_div', '.OUTBRAIN', 'div[widget-id^="outbrain_widget_"]', '[class*="native-ad"]',
             '.ad-placeholder', '.pub_300x250', '.text-ad', '.sponsored-post', '.sponsored-link', '.ads-box', 'div[aria-label="Ads"]', 'div[data-ad-manager-id]',
             'object[data*="ad.swf"]', 'embed[src*="ad.swf"]', 'div[id*="taboola"]', 'div[data-content-ad]', 'div[class*="ad-blocker-wrapper"]',
+            // Popup & Interstitial Selectors
             '[class*="expandable-ad"]', '[class*="interstitial-ad"]', 'div[id*="interstitial"]', 'div[class*="pop-up-ad"]', 'div[class*="popup"]',
             'div.pn-widget', '#inpage-push', '[class*="push-prompt"]', '[id*="notification-prompt"]', '#onesignal-slidedown-container', '[class*="modal-dialog"]'
         ];
@@ -687,9 +716,12 @@
             'div[style*="z-index: 9999"]', 'div[class*="modal-dialog"][id*="adblock"]', 'div[id="adblock-detect"]'
         ];
         const blockedScriptKeywords = [
+            // Anti-Adblock Scripts
             'fuckadblock.js', 'blockadblock.js', 'adblock-detector.js', 'advertisement.js', 'ad-reblock.js', 'sniff.js', 'adblock-notify.js', 'detectadblock.js',
+            // Analytics & Tracking Scripts
             'google-analytics.com/analytics.js', 'googletagmanager.com/gtm.js', 'hotjar.com', 'yandex.ru/metrika', 'matomo.js',
             'mixpanel.js', 'optimizely.js', 'chartbeat.js', 'quantserve.com/quant.js', 'scorecardresearch.com/beacon.js',
+            // Fingerprinting & Malicious Scripts
             'fingerprint.js', 'client.js', 'webmine.js', 'coinhive.min.js', 'ad.js'
         ];
 
@@ -698,24 +730,27 @@
             fullscreenButtonEl, settingsButtonEl, bookmarkButtonEl, historyButtonEl, bookmarkMenuEl, 
             historyMenuEl, settingsMenuEl, bookmarksListPopupEl, newBookmarkNameInputPopupEl, 
             addCurrentBookmarkButtonPopupEl, historyListPopupEl, toolbarEl, 
-            themeSelectorEl, searchEngineSelectorEl, historyLifespanSelectorEl, clearBrowserDataButtonEl, historySearchBarEl,
+            themeSelectorEl, searchEngineSelectorEl, historyLifespanSelectorEl, clearAllDataButtonEl, historySearchBarEl,
             homepageEl, homepageSearchBarEl, searchSuggestionsEl,
             homepageSearchIconEl, adBlockLevelSelectorEl,
             customThemeSettingsContainerEl, customThemeBgBaseEl, customThemeAccentBaseEl, applyCustomThemeButtonEl,
             customHistoryDaysContainerEl, customHistoryDaysInputEl, applyCustomHistoryDaysButtonEl,
             httpsEnforceToggleEl, homepageUrlInputEl, setCurrentPageAsHomepageButtonEl, resetHomepageButtonEl,
-            restoreSessionToggleEl,
+            restoreSessionToggleEl, clearCurrentSiteCookiesButtonEl, clearAllBrowserCookiesButtonEl,
+            blockThirdPartyCookiesToggleEl, cookieManagementContainerEl,
             topSearchSuggestionsEl, errorOverlayEl, errorHomeButtonEl, adBlockCounterContainerEl,
             adBlockerDetailsButtonEl, adBlockerDetailsModalEl, adBlockerDetailsCloseEl, adBlockerDetailsTextEl,
-            pauseHistoryToggleEl, clearAllHistoryButtonEl, loadingOverlayEl, invalidUrlDisplayEl;
+            pauseHistoryToggleEl, clearAllHistoryButtonEl, loadingOverlayEl, invalidUrlDisplayEl,
+            settingsClearHistoryButtonEl;
 
         let bookmarkItemTemplate, historyItemTemplate, historyGroupTemplate;
         
-        // --- AD BLOCKER ENGINE ---
+        // --- AD BLOCKER ENGINE (OVERHAULED) ---
         function findAndDestroyAdContainer(element) {
             if (!element) return false;
             let current = element;
             let containerFound = false;
+            // Traverse up the DOM tree a significant number of levels to find the full container
             for (let i = 0; i < 10 && current.parentElement; i++) {
                 const id = (current.id || '').toLowerCase();
                 const className = (current.className || '').toLowerCase();
@@ -730,15 +765,18 @@
         }
 
         function forcefullyRemoveElement(element) {
+            // Check if the element is valid and hasn't already been processed
             if (!element || element.classList.contains('vern-removed')) return false;
             try {
+                // Apply aggressive CSS to hide the element immediately
                 element.style.setProperty('display', 'none', 'important');
                 element.style.setProperty('visibility', 'hidden', 'important');
                 element.style.setProperty('height', '0', 'important');
                 element.style.setProperty('max-height', '0', 'important');
                 element.style.setProperty('overflow', 'hidden', 'important');
                 element.style.setProperty('pointer-events', 'none', 'important');
-                element.classList.add('vern-removed');
+                element.classList.add('vern-removed'); // Mark as processed
+                // Physically remove from the DOM
                 if (element.parentNode) {
                     element.parentNode.removeChild(element);
                 }
@@ -761,14 +799,17 @@
             if (!doc || !doc.body) return;
             let newlyRemoved = 0;
             const allSelectors = [...blockedSelectors, ...antiAdBlockerSelectors];
+
+            // Scan for and remove elements matching the blocklists
             allSelectors.forEach(selector => {
                 try {
                     doc.querySelectorAll(selector + ':not(.vern-removed)').forEach(el => {
                         if (findAndDestroyAdContainer(el)) newlyRemoved++;
                     });
-                } catch (e) { /* ignore */ }
+                } catch (e) { /* ignore errors from invalid selectors on certain pages */ }
             });
             
+            // For more aggressive modes, also block known ad scripts
             const adBlockLevel = localStorage.getItem('vernAdBlockLevel');
             if(adBlockLevel === 'aggressive' || adBlockLevel === 'annihilator') {
                  doc.querySelectorAll('script:not(.vern-removed)').forEach(script => {
@@ -779,9 +820,10 @@
                 });
             }
 
+            // Attempt to fix pages broken by adblocker-blockers
             if (doc.body && doc.body.style.overflow === 'hidden') {
                 doc.body.style.setProperty('overflow', 'auto', 'important');
-                newlyRemoved++;
+                newlyRemoved++; // Count this as a "blocked" item as it's an anti-adblock measure.
             }
             if (doc.documentElement && doc.documentElement.style.overflow === 'hidden') {
                 doc.documentElement.style.setProperty('overflow', 'auto', 'important');
@@ -803,16 +845,20 @@
                 const doc = iframe.contentDocument;
                 if (!doc || !doc.body) return;
 
+                // Disconnect any previous observer to prevent duplicates
                 if (adBlockerObserver) adBlockerObserver.disconnect();
+                // Use MutationObserver to react to dynamically added ads
                 adBlockerObserver = new MutationObserver(() => scanAndRemoveAds(doc));
                 adBlockerObserver.observe(doc.body, { childList: true, subtree: true });
 
+                // Run an initial scan as soon as the page is ready
                 scanAndRemoveAds(doc);
 
+                // For the most aggressive modes, also run a timed, repeating scan
                 if (adBlockLevel === 'annihilator') {
-                    adBlockerInterval = setInterval(() => scanAndRemoveAds(doc), 100);
+                    adBlockerInterval = setInterval(() => scanAndRemoveAds(doc), 100); // Hyper-aggressive check
                 } else if (adBlockLevel === 'aggressive') {
-                    adBlockerInterval = setInterval(() => scanAndRemoveAds(doc), 250);
+                    adBlockerInterval = setInterval(() => scanAndRemoveAds(doc), 250); // Aggressive check
                 }
             } catch (e) {
                 console.warn("Ad blocker could not access iframe content.", e);
@@ -860,7 +906,7 @@
             bookmarksListPopupEl = document.getElementById('bookmarks-list-popup'); newBookmarkNameInputPopupEl = document.getElementById('new-bookmark-name-popup'); addCurrentBookmarkButtonPopupEl = document.getElementById('add-current-bookmark-button-popup');
             historyListPopupEl = document.getElementById('history-list-popup'); historySearchBarEl = document.getElementById('history-search-bar'); clearAllHistoryButtonEl = document.getElementById('clear-all-history-button');
             themeSelectorEl = document.getElementById('theme-selector'); searchEngineSelectorEl = document.getElementById('search-engine-selector'); historyLifespanSelectorEl = document.getElementById('history-lifespan-selector');
-            clearBrowserDataButtonEl = document.getElementById('clear-browser-data-button');
+            clearAllDataButtonEl = document.getElementById('clear-all-data-button');
             bookmarkItemTemplate = document.getElementById('bookmark-item-template'); historyItemTemplate = document.getElementById('history-item-template'); historyGroupTemplate = document.getElementById('history-group-template');
             homepageEl = document.getElementById('homepage'); homepageSearchBarEl = document.getElementById('homepage-search-bar'); searchSuggestionsEl = document.getElementById('search-suggestions');
             topSearchSuggestionsEl = document.getElementById('top-search-suggestions');
@@ -880,10 +926,15 @@
             resetHomepageButtonEl = document.getElementById('reset-homepage-button');
             restoreSessionToggleEl = document.getElementById('restore-session-toggle');
             pauseHistoryToggleEl = document.getElementById('pause-history-toggle');
+            clearCurrentSiteCookiesButtonEl = document.getElementById('clear-current-site-cookies-button');
+            clearAllBrowserCookiesButtonEl = document.getElementById('clear-all-browser-cookies-button');
+            blockThirdPartyCookiesToggleEl = document.getElementById('block-third-party-cookies-toggle');
+            cookieManagementContainerEl = document.getElementById('cookie-management-container');
             errorOverlayEl = document.getElementById('error-overlay');
             errorHomeButtonEl = document.getElementById('error-home-button');
             loadingOverlayEl = document.getElementById('loading-overlay');
             invalidUrlDisplayEl = document.getElementById('invalid-url-display');
+            settingsClearHistoryButtonEl = document.getElementById('settings-clear-history-button');
         }
         
         async function initUV() { try { await registerSW(); } catch (err) { console.error("SW registration failed:", err); }}
@@ -912,47 +963,31 @@
                 toggleCustomHistoryView(true);
             }
             adBlockLevelSelectorEl.value = localStorage.getItem('vernAdBlockLevel') || 'standard';
+            blockThirdPartyCookiesToggleEl.checked = localStorage.getItem('vernBlockThirdPartyCookies') === 'true';
             document.title = 'VERN MAX';
             updateBlockCounterDisplay();
         }
 
         function setupEventListeners() {
-            // Toolbar and Navigation
-            fullscreenButtonEl.addEventListener('click', toggleIframeFullscreen); 
-            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            fullscreenButtonEl.addEventListener('click', toggleIframeFullscreen); document.addEventListener('fullscreenchange', handleFullscreenChange);
             homeButtonEl.addEventListener('click', () => navigateTo(getHomepageUrl()));
-            backButtonEl.addEventListener('click', () => contentIframeEl.contentWindow.history.back()); 
-            forwardButtonEl.addEventListener('click', () => contentIframeEl.contentWindow.history.forward());
-            refreshButtonEl.addEventListener('click', () => { if (!isLoading && currentUrl && !currentUrl.startsWith('about:')) { const icon = refreshButtonEl.querySelector('.icon-img'); icon.classList.add('spinning'); isRefreshing = true; contentIframeEl.contentWindow.location.reload(true); } });
+            backButtonEl.addEventListener('click', () => contentIframeEl.contentWindow.history.back()); forwardButtonEl.addEventListener('click', () => contentIframeEl.contentWindow.history.forward());
+            refreshButtonEl.addEventListener('click', () => { if (contentIframeEl.src !== 'about:blank' && !contentIframeEl.src.endsWith('#')) { const icon = refreshButtonEl.querySelector('.icon-img'); icon.classList.add('spinning'); isRefreshing = true; contentIframeEl.contentWindow.location.reload(true); } });
             contentIframeEl.addEventListener('load', handleIframeLoad);
-
-            // Search Bars and Suggestions
-            [searchBarEl, homepageSearchBarEl].forEach(bar => {
-                const suggestionsEl = bar.id === 'search-bar' ? topSearchSuggestionsEl : searchSuggestionsEl;
-                bar.addEventListener('input', () => handleSearchInput(bar, suggestionsEl));
-                bar.addEventListener('keydown', (e) => handleSuggestionNavigation(e, bar, suggestionsEl));
-            });
-            
-            // Menus
             settingsButtonEl.addEventListener('click', (e) => { e.stopPropagation(); toggleSettingsMenu(); });
             bookmarkButtonEl.addEventListener('click', (e) => { e.stopPropagation(); toggleBookmarkMenu(); });
             historyButtonEl.addEventListener('click', (e) => { e.stopPropagation(); toggleHistoryMenu(); });
-            settingsMenuEl.addEventListener('click', e => e.stopPropagation()); // Prevent settings menu from closing on inner clicks
             document.addEventListener('click', (e) => {
                 closeAllMenus(e);
-                if (homepageSearchBarEl && !homepageSearchBarEl.contains(e.target)) searchSuggestionsEl.style.display = 'none';
-                if (searchBarEl && !searchBarEl.contains(e.target)) topSearchSuggestionsEl.style.display = 'none';
+                if (homepageSearchBarEl && !homepageSearchBarEl.parentElement.contains(e.target)) hideSuggestions(searchSuggestionsEl);
+                if (!searchBarEl.parentElement.contains(e.target)) hideSuggestions(topSearchSuggestionsEl);
             });
-
-            // Bookmarks
             addCurrentBookmarkButtonPopupEl.addEventListener('click', handleAddCurrentBookmark);
             bookmarksListPopupEl.addEventListener('click', handleBookmarkClick);
-
-            // History
             historyListPopupEl.addEventListener('click', handleHistoryClick);
             historySearchBarEl.addEventListener('input', () => loadHistory(historySearchBarEl.value));
-
-            // Settings Controls
+            clearAllHistoryButtonEl.addEventListener('click', clearAllHistory);
+            settingsClearHistoryButtonEl.addEventListener('click', clearAllHistory);
             themeSelectorEl.addEventListener('change', (e) => {
                 const themeKey = e.target.value;
                 applyTheme(themeKey);
@@ -973,37 +1008,78 @@
                 localStorage.setItem('vernAdBlockLevel', e.target.value);
                 if (currentUrl && !currentUrl.startsWith('about:')) contentIframeEl.contentWindow.location.reload(true);
                 updateBlockCounterDisplay();
+               });
+             adBlockerDetailsButtonEl.addEventListener('click', showBlockerDetails);
+             adBlockerDetailsCloseEl.addEventListener('click', (event) => {
+                 event.stopPropagation();
+                 adBlockerDetailsModalEl.style.display = "none";
             });
-            adBlockerDetailsButtonEl.addEventListener('click', showBlockerDetails);
-            adBlockerDetailsCloseEl.addEventListener('click', (e) => { e.stopPropagation(); adBlockerDetailsModalEl.style.display = "none"; });
-            window.addEventListener('click', (event) => { if (event.target == adBlockerDetailsModalEl) { adBlockerDetailsModalEl.style.display = "none"; } });
-            
+             window.addEventListener('click', (event) => {
+                 if (event.target == adBlockerDetailsModalEl) {
+                     adBlockerDetailsModalEl.style.display = "none";
+                 }
+            });
             applyCustomThemeButtonEl.addEventListener('click', applyAndSaveCustomTheme);
             applyCustomHistoryDaysButtonEl.addEventListener('click', applyAndSaveCustomHistoryDays);
+            clearAllDataButtonEl.addEventListener('click', clearAllData);
+            homepageSearchIconEl.addEventListener('click', () => navigateTo(homepageSearchBarEl.value));
             
+            // Search Bar Event Listeners (for both top and homepage bars)
+            [searchBarEl, homepageSearchBarEl].forEach(bar => {
+                const suggestionsEl = bar.id === 'search-bar' ? topSearchSuggestionsEl : searchSuggestionsEl;
+                bar.addEventListener('input', () => handleSearchInput(bar, suggestionsEl));
+                bar.addEventListener('keydown', (e) => handleSearchKeyDown(e, bar, suggestionsEl));
+                bar.addEventListener('blur', () => { 
+                    // Delay hiding to allow click on suggestion to register
+                    setTimeout(() => {
+                        if (document.activeElement !== bar && !suggestionsEl.contains(document.activeElement)) {
+                           hideSuggestions(suggestionsEl);
+                        }
+                    }, 150);
+                });
+                suggestionsEl.addEventListener('mousedown', (e) => { 
+                    if (e.target.tagName === 'LI') {
+                        e.preventDefault(); // Prevent blur event from firing on the input
+                        navigateTo(e.target.textContent); 
+                    }
+                });
+            });
+
+            document.addEventListener('keydown', handleGlobalKeyDown);
+            window.addEventListener('resize', () => { if (document.querySelector('.mini-menu.show')) closeAllMenus(new MouseEvent('click')); });
             httpsEnforceToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernHttpsEnforce', e.target.checked); });
             homepageUrlInputEl.addEventListener('input', () => { localStorage.setItem('vernCustomHomepage', homepageUrlInputEl.value.trim()); });
             setCurrentPageAsHomepageButtonEl.addEventListener('click', () => {
-                if (currentUrl && currentUrl !== 'about:blank' && currentUrl !== 'about:blank#') {
-                    homepageUrlInputEl.value = currentUrl;
-                    localStorage.setItem('vernCustomHomepage', currentUrl);
+                const pageInfo = getCurrentPageInfo();
+                if (pageInfo.url && pageInfo.url !== 'about:blank' && pageInfo.url !== 'about:blank#') {
+                    homepageUrlInputEl.value = pageInfo.url;
+                    localStorage.setItem('vernCustomHomepage', pageInfo.url);
+                    alert('Current page set as homepage!');
+                } else {
+                    alert('Cannot set this page as homepage.');
                 }
             });
             resetHomepageButtonEl.addEventListener('click', () => {
                 homepageUrlInputEl.value = '';
                 localStorage.removeItem('vernCustomHomepage');
+                alert('Homepage reset to default.');
             });
             restoreSessionToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernRestoreSession', e.target.checked); });
             pauseHistoryToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernHistoryPaused', e.target.checked); });
-
-            // Data Management
-            clearAllHistoryButtonEl.addEventListener('click', clearAllHistory);
-            clearBrowserDataButtonEl.addEventListener('click', clearAllData);
-
-            // Global Handlers
             errorHomeButtonEl.addEventListener('click', () => navigateTo(getHomepageUrl()));
-            document.addEventListener('keydown', handleGlobalKeyDown);
-            window.addEventListener('resize', () => { if (document.querySelector('.mini-menu.show')) closeAllMenus(new MouseEvent('click')); });
+            clearCurrentSiteCookiesButtonEl.addEventListener('click', () => {
+                if (confirm("Are you sure you want to clear cookies for the current site?")) {
+                    clearCookiesForCurrentSite();
+                    alert("Attempted to clear cookies for the current site.");
+                }
+            });
+            clearAllBrowserCookiesButtonEl.addEventListener('click', () => {
+                if (confirm("Are you sure you want to clear ALL browser cookies?")) {
+                    clearAllBrowserCookies();
+                    alert("All browser cookies cleared.");
+                }
+            });
+            blockThirdPartyCookiesToggleEl.addEventListener('change', (e) => { localStorage.setItem('vernBlockThirdPartyCookies', e.target.checked); });
         }
 
         function showBlockerDetails() {
@@ -1026,8 +1102,12 @@
                 case 'annihilator':
                     content = `<h4>Mode: Ad Annihilator</h4><p>The most extreme level of blocking. This mode uses a hyper-aggressive, constant scan to find and destroy almost all forms of advertising, trackers, and annoyances at the centisecond level (100 times per second).</p>
                                 <p><b>Warning:</b> This mode is very powerful and may cause some websites to load or function incorrectly.</p>
-                                <p class="details-list-heading">What it blocks:</p>
-                                <ul><li>All common ad types, video ads, pop-ups, and trackers.</li><li>Most anti-ad-block scripts and fingerprinting attempts.</li></ul>`;
+                                <p class="details-list-heading">Simple Ads Blocked:</p>
+                                <ul><li>Banner, sidebar, footer, header, pop-up, pop-under, interstitial, in-page text, search engine, and all forms of video ads (pre-roll, mid-roll, post-roll, overlay).</li></ul>
+                                <p class="details-list-heading">Advanced Ads Blocked:</p>
+                                <ul><li>Floating, sticky, expandable, collapsible, native ads, sponsored articles, promoted posts/tweets, suggested video ads, and all types of in-app and in-feed mobile ads.</li></ul>
+                                <p class="details-list-heading">Extreme Threats Targeted:</p>
+                                <ul><li>Scripts associated with server-side ads, programmatic ad channels, and user fingerprinting.</li><li>Patterns of CDN-injected content and known ad-related WebRTC streams.</li><li><b>Note:</b> True DNS hijacking or P2P injection are network-level threats and cannot be fully blocked by a webpage alone, but this mode blocks their known patterns and scripts.</li></ul>`;
                     break;
             }
             adBlockerDetailsTextEl.innerHTML = content;
@@ -1037,11 +1117,11 @@
         function navigateTo(urlInput) {
             stopAdBlockerInstances();
             isLoading = true;
-            addCurrentBookmarkButtonPopupEl.disabled = true;
             showLoadingOverlay();
+            toggleBookmarkControls(false); // Disable bookmark controls while loading
 
-            searchSuggestionsEl.style.display = 'none';
-            topSearchSuggestionsEl.style.display = 'none';
+            hideSuggestions(searchSuggestionsEl);
+            hideSuggestions(topSearchSuggestionsEl);
 
             let targetUrl = urlInput ? urlInput.trim() : '';
             lastInvalidUrl = targetUrl; // Store the attempted URL for the error message
@@ -1072,6 +1152,7 @@
                 showHomepage();
                 searchBarEl.value = '';
                 currentUrl = 'about:blank';
+                currentTitle = 'New Tab';
             } else {
                 hideHomepage();
                 contentIframeEl.src = proxyUrl(targetUrl);
@@ -1080,48 +1161,31 @@
 
         function handleIframeLoad() {
             isLoading = false;
-            addCurrentBookmarkButtonPopupEl.disabled = false;
             hideLoadingOverlay();
+            toggleBookmarkControls(true); // Re-enable bookmark controls
             if (isRefreshing) { refreshButtonEl.querySelector('.icon-img').classList.remove('spinning'); isRefreshing = false; }
             
-            let finalUrl = 'about:blank', finalTitle = 'New Tab';
-            try {
-                if(contentIframeEl.contentWindow.location.href === "about:blank" || contentIframeEl.contentWindow.location.href === "about:srcdoc") throw new Error("Blank page loaded");
-                if (contentIframeEl.contentWindow && contentIframeEl.contentWindow.__uv && contentIframeEl.contentWindow.__uv.location.href !== 'about:blank') {
-                    finalUrl = contentIframeEl.contentWindow.__uv.location.href;
-                    finalTitle = contentIframeEl.contentDocument.title || new URL(finalUrl).hostname;
-                } else {
-                     throw new Error("Proxy location not found");
-                }
-            } catch (e) { 
-                if(currentUrl !== 'about:blank' && !contentIframeEl.src.startsWith('about:blank')){
-                    showErrorPage();
-                    return;
-                }
-                finalUrl = 'about:blank';
-                finalTitle = 'New Tab';
-            }
+            const pageInfo = getCurrentPageInfo();
+            currentUrl = pageInfo.url;
+            currentTitle = pageInfo.title;
 
             const adBlockLevel = localStorage.getItem('vernAdBlockLevel') || 'standard';
-            if (adBlockLevel !== 'off' && finalUrl.includes('#google_vignette')) {
-                navigateTo(finalUrl.split('#google_vignette')[0]);
+            if (adBlockLevel !== 'off' && currentUrl.includes('#google_vignette')) {
+                navigateTo(currentUrl.split('#google_vignette')[0]);
                 return;
             }
             
-            if(finalUrl === 'about:blank' || contentIframeEl.src.endsWith('#')){
+            if(currentUrl === 'about:blank' || contentIframeEl.src.endsWith('#')){
                 showHomepage();
                 searchBarEl.value = '';
-                currentUrl = 'about:blank';
             } else {
                 hideHomepage();
-                currentUrl = finalUrl;
-                searchBarEl.value = finalUrl;
+                searchBarEl.value = currentUrl;
             }
 
-            currentTitle = finalTitle;
             if (localStorage.getItem('vernRestoreSession') === 'true') localStorage.setItem('vernLastUrl', currentUrl);
             if (currentUrl && !currentUrl.startsWith('about:')) addToHistory(currentTitle, currentUrl);
-            if (adBlockLevel !== 'off' && finalUrl !== 'about:blank') {
+            if (adBlockLevel !== 'off' && currentUrl !== 'about:blank') {
                 setTimeout(() => initializeAdBlocker(contentIframeEl), 150);
             }
             updateBlockCounterDisplay();
@@ -1162,6 +1226,7 @@
         }
         function showErrorPage() {
             hideLoadingOverlay();
+            toggleBookmarkControls(true); // Also enable on error
             homepageEl.style.display = 'none';
             contentIframeEl.style.display = 'none';
             errorOverlayEl.style.display = 'flex';
@@ -1171,60 +1236,102 @@
             }
             invalidUrlDisplayEl.textContent = truncatedUrl;
         }
+        
+        // --- SEARCH SUGGESTIONS ---
         function handleSearchInput(inputElement, suggestionsElement) {
             const query = inputElement.value;
-            if (query.length > 0) {
-                fetch(`https://api.allorigins.win/raw?url=https://duckduckgo.com/ac/?q=${encodeURIComponent(query)}&type=json`)
-                    .then(response => response.ok ? response.json() : Promise.reject('Network error'))
-                    .then(data => {
-                        const suggestions = data.map(item => item.phrase);
-                        suggestionsElement.innerHTML = '';
-                        suggestions.forEach(suggestion => {
-                            const li = document.createElement('li');
-                            li.textContent = suggestion;
-                            suggestionsElement.appendChild(li);
-                        });
-                        suggestionsElement.style.display = 'block';
-                        suggestionIndex = -1; // Reset index on new input
-                    }).catch(error => {
+            if (suggestionFetchController) {
+                suggestionFetchController.abort();
+            }
+            if (query.length === 0) {
+                hideSuggestions(suggestionsElement);
+                return;
+            }
+
+            suggestionFetchController = new AbortController();
+            const signal = suggestionFetchController.signal;
+
+            fetch(`https://api.allorigins.win/raw?url=https://duckduckgo.com/ac/?q=${encodeURIComponent(query)}&type=json`, { signal })
+                .then(response => response.ok ? response.json() : Promise.reject('Network error'))
+                .then(data => {
+                    const suggestions = data.map(item => item.phrase);
+                    renderSuggestions(suggestions, suggestionsElement);
+                }).catch(error => {
+                    if (error.name !== 'AbortError') {
                         console.warn("Could not fetch search suggestions:", error);
-                        suggestionsElement.style.display = 'none';
-                    });
+                        hideSuggestions(suggestionsElement);
+                    }
+                });
+        }
+
+        function renderSuggestions(suggestions, suggestionsElement) {
+            suggestionsElement.innerHTML = '';
+            if (suggestions.length > 0) {
+                suggestions.forEach(suggestion => {
+                    const li = document.createElement('li');
+                    li.textContent = suggestion;
+                    suggestionsElement.appendChild(li);
+                });
+                suggestionsElement.style.display = 'block';
+                suggestionIndex = -1; // Reset index
             } else {
+                hideSuggestions(suggestionsElement);
+            }
+        }
+
+        function hideSuggestions(suggestionsElement) {
+            if (suggestionsElement) {
                 suggestionsElement.style.display = 'none';
+                suggestionsElement.innerHTML = '';
+                suggestionIndex = -1;
             }
         }
-        function handleSuggestionNavigation(event, inputElement, suggestionsElement) {
-            const suggestions = suggestionsElement.querySelectorAll('li');
-            if (!suggestions.length || suggestionsElement.style.display === 'none') return;
 
-            if (event.key === 'ArrowDown') {
-                event.preventDefault();
-                suggestionIndex = (suggestionIndex + 1) % suggestions.length;
-                updateSuggestionSelection(suggestions, inputElement);
-            } else if (event.key === 'ArrowUp') {
-                event.preventDefault();
-                suggestionIndex = (suggestionIndex - 1 + suggestions.length) % suggestions.length;
-                updateSuggestionSelection(suggestions, inputElement);
-            } else if (event.key === 'Enter') {
-                if (suggestionIndex > -1) {
-                    event.preventDefault(); // Prevent form submission
-                    inputElement.value = suggestions[suggestionIndex].textContent;
-                    navigateTo(inputElement.value);
-                    suggestionsElement.style.display = 'none';
+        function handleSearchKeyDown(event, inputElement, suggestionsElement) {
+            const items = suggestionsElement.querySelectorAll('li');
+            if (!items.length) return;
+
+            switch (event.key) {
+                case 'ArrowDown':
+                    event.preventDefault();
+                    suggestionIndex++;
+                    if (suggestionIndex >= items.length) suggestionIndex = 0;
+                    updateSelectedSuggestion(items, inputElement);
+                    break;
+                case 'ArrowUp':
+                    event.preventDefault();
+                    suggestionIndex--;
+                    if (suggestionIndex < 0) suggestionIndex = items.length - 1;
+                    updateSelectedSuggestion(items, inputElement);
+                    break;
+                case 'Enter':
+                    if (suggestionIndex > -1) {
+                        event.preventDefault();
+                        inputElement.value = items[suggestionIndex].textContent;
+                        navigateTo(inputElement.value);
+                    }
+                    // Allow default 'Enter' behavior if no suggestion is selected
+                    break;
+                case 'Escape':
+                    event.preventDefault();
+                    hideSuggestions(suggestionsElement);
+                    break;
+            }
+        }
+
+        function updateSelectedSuggestion(items, inputElement) {
+            items.forEach((item, index) => {
+                if (index === suggestionIndex) {
+                    item.classList.add('selected');
+                    // Optional: put suggestion text in search bar
+                    // inputElement.value = item.textContent; 
+                } else {
+                    item.classList.remove('selected');
                 }
-            }
-        }
-
-        function updateSuggestionSelection(suggestions, inputElement) {
-            suggestions.forEach((li, index) => {
-                li.classList.toggle('selected', index === suggestionIndex);
             });
-            if (suggestionIndex > -1) {
-                inputElement.value = suggestions[suggestionIndex].textContent;
-            }
         }
-
+        
+        // --- HISTORY MANAGEMENT ---
         function getHistory() { return JSON.parse(localStorage.getItem('vernHistory') || '[]'); }
         function saveHistory(history) { localStorage.setItem('vernHistory', JSON.stringify(history)); }
         function addToHistory(title, url) {
@@ -1240,12 +1347,12 @@
             let history = getHistory();
             const newHistory = history.filter(item => item.timestamp !== timestamp);
             saveHistory(newHistory);
-            loadHistory(historySearchBarEl.value);
+            loadHistory(historySearchBarEl.value); // Refresh the visible list
         }
         function clearAllHistory() {
             if (confirm("Are you sure you want to clear your entire search history? This cannot be undone.")) {
                 saveHistory([]);
-                loadHistory();
+                loadHistory(); // Refresh the visible list
             }
         }
         function loadHistory(searchTerm = '') {
@@ -1261,7 +1368,7 @@
                         const itemTpl = historyItemTemplate.content.cloneNode(true); 
                         const li = itemTpl.querySelector('li'); 
                         li.dataset.url = item.url;
-                        li.dataset.timestamp = item.timestamp;
+                        li.dataset.timestamp = item.timestamp; // Use timestamp for unique identification
                         li.title = `${item.title}\n${item.url}`; 
                         li.querySelector('.item-name').textContent = item.title; 
                         li.querySelector('.item-url').textContent = item.url;
@@ -1281,17 +1388,55 @@
             const cutoffDate = new Date(); cutoffDate.setDate(cutoffDate.getDate() - lifespanDays);
             saveHistory(getHistory().filter(item => new Date(item.timestamp) >= cutoffDate));
         }
-        function loadBookmarks() { const bms = JSON.parse(localStorage.getItem('vernBookmarks') || '[]'); bookmarksListPopupEl.innerHTML = ''; bms.forEach(renderBookmarkItem); updateBookmarkMenuLayout(); }
+
+        // --- BOOKMARK MANAGEMENT ---
+        function loadBookmarks() { const bms = JSON.parse(localStorage.getItem('vernBookmarks') || '[]'); bookmarksListPopupEl.innerHTML = ''; bms.forEach(renderBookmarkItem); }
         function saveBookmarks(bms) { localStorage.setItem('vernBookmarks', JSON.stringify(bms)); }
         function renderBookmarkItem(bm) { const li = bookmarkItemTemplate.content.cloneNode(true).firstElementChild; li.dataset.url = bm.url; li.title = `${bm.name}\n${bm.url}`; li.querySelector('.item-name').textContent = bm.name; li.querySelector('.item-url').textContent = bm.url; li.querySelector('.item-remove-button').onclick = (e) => { e.stopPropagation(); removeBookmark(bm.url); }; bookmarksListPopupEl.appendChild(li); }
-        function handleAddCurrentBookmark() { if (!currentUrl || currentUrl.startsWith('about:')) return; const name = newBookmarkNameInputPopupEl.value.trim() || currentTitle; let bms = JSON.parse(localStorage.getItem('vernBookmarks') || '[]'); if (bms.some(b => b.url === currentUrl)) return; bms.push({ name, url: currentUrl }); saveBookmarks(bms); renderBookmarkItem({ name, url: currentUrl }); newBookmarkNameInputPopupEl.value = ''; updateBookmarkMenuLayout(); }
+        function handleAddCurrentBookmark() { 
+            const pageInfo = getCurrentPageInfo();
+            if (!pageInfo.url || pageInfo.url.startsWith('about:')) return alert("Cannot bookmark this page."); 
+            const name = newBookmarkNameInputPopupEl.value.trim() || pageInfo.title; 
+            let bms = JSON.parse(localStorage.getItem('vernBookmarks') || '[]'); 
+            if (bms.some(b => b.url === pageInfo.url)) return alert("This page is already bookmarked."); 
+            bms.push({ name, url: pageInfo.url }); 
+            saveBookmarks(bms); 
+            renderBookmarkItem({ name, url: pageInfo.url }); 
+            newBookmarkNameInputPopupEl.value = ''; 
+        }
         function removeBookmark(url) { let bms = JSON.parse(localStorage.getItem('vernBookmarks') || '[]'); saveBookmarks(bms.filter(b => b.url !== url)); loadBookmarks(); }
-        function updateBookmarkMenuLayout() { bookmarksListPopupEl.classList.toggle('scrollable', bookmarksListPopupEl.children.length > 4); }
+        function toggleBookmarkControls(enabled) {
+            addCurrentBookmarkButtonPopupEl.disabled = !enabled;
+            bookmarksListPopupEl.style.pointerEvents = enabled ? 'auto' : 'none';
+            bookmarksListPopupEl.style.opacity = enabled ? '1' : '0.5';
+        }
+
+        // --- DATA & SETTINGS ---
         function clearAllData() {
             if (confirm("Are you sure you want to clear ALL browser data? This will delete all bookmarks, history, and settings and cannot be undone.")) {
                 Object.keys(localStorage).filter(k => k.startsWith('vern')).forEach(k => localStorage.removeItem(k));
-                window.location.reload();
+                alert("All browser data has been cleared."); window.location.reload();
             }
+        }
+        function clearCookiesForCurrentSite() {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i]; const eqPos = cookie.indexOf("="); const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+            }
+            if (contentIframeEl.contentWindow && contentIframeEl.contentWindow.location.href !== 'about:blank') {
+                try {
+                    contentIframeEl.contentWindow.document.cookie.split(';').forEach(function(c) {
+                        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                    });
+                    contentIframeEl.contentWindow.location.reload(true);
+                } catch (e) { console.warn("Could not directly clear iframe cookies due to security restrictions:", e); }
+            }
+        }
+        function clearAllBrowserCookies() {
+            const allCookies = document.cookie.split(';');
+            for (let i = 0; i < allCookies.length; i++) { document.cookie = allCookies[i].split('=')[0] + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"; }
+            window.location.reload();
         }
         function hexToRgb(hex) {
             let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -1327,21 +1472,28 @@
             localStorage.setItem('vernTheme', 'custom');
             themeSelectorEl.value = 'custom';
             applyTheme('custom');
+            alert('Smart theme applied and saved!');
         }
         function applyAndSaveCustomHistoryDays() {
             const days = parseInt(customHistoryDaysInputEl.value, 10);
-            if (isNaN(days) || days < 0 || days > 14) { return; }
+            if (isNaN(days) || days < 0 || days > 14) { alert('Please enter a number between 0 and 14.'); return; }
             localStorage.setItem('vernHistoryLifespan', days.toString());
             historyLifespanSelectorEl.value = 'custom';
             pruneHistory();
             loadHistory();
+            alert(`History lifespan set to ${days} days.`);
         }
         function toggleCustomThemeView(show) { customThemeSettingsContainerEl.classList.toggle('visible', show); }
         function toggleCustomHistoryView(show) { customHistoryDaysContainerEl.classList.toggle('visible', show); }
         function closeAllMenus(event) {
              if (!event || (bookmarkMenuEl.classList.contains('show') && !bookmarkMenuEl.contains(event?.target) && !bookmarkButtonEl.contains(event?.target))) bookmarkMenuEl.classList.remove('show');
              if (!event || (historyMenuEl.classList.contains('show') && !historyMenuEl.contains(event?.target) && !historyButtonEl.contains(event?.target))) historyMenuEl.classList.remove('show');
-             if (!event || (settingsMenuEl.classList.contains('show') && !settingsMenuEl.contains(event?.target) && !settingsButtonEl.contains(event?.target))) settingsMenuEl.classList.remove('show');
+             // Settings menu is now persistent and only closed by clicking its button again.
+             if (settingsMenuEl.classList.contains('show') && settingsButtonEl.contains(event?.target)) {
+                 // Allow the settings button to close its own menu
+             } else if (settingsMenuEl.classList.contains('show') && !settingsMenuEl.contains(event?.target)) {
+                 // This is where it would close on background click. We leave it open.
+             }
         }
         function positionMenuUnderButton(menuEl, buttonEl) {
             const btnRect = buttonEl.getBoundingClientRect();
@@ -1351,12 +1503,31 @@
         }
         function toggleMenu(menuEl, buttonEl) {
             const isShowing = menuEl.classList.contains('show');
-            closeAllMenus();
-            if (!isShowing) { menuEl.classList.add('show'); positionMenuUnderButton(menuEl, buttonEl); }
+            // Close all OTHER menus before opening a new one
+            if (menuEl !== bookmarkMenuEl) bookmarkMenuEl.classList.remove('show');
+            if (menuEl !== historyMenuEl) historyMenuEl.classList.remove('show');
+            if (menuEl !== settingsMenuEl) settingsMenuEl.classList.remove('show');
+
+            if (!isShowing) { 
+                menuEl.classList.add('show'); 
+                positionMenuUnderButton(menuEl, buttonEl); 
+            } else {
+                menuEl.classList.remove('show');
+            }
         }
         function toggleBookmarkMenu() { toggleMenu(bookmarkMenuEl, bookmarkButtonEl); }
         function toggleHistoryMenu() { toggleMenu(historyMenuEl, historyButtonEl); if(historyMenuEl.classList.contains('show')) historySearchBarEl.focus(); }
-        function toggleSettingsMenu() { toggleMenu(settingsMenuEl, settingsButtonEl); }
+        function toggleSettingsMenu() { 
+            // Settings menu toggles independently and doesn't close others
+            const isShowing = settingsMenuEl.classList.contains('show');
+            if (isShowing) {
+                settingsMenuEl.classList.remove('show');
+            } else {
+                closeAllMenus(); // Close other menus first
+                settingsMenuEl.classList.add('show');
+                positionMenuUnderButton(settingsMenuEl, settingsButtonEl);
+            }
+        }
         function populateThemeSelector() {
             themeSelectorEl.innerHTML = '';
             const customThemesGroup = document.createElement('optgroup');
@@ -1397,11 +1568,17 @@
             const li = e.target.closest('li[data-url]'); 
             if (li) { navigateTo(li.dataset.url); closeAllMenus(); } 
         }
-        function handleGlobalKeyDown(e) { if (e.target.tagName === 'INPUT' || e.target.isContentEditable) return; if (e.altKey && e.key === 'ArrowLeft') backButtonEl.click(); if (e.altKey && e.key === 'ArrowRight') forwardButtonEl.click(); if ((e.ctrlKey || e.metaKey) && e.key === 'r') { e.preventDefault(); refreshButtonEl.click(); } if ((e.ctrlKey || e.metaKey) && e.key === 'l') { e.preventDefault(); searchBarEl.select(); }}
+        function handleGlobalKeyDown(e) { 
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.isContentEditable) return; 
+            if (e.altKey && e.key === 'ArrowLeft') backButtonEl.click(); 
+            if (e.altKey && e.key === 'ArrowRight') forwardButtonEl.click(); 
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') { e.preventDefault(); refreshButtonEl.click(); } 
+            if ((e.ctrlKey || e.metaKey) && e.key === 'l') { e.preventDefault(); searchBarEl.select(); }
+        }
         function toggleIframeFullscreen() { 
             if (!document.fullscreenElement) {
                 contentIframeEl.requestFullscreen().catch(err => {
-                    console.error(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
+                    alert(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
                 });
             } else { 
                 document.exitFullscreen(); 
@@ -1411,6 +1588,25 @@
             const isFullscreen = !!document.fullscreenElement;
             document.body.classList.toggle('app-ui-hidden', isFullscreen);
             document.getElementById('fullscreen-icon-img').src = `../images/zoom-${isFullscreen ? 'out' : 'in'}-white.png`;
+        }
+        function getCurrentPageInfo() {
+            let url = 'about:blank';
+            let title = 'New Tab';
+            try {
+                if(contentIframeEl.contentWindow.location.href === "about:blank" || contentIframeEl.contentWindow.location.href === "about:srcdoc") throw new Error("Blank page loaded");
+                if (contentIframeEl.contentWindow && contentIframeEl.contentWindow.__uv && contentIframeEl.contentWindow.__uv.location.href !== 'about:blank') {
+                    url = contentIframeEl.contentWindow.__uv.location.href;
+                    title = contentIframeEl.contentDocument.title || new URL(url).hostname;
+                } else {
+                     throw new Error("Proxy location not found");
+                }
+            } catch (e) { 
+                if(!isLoading && currentUrl !== 'about:blank' && !contentIframeEl.src.startsWith('about:blank')){
+                    showErrorPage();
+                    return { url: 'about:blank', title: 'Error' };
+                }
+            }
+            return { url, title };
         }
     </script>
 </body>
