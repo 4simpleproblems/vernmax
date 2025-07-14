@@ -622,25 +622,61 @@ document.addEventListener('DOMContentLoaded', () => {
         const targetId = `anon-host-${code.replace('-', '')}`;
         
         showToast(`Joining Anonymous Chat...`);
-        tempPeer = new Peer(null, {});
+        tempPeer = new Peer(null, {}); // Create a disposable peer with a random ID for the joiner
 
         tempPeer.on('open', id => {
-            setTimeout(() => {
+            let attemptCount = 0;
+            const maxAttempts = 5;
+
+            const attemptConnection = () => {
+                attemptCount++;
+                if (attemptCount > maxAttempts) {
+                    showToast(`Could not connect to chat. Please try again.`);
+                    showContactsView();
+                    return;
+                }
+
+                // Don't show the toast on the first attempt
+                if (attemptCount > 1) {
+                    showToast(`Host not found. Retrying... (${attemptCount}/${maxAttempts})`);
+                }
+
                 const conn = tempPeer.connect(targetId, { reliable: true });
                 tempConnection = conn;
-                
-                showChatView({
-                    id: targetId, name: 'Anonymous Chat', type: 'anonymous',
-                    history: [{ type: 'system', content: `Connecting to chat ${code}...` }]
+
+                // This handler is for the error that occurs if the ID doesn't exist *at all*.
+                conn.on('error', (err) => {
+                    if (err.type === 'peer-unavailable') {
+                        // Wait 1 second and try again.
+                        setTimeout(attemptConnection, 1000);
+                    } else {
+                        // Handle other, unexpected connection errors
+                        console.error("Connection error:", err);
+                        showToast(`Connection error: ${err.type}`);
+                        showContactsView();
+                    }
                 });
 
+                // These handlers are for a successful connection.
                 conn.on('open', () => {
-                    appendMessage({type: 'system', content: `Connected! This chat is anonymous and will be deleted when either person leaves.`}, 'left');
+                    showChatView({
+                        id: targetId, name: 'Anonymous Chat', type: 'anonymous',
+                        history: [{ type: 'system', content: `Connected! This chat is anonymous and will be deleted when either person leaves.` }]
+                    });
                 });
                 
                 setupConnection(conn, {}, false, handleTempData);
-            }, 500);
+            };
+
+            // Start the first connection attempt
+            attemptConnection();
         });
+        
+        tempPeer.on('error', (err) => { 
+            showToast(`Error: ${err.type}`); 
+            showContactsView(); 
+        });
+    };
         
         tempPeer.on('error', (err) => { showToast(`Error: ${err.type}`); showContactsView(); });
     };
